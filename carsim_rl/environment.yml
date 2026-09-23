@@ -1,0 +1,6 @@
+name: drl_mpc_carsim
+channels:
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
