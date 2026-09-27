@@ -5,6 +5,9 @@
 最新批量验证入口与结论见 [PHYSICS_CHECK_GUIDE.md](PHYSICS_CHECK_GUIDE.md)：
 时间、带符号执行器合扭矩、三种载荷记忆策略、参数对照及 50 ms 回放已放在同一工具中。
 
+正弦转向＋驱动/制动开环实验、连续预测曲线及误差指标，见 [OPEN_LOOP_GUIDE.md](OPEN_LOOP_GUIDE.md)。
+入口 `python -m dynamics7dof.open_loop` 默认只读；`--run` 才启动真实 CarSim，`--replay` 仅离线重放。
+
 物理模型和离线示例不加载 CarSim DLL、不导入 SAC、不修改已有模型、参考路径和训练日志。
 它保留用户 MATLAB 物理部分的行为，先让逐项比较有据可查；不是已经修正/标定完成的新模型。
 第二阶段新增的 `collect.py` 在实际采集模式下会运行 CarSim，使用方法见 `CAPTURE_GUIDE.md`。
@@ -17,6 +20,7 @@
 - `collect.py` / `timing.py`：25 通道采集及只读求解器 T 时钟观察，不改变现有控制逻辑。
 - `audit.py`：兼容 v1/v2 采集的离线核对入口，默认不写文件，不加载 DLL，不生成训练标签。
 - `physics_check.py`：基于保存的 CarSim 独立证据批量验证，输出可读报告和可复核 JSON。
+- `open_loop.py` / `comparison.py`：开环输入实验、从共同初值连续积分的对比曲线及误差报告；无需额外绘图库。
 - `tests/test_capture.py` / `tests/test_audit.py`：通道、时间、终止安全及离线核对的回归测试。
 - 本说明：参数映射、已知限制以及下一步需要的 CarSim 信号。
 

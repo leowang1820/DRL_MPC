@@ -1,0 +1,22 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>CarSim / 7DOF 对比</title>
+<style>body{font:16px/1.65 "Segoe UI",sans-serif;background:#f4f7fb;color:#1d2b3c;max-width:1240px;margin:30px auto;padding:0 20px}h1,h2{line-height:1.3}img{width:100%;height:auto}table{border-collapse:collapse;background:white}td,th{padding:9px 18px;border:1px solid #dce4ee}code{overflow-wrap:anywhere}.note{padding:16px;background:#fff4dc;border-left:4px solid #e9ac39}</style>
+<h1>CarSim 与 7DOF：开环动力学对比</h1><p><code>E:\modelcodeE\DRL_MPC\DRL_MPC\carsim_rl\artifacts\dynamics7dof\capture_20260927_155420_045453</code></p>
+<div class="note">时间依据：NOMINAL_TIME_UNVERIFIED。原模型参数不变，未训练网络。
+主曲线只在初始时刻对齐状态，之后连续积分；使用记录的实际前轮角和轮端扭矩，不是油门/方向盘指令直接代入。
+这是实测输入条件下的动力学验证，不验证执行器模型。<br>
+采集状态：episode_ended；连续预测覆盖率：100.0%；停止信息：None。
+比较不足完整时长时不能按局部误差宣称通过。旧 DLC 数据重放不是新正弦试验。</div>
+<h2>1. 状态对比</h2><p>蓝色为 CarSim；橙色为从同一初始状态连续积分的 7DOF。角速度图用 deg/s，CSV 与指标保持 SI。</p><img src="states.svg" alt="状态对比">
+<h2>2. 连续预测误差</h2><img src="errors.svg" alt="误差曲线">
+<h2>3. 输入检查</h2><p>先确认实际前轮角存在期望激励、实际制动扭矩为负，再解释状态误差。</p><img src="inputs.svg" alt="指令及实际执行器输入">
+<h2>4. 指标</h2><p>排除前 0.1 s 和终止行。RMSE、MAE、最大绝对误差均使用各状态 SI 单位；零方差附近不计算百分比精度。</p>
+<table><tr><th>状态</th><th>RMSE</th><th>MAE</th><th>最大绝对误差</th></tr><tr><td>vx_m_s</td><td>0.735624</td><td>0.64529</td><td>1.25078</td></tr>
+<tr><td>vy_m_s</td><td>0.0190058</td><td>0.0137163</td><td>0.0432869</td></tr>
+<tr><td>yaw_rate_rad_s</td><td>0.00979198</td><td>0.00722857</td><td>0.0208551</td></tr>
+<tr><td>omega_fl_rad_s</td><td>2.11529</td><td>1.86494</td><td>3.55621</td></tr>
+<tr><td>omega_fr_rad_s</td><td>2.11629</td><td>1.86517</td><td>3.55347</td></tr>
+<tr><td>omega_rl_rad_s</td><td>2.12099</td><td>1.87056</td><td>3.55609</td></tr>
+<tr><td>omega_rr_rad_s</td><td>2.12218</td><td>1.87094</td><td>3.55418</td></tr></table>
+<p>完整指标、独立的一步预测诊断及保持当前值基准见 <a href="metrics.json">metrics.json</a>；逐点数据见 <a href="comparison.csv">comparison.csv</a>。</p>
+<p>判断顺序：实际输入是否正确 → 初值/单位/参数与时间 → 符号、幅值、相位 → 长时漂移。
+当前没有全工况“通过阈值”，一次曲线吻合不能代替独立工况验证。</p></html>

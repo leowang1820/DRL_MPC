@@ -1,0 +1,231 @@
+{
+  "format": "open_loop_comparison_v1",
+  "capture": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\dynamics7dof\\open_loop_20260927_223412_368297\\capture",
+  "capture_status": "captured_requested_duration",
+  "final_info": {
+    "return_code": 0
+  },
+  "source_sha256": {
+    "metadata.json": "ac79196c61286c3b5dca0ca8e94445b81aa5344a3c63c471ac78d706ec63109a",
+    "raw_exports.csv": "bc97a579bceac76b071128cd6b42f2aa5b3a34f5b06573e1d2e1395b0fce8d46",
+    "signals_si.csv": "d5145df00cbe980ce896cfe3de0a263bd648e9ac0c3abdd45a81577f1dd6b7ce"
+  },
+  "time_basis": "observed_solver_T",
+  "vehicle": {
+    "mass_kg": 2026.0,
+    "lf_m": 1.265,
+    "lr_m": 1.8950000000000002,
+    "track_front_m": 1.605,
+    "track_rear_m": 1.605,
+    "cg_height_m": 0.59,
+    "yaw_inertia_kg_m2": 4095.0,
+    "wheel_inertia_kg_m2": 2.0,
+    "wheel_radius_m": 0.353,
+    "gravity_m_s2": 9.81
+  },
+  "mu": 0.5,
+  "substep_s": 0.0005,
+  "metric_warmup_s": 0.1,
+  "initial_state_si": [
+    11.11111111111111,
+    0.0,
+    0.0,
+    31.47623544224111,
+    31.47623544224111,
+    31.47623544224111,
+    31.47623544224111
+  ],
+  "initial_memory": [
+    0.0,
+    0.0
+  ],
+  "rollout_stop": null,
+  "one_step_stop": null,
+  "rollout_scored_samples": 7900,
+  "eligible_samples": 7900,
+  "rollout_coverage_fraction": 1.0,
+  "last_valid_rollout_elapsed_s": 7.999500000001006,
+  "continuous_rollout_metrics_SI": {
+    "vx_m_s": {
+      "samples": 7900,
+      "rmse": 0.5608324546077482,
+      "mae": 0.5024166407378667,
+      "max_abs": 0.8650191666514218,
+      "bias": 0.5024166407378667,
+      "nrmse_by_truth_std": 0.813588829867768
+    },
+    "vy_m_s": {
+      "samples": 7900,
+      "rmse": 0.012416123531821907,
+      "mae": 0.009670650966007655,
+      "max_abs": 0.027225289712941952,
+      "bias": -0.0034382610385734545,
+      "nrmse_by_truth_std": 0.7992542142717938
+    },
+    "yaw_rate_rad_s": {
+      "samples": 7900,
+      "rmse": 0.002719375795090782,
+      "mae": 0.00227661435625162,
+      "max_abs": 0.005213867236828832,
+      "bias": 0.00023240648885667332,
+      "nrmse_by_truth_std": 0.18027657190797444
+    },
+    "omega_fl_rad_s": {
+      "samples": 7900,
+      "rmse": 1.5891668712094156,
+      "mae": 1.4266998090984575,
+      "max_abs": 2.457723766239077,
+      "bias": 1.4266998090984575,
+      "nrmse_by_truth_std": 0.8253443686495975
+    },
+    "omega_fr_rad_s": {
+      "samples": 7900,
+      "rmse": 1.5890577984974972,
+      "mae": 1.4289866359094379,
+      "max_abs": 2.4561510456968136,
+      "bias": 1.4289866359094379,
+      "nrmse_by_truth_std": 0.8289818190607811
+    },
+    "omega_rl_rad_s": {
+      "samples": 7900,
+      "rmse": 1.5882838219492048,
+      "mae": 1.4278595727420238,
+      "max_abs": 2.455335685492223,
+      "bias": 1.4278595727420238,
+      "nrmse_by_truth_std": 0.8292503795830348
+    },
+    "omega_rr_rad_s": {
+      "samples": 7900,
+      "rmse": 1.587824112581914,
+      "mae": 1.4289719045988971,
+      "max_abs": 2.4539864752622975,
+      "bias": 1.4289719045988971,
+      "nrmse_by_truth_std": 0.8323136044312412
+    }
+  },
+  "teacher_forced_one_step_metrics_SI": {
+    "vx_m_s": {
+      "samples": 7900,
+      "rmse": 9.881197912548837e-05,
+      "mae": 9.010038835824241e-05,
+      "max_abs": 0.00018654380737892495,
+      "bias": 8.589489534339181e-05,
+      "nrmse_by_truth_std": 0.00014334463316651602
+    },
+    "vy_m_s": {
+      "samples": 7900,
+      "rmse": 7.636177680188028e-05,
+      "mae": 5.630516091048828e-05,
+      "max_abs": 0.0001778326993685589,
+      "bias": -1.795529508712729e-05,
+      "nrmse_by_truth_std": 0.004915581885260864
+    },
+    "yaw_rate_rad_s": {
+      "samples": 7900,
+      "rmse": 2.4932853409288405e-05,
+      "mae": 2.0972208568527573e-05,
+      "max_abs": 4.686520039399317e-05,
+      "bias": -1.10281061594021e-06,
+      "nrmse_by_truth_std": 0.0016528827492783191
+    },
+    "omega_fl_rad_s": {
+      "samples": 7900,
+      "rmse": 0.0067399144972025175,
+      "mae": 0.00511545229065807,
+      "max_abs": 0.023917277385230307,
+      "bias": 0.002075543666213628,
+      "nrmse_by_truth_std": 0.0035004193557171374
+    },
+    "omega_fr_rad_s": {
+      "samples": 7900,
+      "rmse": 0.007488652692056452,
+      "mae": 0.005789421177797059,
+      "max_abs": 0.022330938227341335,
+      "bias": 0.0026531756354005206,
+      "nrmse_by_truth_std": 0.003906690453201379
+    },
+    "omega_rl_rad_s": {
+      "samples": 7900,
+      "rmse": 0.004733081003595798,
+      "mae": 0.003753426327050356,
+      "max_abs": 0.017794275713484353,
+      "bias": 0.0022321877609546917,
+      "nrmse_by_truth_std": 0.002471163632462278
+    },
+    "omega_rr_rad_s": {
+      "samples": 7900,
+      "rmse": 0.0050712299747965196,
+      "mae": 0.0039969484896849915,
+      "max_abs": 0.017674063200423973,
+      "bias": 0.0024401195511288974,
+      "nrmse_by_truth_std": 0.0026582627545309397
+    }
+  },
+  "one_step_persistence_metrics_SI": {
+    "vx_m_s": {
+      "samples": 7900,
+      "rmse": 0.0005561146642584358,
+      "mae": 0.0004707190094941385,
+      "max_abs": 0.0008671646091915619,
+      "bias": -0.00016805451636811084,
+      "nrmse_by_truth_std": 0.0008067448223601371
+    },
+    "vy_m_s": {
+      "samples": 7900,
+      "rmse": 2.9746061048611857e-05,
+      "mae": 2.4597109176486162e-05,
+      "max_abs": 5.519840807573055e-05,
+      "bias": -6.456377213445578e-08,
+      "nrmse_by_truth_std": 0.0019148218516154255
+    },
+    "yaw_rate_rad_s": {
+      "samples": 7900,
+      "rmse": 2.9449036726143945e-05,
+      "mae": 2.3800389715052054e-05,
+      "max_abs": 6.0296915238068974e-05,
+      "bias": 1.706057692998155e-08,
+      "nrmse_by_truth_std": 0.001952275737897431
+    },
+    "omega_fl_rad_s": {
+      "samples": 7900,
+      "rmse": 0.0015893048143028681,
+      "mae": 0.0013480303560007754,
+      "max_abs": 0.0030204085953542403,
+      "bias": -0.0004714171557458829,
+      "nrmse_by_truth_std": 0.0008254160103112995
+    },
+    "omega_fr_rad_s": {
+      "samples": 7900,
+      "rmse": 0.0015768557444672065,
+      "mae": 0.0013234618936328287,
+      "max_abs": 0.002848474703725401,
+      "bias": -0.00047125194995742826,
+      "nrmse_by_truth_std": 0.0008226162350298713
+    },
+    "omega_rl_rad_s": {
+      "samples": 7900,
+      "rmse": 0.0015902053323416257,
+      "mae": 0.001348207124472171,
+      "max_abs": 0.003001033708152079,
+      "bias": -0.00046937236647980323,
+      "nrmse_by_truth_std": 0.0008302536091067935
+    },
+    "omega_rr_rad_s": {
+      "samples": 7900,
+      "rmse": 0.0015796774602242756,
+      "mae": 0.0013263156990806308,
+      "max_abs": 0.002835640444104115,
+      "bias": -0.0004692801236284164,
+      "nrmse_by_truth_std": 0.0008280432513523927
+    }
+  },
+  "ready_for_residual_training": false,
+  "notes": [
+    "Main curves initialize from CarSim only once; load memory is carried, never reset.",
+    "One-step diagnostic DOES reset state to measurement; do not interpret it as a free rollout.",
+    "Input is actual wheel angle and drive+signed brake torque; steering ratio is not an actuator model.",
+    "Recorded u_i held over [t_i,t_i+1); actuator discontinuities retain sampling uncertainty.",
+    "Scores use SI; plotted yaw rate and beta use degrees. Near-zero variance => NRMSE null.",
+    "No learned correction; original reference model and fit unchanged."
+  ]
+}

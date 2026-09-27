@@ -1,0 +1,257 @@
+{
+  "format": "open_loop_comparison_v1",
+  "capture": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\dynamics7dof\\capture_20260927_155420_045453",
+  "capture_status": "episode_ended",
+  "final_info": {
+    "return_code": 0,
+    "lateral_error": 0.0014707181583611902,
+    "heading_error_deg": 0.0030022036713148736,
+    "station": 159.77904691321447,
+    "speed_kmh": 42.653386544514795,
+    "x": 159.20074691321446,
+    "y": 0.0014707181583611902,
+    "yaw_deg": 0.003002203671307915,
+    "yaw_rate_deg_s": -0.11605206533058993,
+    "path_length": 160.5783,
+    "path_progress": 0.9950226581874043,
+    "desired_action": [
+      0.04040471091866493,
+      -0.008499202318489552
+    ],
+    "executed_action": [
+      0.04040471091866493,
+      -0.008499202318489552
+    ],
+    "applied_controls": [
+      0.04040471091866493,
+      0.0,
+      -0.7649282086640596
+    ],
+    "completed": true,
+    "completion_reason": "path_end",
+    "completion_bonus": 50.0
+  },
+  "source_sha256": {
+    "metadata.json": "fa365abe6f0fe07cb77de4c95989416a029023bd31418fe364357be91680bf33",
+    "raw_exports.csv": "d20dd6308a759bc201ff76e0dbc582897c5612176d62bb63bbbcabe52c7002b2",
+    "signals_si.csv": "5e0122a0c34e4b4388c2908b500b19844ee046b58186e2877896bd717189d6c2"
+  },
+  "time_basis": "NOMINAL_TIME_UNVERIFIED",
+  "vehicle": {
+    "mass_kg": 2026.0,
+    "lf_m": 1.265,
+    "lr_m": 1.8950000000000002,
+    "track_front_m": 1.605,
+    "track_rear_m": 1.605,
+    "cg_height_m": 0.59,
+    "yaw_inertia_kg_m2": 4095.0,
+    "wheel_inertia_kg_m2": 2.0,
+    "wheel_radius_m": 0.353,
+    "gravity_m_s2": 9.81
+  },
+  "mu": 0.5,
+  "substep_s": 0.0005,
+  "metric_warmup_s": 0.1,
+  "initial_state_si": [
+    11.11111111111111,
+    0.0,
+    0.0,
+    31.47623544224111,
+    31.47623544224111,
+    31.47623544224111,
+    31.47623544224111
+  ],
+  "initial_memory": [
+    0.0,
+    0.0
+  ],
+  "rollout_stop": null,
+  "one_step_stop": null,
+  "rollout_scored_samples": 13501,
+  "eligible_samples": 13501,
+  "rollout_coverage_fraction": 1.0,
+  "last_valid_rollout_elapsed_s": 13.599999999997902,
+  "continuous_rollout_metrics_SI": {
+    "vx_m_s": {
+      "samples": 13501,
+      "rmse": 0.7356240988930813,
+      "mae": 0.645289942187517,
+      "max_abs": 1.2507820288719067,
+      "bias": 0.645289942187517,
+      "nrmse_by_truth_std": 4.39254402878107
+    },
+    "vy_m_s": {
+      "samples": 13501,
+      "rmse": 0.019005834377157402,
+      "mae": 0.013716303099817632,
+      "max_abs": 0.04328688291003927,
+      "bias": -9.216525118343037e-05,
+      "nrmse_by_truth_std": 0.24021309201509125
+    },
+    "yaw_rate_rad_s": {
+      "samples": 13501,
+      "rmse": 0.009791977911720678,
+      "mae": 0.007228570562593613,
+      "max_abs": 0.02085514129419158,
+      "bias": 3.421120502061551e-05,
+      "nrmse_by_truth_std": 0.14661008319609584
+    },
+    "omega_fl_rad_s": {
+      "samples": 13501,
+      "rmse": 2.1152877021594088,
+      "mae": 1.8649377364275586,
+      "max_abs": 3.556205807562577,
+      "bias": 1.8649377364275586,
+      "nrmse_by_truth_std": 4.213002631439133
+    },
+    "omega_fr_rad_s": {
+      "samples": 13501,
+      "rmse": 2.116290954616609,
+      "mae": 1.8651723771782922,
+      "max_abs": 3.553471812638854,
+      "bias": 1.8651723771782922,
+      "nrmse_by_truth_std": 4.468564574609759
+    },
+    "omega_rl_rad_s": {
+      "samples": 13501,
+      "rmse": 2.1209915952040257,
+      "mae": 1.8705595500949603,
+      "max_abs": 3.5560932010625166,
+      "bias": 1.8705595500949603,
+      "nrmse_by_truth_std": 4.271748888923796
+    },
+    "omega_rr_rad_s": {
+      "samples": 13501,
+      "rmse": 2.122179695711665,
+      "mae": 1.8709402092601557,
+      "max_abs": 3.5541821498660724,
+      "bias": 1.8709402092601557,
+      "nrmse_by_truth_std": 4.530141643076681
+    }
+  },
+  "teacher_forced_one_step_metrics_SI": {
+    "vx_m_s": {
+      "samples": 13501,
+      "rmse": 4.624415363495293e-05,
+      "mae": 3.344676681019261e-05,
+      "max_abs": 0.00019876734920742933,
+      "bias": 4.835759109300729e-06,
+      "nrmse_by_truth_std": 0.00027613217296837167
+    },
+    "vy_m_s": {
+      "samples": 13501,
+      "rmse": 0.00016220217442152157,
+      "mae": 0.0001097477675325923,
+      "max_abs": 0.0006720191335809894,
+      "bias": 1.0387557101809012e-08,
+      "nrmse_by_truth_std": 0.0020500592121434837
+    },
+    "yaw_rate_rad_s": {
+      "samples": 13501,
+      "rmse": 9.725392626564903e-05,
+      "mae": 7.052849296453954e-05,
+      "max_abs": 0.00023994447639523464,
+      "bias": 3.108808022220463e-07,
+      "nrmse_by_truth_std": 0.001456131370954884
+    },
+    "omega_fl_rad_s": {
+      "samples": 13501,
+      "rmse": 0.009771737844031788,
+      "mae": 0.008776217861240533,
+      "max_abs": 0.02166133993746655,
+      "bias": 0.008653904551776274,
+      "nrmse_by_truth_std": 0.019462296882174577
+    },
+    "omega_fr_rad_s": {
+      "samples": 13501,
+      "rmse": 0.009546257802270903,
+      "mae": 0.008760921602170246,
+      "max_abs": 0.018670817751655022,
+      "bias": 0.008641017582634808,
+      "nrmse_by_truth_std": 0.020156996533138693
+    },
+    "omega_rl_rad_s": {
+      "samples": 13501,
+      "rmse": 0.008701878566330043,
+      "mae": 0.007819171237633947,
+      "max_abs": 0.0178324772308045,
+      "bias": 0.007638116727178644,
+      "nrmse_by_truth_std": 0.017525878075765985
+    },
+    "omega_rr_rad_s": {
+      "samples": 13501,
+      "rmse": 0.008611439031894734,
+      "mae": 0.00786874000965978,
+      "max_abs": 0.014619673924421761,
+      "bias": 0.007687685499204464,
+      "nrmse_by_truth_std": 0.018382533130456735
+    }
+  },
+  "one_step_persistence_metrics_SI": {
+    "vx_m_s": {
+      "samples": 13501,
+      "rmse": 0.00011572860056094752,
+      "mae": 5.849537756725061e-05,
+      "max_abs": 0.0006553691885393675,
+      "bias": -5.565806893187592e-05,
+      "nrmse_by_truth_std": 0.0006910363242831503
+    },
+    "vy_m_s": {
+      "samples": 13501,
+      "rmse": 0.0001240493884244171,
+      "mae": 8.624090727907502e-05,
+      "max_abs": 0.00039934851424794013,
+      "bias": 1.3690413438524758e-07,
+      "nrmse_by_truth_std": 0.001567849459523022
+    },
+    "yaw_rate_rad_s": {
+      "samples": 13501,
+      "rmse": 0.0001058155567601893,
+      "mae": 7.340788945202149e-05,
+      "max_abs": 0.00027490887415670593,
+      "bias": 1.5002523100204067e-07,
+      "nrmse_by_truth_std": 0.001584320115906639
+    },
+    "omega_fl_rad_s": {
+      "samples": 13501,
+      "rmse": 0.0005145122207184633,
+      "mae": 0.00032975290062317326,
+      "max_abs": 0.0031496306462486245,
+      "bias": -0.0001591112686374387,
+      "nrmse_by_truth_std": 0.001024750126227096
+    },
+    "omega_fr_rad_s": {
+      "samples": 13501,
+      "rmse": 0.0005221216288916095,
+      "mae": 0.00034885283550506295,
+      "max_abs": 0.003253084824912378,
+      "bias": -0.00015841904142915874,
+      "nrmse_by_truth_std": 0.001102463822100144
+    },
+    "omega_rl_rad_s": {
+      "samples": 13501,
+      "rmse": 0.0004117983077114928,
+      "mae": 0.00026831587251911233,
+      "max_abs": 0.002133787944480048,
+      "bias": -0.00015972775007369169,
+      "nrmse_by_truth_std": 0.0008293757351066046
+    },
+    "omega_rr_rad_s": {
+      "samples": 13501,
+      "rmse": 0.0004212107709227411,
+      "mae": 0.0002895580047379414,
+      "max_abs": 0.002133787944480048,
+      "bias": -0.00015905499349040425,
+      "nrmse_by_truth_std": 0.0008991436765347304
+    }
+  },
+  "ready_for_residual_training": false,
+  "notes": [
+    "Main curves initialize from CarSim only once; load memory is carried, never reset.",
+    "One-step diagnostic DOES reset state to measurement; do not interpret it as a free rollout.",
+    "Input is actual wheel angle and drive+signed brake torque; steering ratio is not an actuator model.",
+    "Recorded u_i held over [t_i,t_i+1); actuator discontinuities retain sampling uncertainty.",
+    "Scores use SI; plotted yaw rate and beta use degrees. Near-zero variance => NRMSE null.",
+    "No learned correction; original reference model and fit unchanged."
+  ]
+}
