@@ -1,6 +1,9 @@
 # 7DOF 第一阶段：MATLAB 物理模型的独立 Python 对照版
 
-状态：**reference-only，尚未通过 CarSim 精度验证，不用于控制接管或自动生成正式残差标签。**
+状态：**参考模型原样保留；已完成首批 CarSim 离线误差对比，但未通过全工况精度/控制接管验收，不自动生成正式残差标签。**
+
+最新批量验证入口与结论见 [PHYSICS_CHECK_GUIDE.md](PHYSICS_CHECK_GUIDE.md)：
+时间、带符号执行器合扭矩、三种载荷记忆策略、参数对照及 50 ms 回放已放在同一工具中。
 
 物理模型和离线示例不加载 CarSim DLL、不导入 SAC、不修改已有模型、参考路径和训练日志。
 它保留用户 MATLAB 物理部分的行为，先让逐项比较有据可查；不是已经修正/标定完成的新模型。
@@ -11,6 +14,10 @@
 - `model.py`：参数、原拟合轮胎力、瞬时状态导数、带显式载荷记忆的 Euler 预测。
 - `__main__.py`：合成初值的一步预测示例，不启动 CarSim、不写出文件。
 - `tests/test_reference.py`：正式保留的回归/物理结构测试，不是整车精度证明。
+- `collect.py` / `timing.py`：25 通道采集及只读求解器 T 时钟观察，不改变现有控制逻辑。
+- `audit.py`：兼容 v1/v2 采集的离线核对入口，默认不写文件，不加载 DLL，不生成训练标签。
+- `physics_check.py`：基于保存的 CarSim 独立证据批量验证，输出可读报告和可复核 JSON。
+- `tests/test_capture.py` / `tests/test_audit.py`：通道、时间、终止安全及离线核对的回归测试。
 - 本说明：参数映射、已知限制以及下一步需要的 CarSim 信号。
 
 在 PyCharm Terminal 中：

@@ -119,7 +119,8 @@ def inspect_configuration(sim_path):
             imports.append(parts[1])
         elif name == "EXPORT":
             exports.append(parts[1])
-        elif name in ("OPT_IO_SYNC_FM", "OPT_INT_METHOD", "MU_ROAD_CONSTANT", "TSTART", "TSTOP"):
+        elif name in ("OPT_IO_SYNC_FM", "OPT_IO_UPDATE", "OPT_INT_METHOD", "MU_ROAD_CONSTANT",
+                      "TSTART", "TSTOP", "TSTEP"):
             value = line[len(parts[0]):].strip().lstrip("=").strip().rstrip(";")
             try:
                 settings[name] = float(value)

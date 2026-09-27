@@ -1,0 +1,243 @@
+{
+  "format": "dynamics7dof_audit_v1",
+  "capture": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\dynamics7dof\\capture_20260927_160434_220127",
+  "integrity": "PASS",
+  "errors": [],
+  "warnings": [
+    "Legacy capture has no actual solver time; no 0.5 ms shift has been inferred or applied",
+    "AM/RK uses internal half steps; inspect OPT_IO_UPDATE. OPT_IO_SYNC_FM alone does not establish timing",
+    "Tracking metrics use current path file; historical path identity is unverified for this legacy capture"
+  ],
+  "ready_for_residual_training": false,
+  "pending_physical_checks": [
+    "Per-export state/force timestamp alignment is not yet physically verified.",
+    "Signed drive + brake is only a candidate net torque; wheel torque balance remains unverified.",
+    "CarSim Ax/Ay are not automatically the reference model's LoadMemory."
+  ],
+  "source_sha256": {
+    "metadata.json": "ab549af54b67789baaa8a860ee7563ef8b07632ef3307420c6158c1f8d4f2fec",
+    "raw_exports.csv": "0ccb77e84da02e291c0dd7fc9eaa07583fa26b9f025c6b03565d40b8395556e6",
+    "signals_si.csv": "dfa00990cace8173b57a20bc866fa0b0ec7f93b3147462eaa9b1d888555f5ebd"
+  },
+  "rows": 17701,
+  "capture_status": "episode_ended",
+  "final_info": {
+    "return_code": 0,
+    "lateral_error": -2.8592281674966958e-05,
+    "heading_error_deg": 0.024589460409629282,
+    "station": 159.91262943859786,
+    "speed_kmh": 32.14170589357865,
+    "x": 159.33432943859788,
+    "y": -2.8592281674966958e-05,
+    "yaw_deg": 0.024589460409637255,
+    "yaw_rate_deg_s": -0.02893121927854584,
+    "path_length": 160.5783,
+    "path_progress": 0.9958545422301635,
+    "desired_action": [
+      0.05574900656938553,
+      -0.0019112367881461978
+    ],
+    "executed_action": [
+      0.05574900656938553,
+      -0.0019112367881461978
+    ],
+    "applied_controls": [
+      0.05574900656938553,
+      0.0,
+      -0.1720113109331578
+    ],
+    "completed": true,
+    "completion_reason": "path_end",
+    "completion_bonus": 50.0
+  },
+  "max_unit_conversion_error": 0.0,
+  "quality_flags": {
+    "initial_snapshot_not_transition": 1,
+    "first_integrate_call_timing_pending": 1
+  },
+  "timing": {
+    "diagnostic_time_basis": "wrapper_nominal_unverified",
+    "clock_rows": 0,
+    "nominal_dt_s": {
+      "count": 17700,
+      "min": 0.0009999999999994458,
+      "max": 0.0010000000000012221,
+      "mean": 0.0009999999999999237,
+      "rms": 0.0009999999999999237
+    },
+    "all_export_timestamps_verified": false
+  },
+  "integration_settings": {
+    "OPT_INT_METHOD": 2.0,
+    "OPT_IO_SYNC_FM": 0.0,
+    "TSTART": 0.0,
+    "TSTOP": 40.0,
+    "MU_ROAD_CONSTANT": 0.5
+  },
+  "torques": {
+    "net_torque_mapping": "drive + brake is a candidate only; not applied to labels",
+    "wheels": {
+      "fl": {
+        "drive_nm": {
+          "count": 17701,
+          "min": -101.85289871558737,
+          "max": 17.044865485757253,
+          "mean": 2.638488407315149,
+          "rms": 28.786819857642207
+        },
+        "brake_nm": {
+          "count": 17701,
+          "min": -619.5227408442845,
+          "max": -0.0028304590873905466,
+          "mean": -19.386580639214436,
+          "rms": 90.03155177401617
+        },
+        "brake_nm_during_forward_braking": {
+          "count": 1100,
+          "min": -619.5227408442845,
+          "max": -2.8333333333333335,
+          "mean": -303.5522707336951,
+          "rms": 361.13833015158434
+        },
+        "negative_brake_fraction": 1.0
+      },
+      "fr": {
+        "drive_nm": {
+          "count": 17701,
+          "min": -101.85289871558737,
+          "max": 17.81487993294286,
+          "mean": 2.636101808937922,
+          "rms": 28.890216742867533
+        },
+        "brake_nm": {
+          "count": 17701,
+          "min": -619.5227408442845,
+          "max": -0.0028304590873905466,
+          "mean": -19.386580639214436,
+          "rms": 90.03155177401617
+        },
+        "brake_nm_during_forward_braking": {
+          "count": 1100,
+          "min": -619.5227408442845,
+          "max": -2.8333333333333335,
+          "mean": -303.5522707336951,
+          "rms": 361.13833015158434
+        },
+        "negative_brake_fraction": 1.0
+      },
+      "rl": {
+        "drive_nm": {
+          "count": 17701,
+          "min": -102.95439844905438,
+          "max": 17.28459553203613,
+          "mean": 2.58215882270125,
+          "rms": 28.870524410711376
+        },
+        "brake_nm": {
+          "count": 17701,
+          "min": -232.0085278166067,
+          "max": -0.0015894738387225438,
+          "mean": -7.536954780295014,
+          "rms": 33.699128795545946
+        },
+        "brake_nm_during_forward_braking": {
+          "count": 1100,
+          "min": -232.0085278166067,
+          "max": -0.75,
+          "mean": -113.51960152513564,
+          "rms": 135.1643101631924
+        },
+        "negative_brake_fraction": 1.0
+      },
+      "rr": {
+        "drive_nm": {
+          "count": 17701,
+          "min": -102.95439844905438,
+          "max": 18.27543709423529,
+          "mean": 2.579466564102386,
+          "rms": 28.970441826382658
+        },
+        "brake_nm": {
+          "count": 17701,
+          "min": -232.0085278166067,
+          "max": -0.0015894738387225438,
+          "mean": -7.536954780295014,
+          "rms": 33.699128795545946
+        },
+        "brake_nm_during_forward_braking": {
+          "count": 1100,
+          "min": -232.0085278166067,
+          "max": -0.75,
+          "mean": -113.51960152513564,
+          "rms": 135.1643101631924
+        },
+        "negative_brake_fraction": 1.0
+      }
+    },
+    "forward_braking_rows": 1100,
+    "brake_pressure_mpa": {
+      "count": 17701,
+      "min": 0.0,
+      "max": 1.773972362279892,
+      "mean": 0.04741180208223062,
+      "rms": 0.23461808851550256
+    }
+  },
+  "acceleration": {
+    "warmup_excluded_s": 0.01,
+    "samples": 17688,
+    "time_basis": "wrapper_nominal_unverified",
+    "meaning": "planar finite-difference signal consistency; not model accuracy or LoadMemory validation",
+    "ax": {
+      "difference_m_s2": {
+        "count": 17688,
+        "min": -0.015033104930589715,
+        "max": 0.016956692107480572,
+        "mean": 5.155151100630344e-05,
+        "rms": 0.0013023912489216844
+      },
+      "measured_m_s2": {
+        "count": 17688,
+        "min": -2.446320150987526,
+        "max": 0.0037079622981328196,
+        "mean": -0.12688574778472708,
+        "rms": 0.42351388194220635
+      }
+    },
+    "ay": {
+      "difference_m_s2": {
+        "count": 17688,
+        "min": -0.04202682002377249,
+        "max": 0.0418229420943758,
+        "mean": 1.8794040834681831e-06,
+        "rms": 0.003538884756540206
+      },
+      "measured_m_s2": {
+        "count": 17688,
+        "min": -0.9200518407667476,
+        "max": 0.9338576665760898,
+        "mean": 0.0003626270375039841,
+        "rms": 0.44405367504758336
+      }
+    }
+  },
+  "tracking": {
+    "reference": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\paths\\dlc_reference_path.par",
+    "reference_sha256": "3cc4de2685033f057d662bb1771b9cc432b7e65d1d40bfe724d17a1155618aee",
+    "historical_snapshot": false,
+    "lateral_error_m": {
+      "count": 17701,
+      "min": -0.3439260629140021,
+      "max": 0.3435028355124354,
+      "mean": -0.00017815940502090036,
+      "rms": 0.1484849316842049
+    },
+    "heading_error_deg": {
+      "count": 17701,
+      "min": -3.886148696360351,
+      "max": 3.8393423578215504,
+      "mean": -0.0004934748053584818,
+      "rms": 1.747509850764818
+    }
+  }
+}
