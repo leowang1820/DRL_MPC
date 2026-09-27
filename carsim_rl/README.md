@@ -102,3 +102,13 @@ python -m dynamics7dof --mu 0.5
 ```
 
 这里的 0.5 是显式的离线示例输入；必须与实际工况核对，不会自动从 CarSim 同步。
+
+25 通道 CarSim 数据采集已增加独立入口（不训练、不接管控制、不生成残差标签）：
+
+```powershell
+python -m dynamics7dof.collect --check-config-only
+python -m dynamics7dof.collect --mu 0.5 --seconds 2
+```
+
+第二条命令会实际运行 CarSim，运行前停止其他共享此 Run 输出的仿真。
+完整说明见 `dynamics7dof/CAPTURE_GUIDE.md`。结果保存到 `artifacts/dynamics7dof/` 的新时间戳目录。
