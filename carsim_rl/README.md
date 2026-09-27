@@ -89,3 +89,16 @@ SACModule 中的 Pendulum 演示训练、底层环境及 Frenet 模块中的调�
 旧 Word 手册作为历史交付保留。其中提到的 smoke 脚本不再使用，场景验证改用
 `run_dlc_baseline.py`；环境包装模块名改为 `carsim_wrapper.py`。
 如果 PyCharm 的旧 Run Configuration 仍指向已移除文件，请改选本页列出的入口。
+
+## 7DOF 动力学学习准备（独立模块）
+
+`dynamics7dof/` 是用户 MATLAB 物理模型的 Python 对照版，保留拟合参数与原版行为，
+不接入现有 SAC，也尚未通过 CarSim 精度验证。它不是已经开始训练的残差网络。
+参数映射、已知限制、单元测试和下一步所需 CarSim 信号见 `dynamics7dof/README.md`。
+
+```powershell
+python -m unittest discover -s dynamics7dof/tests -v
+python -m dynamics7dof --mu 0.5
+```
+
+这里的 0.5 是显式的离线示例输入；必须与实际工况核对，不会自动从 CarSim 同步。
