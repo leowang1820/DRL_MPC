@@ -1,0 +1,148 @@
+{
+  "format": "residual_dataset_v1",
+  "contract": {
+    "feature_names": [
+      "vx_m_s",
+      "vy_m_s",
+      "yaw_rate_rad_s",
+      "omega_fl_rad_s",
+      "omega_fr_rad_s",
+      "omega_rl_rad_s",
+      "omega_rr_rad_s",
+      "delta_fl_rad",
+      "delta_fr_rad",
+      "torque_fl_nm",
+      "torque_fr_nm",
+      "torque_rl_nm",
+      "torque_rr_nm",
+      "mu",
+      "memory_ax_m_s2",
+      "memory_ay_m_s2"
+    ],
+    "target_names": [
+      "vx_m_s",
+      "vy_m_s",
+      "yaw_rate_rad_s",
+      "omega_fl_rad_s",
+      "omega_fr_rad_s",
+      "omega_rl_rad_s",
+      "omega_rr_rad_s"
+    ],
+    "model_sha256": "4e597b6f077c71f1be10bedd3cb999501202a930c937c96f96720fe4eb286ef6",
+    "vehicle": {
+      "mass_kg": 2026.0,
+      "lf_m": 1.265,
+      "lr_m": 1.8950000000000002,
+      "track_front_m": 1.605,
+      "track_rear_m": 1.605,
+      "cg_height_m": 0.59,
+      "yaw_inertia_kg_m2": 4095.0,
+      "wheel_inertia_kg_m2": 2.0,
+      "wheel_radius_m": 0.353,
+      "gravity_m_s2": 9.81
+    },
+    "memory": "nominal_force_only_carried",
+    "label": "centered_quadratic_dxdt_minus_instantaneous_nominal_rhs",
+    "window_radius": 5,
+    "substep_s": 0.0005,
+    "warmup_s": 0.1
+  },
+  "contract_fingerprint": "12779574b2d92058b98c5d42fed03a1410ff0b5e579cf7b832d8d76427d7f186",
+  "episodes": [
+    {
+      "capture": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\dynamics7dof\\open_loop_20260927_233218_823895\\capture",
+      "source_sha256": {
+        "metadata.json": "0508070742781bbf9ab6da5e57a324e218259ff3e4f0ac9b35ce20eb942ffbd5",
+        "raw_exports.csv": "b0d507c7a71349153b493d9594e1db2284c3e9b87b1f37aa333eeb5f7279303a",
+        "signals_si.csv": "c686c25ed213919ba85801d962f282e564cde0b098a629222aa8068d929f9130"
+      },
+      "physical_signature": "1c8f1be93d2a5157662768e99a1bed3c09982c1e1cdbb68198c593e783546d61",
+      "rows": 8001,
+      "labels": 1579,
+      "parameter_sha256": "ad85b6588878010ddbae31e93e279fa7ad1ec852b4584174937b9013258b164c",
+      "excitation": {
+        "front_amplitude_deg": 5.0,
+        "frequency_hz": 0.5,
+        "steer_start_s": 1.0,
+        "steer_cycles": 2.0,
+        "ramp_s": 0.5,
+        "steering_ratio": 16.0,
+        "throttle": 0.0,
+        "drive_until_s": 3.0,
+        "brake_mpa": 0.0,
+        "brake_start_s": 5.0,
+        "brake_duration_s": 1.0
+      },
+      "split": "train",
+      "id": 0,
+      "role": "training"
+    },
+    {
+      "capture": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\dynamics7dof\\open_loop_20260927_223412_368297\\capture",
+      "source_sha256": {
+        "metadata.json": "ac79196c61286c3b5dca0ca8e94445b81aa5344a3c63c471ac78d706ec63109a",
+        "raw_exports.csv": "bc97a579bceac76b071128cd6b42f2aa5b3a34f5b06573e1d2e1395b0fce8d46",
+        "signals_si.csv": "d5145df00cbe980ce896cfe3de0a263bd648e9ac0c3abdd45a81577f1dd6b7ce"
+      },
+      "physical_signature": "0b8128feb02add96fbdddfe5b0233c209d7efcc282455c749c3d5807810e5387",
+      "rows": 8001,
+      "labels": 1579,
+      "parameter_sha256": "ad85b6588878010ddbae31e93e279fa7ad1ec852b4584174937b9013258b164c",
+      "excitation": {
+        "front_amplitude_deg": 0.5,
+        "frequency_hz": 0.3,
+        "steer_start_s": 1.0,
+        "steer_cycles": 2.0,
+        "ramp_s": 0.5,
+        "steering_ratio": 16.0,
+        "throttle": 0.12,
+        "drive_until_s": 3.0,
+        "brake_mpa": 0.2,
+        "brake_start_s": 5.0,
+        "brake_duration_s": 1.0
+      },
+      "split": "train",
+      "id": 1,
+      "role": "training"
+    },
+    {
+      "capture": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\dynamics7dof\\open_loop_20260928_094104_829627\\capture",
+      "source_sha256": {
+        "metadata.json": "39e3aaec35c2a5fefeb98aef942dbf7c37a1f7128d015baab6668c9eb1507823",
+        "raw_exports.csv": "83006b52733671f7a56cfc6111dfb3803a7bad46cb720f997e9c95eca5f2779a",
+        "signals_si.csv": "a52220272ea68a247924c1402ce71f7519ed3e8cea6ff7c2f148a4cee87eabdd"
+      },
+      "physical_signature": "e2a487135c54e7df72dbe1b1f6ffc8ac891d53f8d3bc312612a6d9420f0679ca",
+      "rows": 8001,
+      "labels": 1579,
+      "parameter_sha256": "ad85b6588878010ddbae31e93e279fa7ad1ec852b4584174937b9013258b164c",
+      "excitation": {
+        "front_amplitude_deg": 3.0,
+        "frequency_hz": 0.6,
+        "steer_start_s": 1.0,
+        "steer_cycles": 2.0,
+        "ramp_s": 0.5,
+        "steering_ratio": 16.0,
+        "throttle": 0.0,
+        "drive_until_s": 3.0,
+        "brake_mpa": 0.0,
+        "brake_start_s": 5.0,
+        "brake_duration_s": 1.0
+      },
+      "split": "validation",
+      "id": 2,
+      "role": "development"
+    }
+  ],
+  "stride": 5,
+  "near_identical_window_fraction": 0.11336288790373654,
+  "validation_role": "development",
+  "notes": [
+    "Experimental derivative labels, not a physical ground truth certificate.",
+    "Whole episodes separated; validation never used for normalization/gradients.",
+    "Centered derivative labels arrive 5 solver ticks later; features are causal.",
+    "No Risk labels or controller takeover.",
+    "Validation episode already informed model design: DEVELOPMENT REGRESSION ONLY, not independent evidence. Shared startup windows retained and overlap reported; no validation rows used for normalization or gradient updates."
+  ],
+  "samples_sha256": "8d54666886bc615bad90d6c9a453b56a713f89207825ceeb6df380c03df751d3"
+}

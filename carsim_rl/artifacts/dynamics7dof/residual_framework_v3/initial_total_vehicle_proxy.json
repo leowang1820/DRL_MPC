@@ -1,0 +1,12 @@
+{
+  "mass_kg": 2126.4,
+  "lf_m": 1.290030098,
+  "lr_m": 1.8699699020000002,
+  "track_front_m": 1.605,
+  "track_rear_m": 1.605,
+  "cg_height_m": 0.5497827314,
+  "yaw_inertia_kg_m2": 5067.232381,
+  "wheel_inertia_kg_m2": 3.23,
+  "wheel_radius_m": 0.353,
+  "gravity_m_s2": 9.81
+}

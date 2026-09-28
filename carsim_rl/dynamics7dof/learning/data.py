@@ -150,7 +150,9 @@ def prepare_capture(path, stride=5):
     return arrays, info
 
 
-def build_dataset(train, validation, output, stride=5):
+def build_dataset(train, validation, output, stride=5, validation_role='held_out'):
+    if validation_role not in ('held_out', 'development'):
+        raise ValueError('Validation role must be held_out or development')
     out = Path(output).resolve()
     sources = [Path(p).resolve() for p in (*train, *validation)]
     if out.exists() or any(out == p or p in out.parents for p in sources):
@@ -170,7 +172,8 @@ def build_dataset(train, validation, output, stride=5):
             signatures.add(info['physical_signature'])
             a['episode'] = np.full(len(a['time']), len(episodes), dtype=int)
             groups.append(a)
-            episodes.append(dict(info, split=split, id=len(episodes)))
+            episodes.append(dict(info, split=split, id=len(episodes),
+                                 role='training' if split == 'train' else validation_role))
         for key in groups[0]:
             arrays[f'{split}_{key}'] = np.concatenate([g[key] for g in groups])
     # Conservatively reject near-identical label windows shared across splits,
@@ -180,14 +183,19 @@ def build_dataset(train, validation, output, stride=5):
         return {row.tobytes() for row in np.round(joined, 7)}
     common = len(row_keys('train') & row_keys('validation'))
     overlap = common/max(1, min(len(arrays['train_time']), len(arrays['validation_time'])))
-    if overlap > .1:
+    if overlap > .1 and validation_role != 'development':
         raise ValueError(f'{overlap:.1%} near-identical windows shared across train/validation; choose another episode')
     manifest = {'format': 'residual_dataset_v1', 'contract': CONTRACT, 'contract_fingerprint': fingerprint(),
                 'episodes': episodes, 'stride': stride, 'near_identical_window_fraction': overlap,
+                'validation_role': validation_role,
                 'notes': ['Experimental derivative labels, not a physical ground truth certificate.',
                           'Whole episodes separated; validation never used for normalization/gradients.',
                           'Centered derivative labels arrive 5 solver ticks later; features are causal.',
                           'No Risk labels or controller takeover.']}
+    if validation_role == 'development':
+        manifest['notes'].append('Validation episode already informed model design: DEVELOPMENT REGRESSION ONLY, '
+                                 'not independent evidence. Shared startup windows retained and overlap reported; '
+                                 'no validation rows used for normalization or gradient updates.')
     out.mkdir(parents=True, exist_ok=False)
     np.savez_compressed(out/'samples.npz', **arrays)
     manifest['samples_sha256'] = sha(out/'samples.npz')

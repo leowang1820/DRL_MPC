@@ -197,8 +197,10 @@ def capture_open_loop(args, contract, signal, output, *, env_factory=None):
         finally:
             if learning is not None:
                 try:
+                    sink.flush()
                     learning.save(sink.output.parent/'learning_shadow',
                                   {'live_CarSim_observer': True, 'capture': str(sink.output),
+                                   'source_sha256': {'signals_si.csv': hashlib.sha256((sink.output/'signals_si.csv').read_bytes()).hexdigest()},
                                    'controls_unchanged_by_learning': True, 'observer_active_at_end': learning_active})
                 except (ValueError, RuntimeError, OSError) as exc:
                     extra['learning_save_error'] = str(exc)
@@ -307,6 +309,11 @@ def main(argv=None):
         return 130
     write_comparison(output/'capture', output/'comparison', substep_s=args.model_substep_s,
                      warmup_s=args.metric_warmup_s, vehicle_json=args.vehicle_json)
+    if args.learning_model:
+        from .learning.workflow import evaluate_checkpoint
+        # Fixed INITIAL checkpoint only. Replaying final adapted weights over the
+        # whole episode would leak future information into an "online" curve.
+        evaluate_checkpoint(args.learning_model, output/'capture', output/'learning_comparison_initial')
     return 2 if info.get('safety_reason') else 0
 
 

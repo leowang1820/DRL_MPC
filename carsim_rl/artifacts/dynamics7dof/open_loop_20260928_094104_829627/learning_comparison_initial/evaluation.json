@@ -1,0 +1,196 @@
+{
+  "capture": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\dynamics7dof\\open_loop_20260928_094104_829627\\capture",
+  "checkpoint": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\dynamics7dof\\residual_framework_v1\\model\\ensemble.pt",
+  "checkpoint_sha256": "f649c590ec65d808eb2eabf58a112482fddfbc107aefaae30d65b2890cc4e913",
+  "source": {
+    "capture": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\dynamics7dof\\open_loop_20260928_094104_829627\\capture",
+    "source_sha256": {
+      "metadata.json": "39e3aaec35c2a5fefeb98aef942dbf7c37a1f7128d015baab6668c9eb1507823",
+      "raw_exports.csv": "83006b52733671f7a56cfc6111dfb3803a7bad46cb720f997e9c95eca5f2779a",
+      "signals_si.csv": "a52220272ea68a247924c1402ce71f7519ed3e8cea6ff7c2f148a4cee87eabdd"
+    },
+    "physical_signature": "e2a487135c54e7df72dbe1b1f6ffc8ac891d53f8d3bc312612a6d9420f0679ca",
+    "rows": 8001,
+    "labels": 1579,
+    "parameter_sha256": "ad85b6588878010ddbae31e93e279fa7ad1ec852b4584174937b9013258b164c",
+    "excitation": {
+      "front_amplitude_deg": 3.0,
+      "frequency_hz": 0.6,
+      "steer_start_s": 1.0,
+      "steer_cycles": 2.0,
+      "ramp_s": 0.5,
+      "steering_ratio": 16.0,
+      "throttle": 0.0,
+      "drive_until_s": 3.0,
+      "brake_mpa": 0.0,
+      "brake_start_s": 5.0,
+      "brake_duration_s": 1.0
+    }
+  },
+  "role": "NEW_EPISODE_UNREVIEWED",
+  "derivative_diagnostic": {
+    "baseline_rmse_si": [
+      0.17162566596071585,
+      0.3359040606171525,
+      0.06549343777834697,
+      17.696553774594577,
+      18.1188150877081,
+      11.195330740269942,
+      11.07535838370723
+    ],
+    "raw_ensemble_rmse_si": [
+      0.02233034443141572,
+      0.0538642452121234,
+      0.0371652208506441,
+      5.667713325251654,
+      4.494953049171063,
+      2.8967839808512412,
+      3.108203029625323
+    ],
+    "gated_rmse_si": [
+      0.02233034443141572,
+      0.0538642452121234,
+      0.0371652208506441,
+      5.667713325251654,
+      4.494953049171063,
+      2.8967839808512412,
+      3.108203029625323
+    ],
+    "normalized_baseline_rmse": 0.9191518128120433,
+    "normalized_gated_rmse": 0.2634192872387413,
+    "rejection_fraction": 0.0,
+    "ood_fraction": 0.0,
+    "clipped_fraction": 0.0,
+    "disagreement_p50_p95": [
+      0.06500925506335753,
+      0.156420530760666
+    ],
+    "uncertainty_is_calibrated": false
+  },
+  "augmented_stop": null,
+  "baseline_stop": null,
+  "common_coverage_fraction": 1.0,
+  "continuous_rollout_common_samples": 7900,
+  "baseline_rmse": {
+    "vx_m_s": {
+      "samples": 7900,
+      "rmse": 0.21261768344188506,
+      "mae": 0.19219706131894218,
+      "max_abs": 0.3193202162710689,
+      "bias": 0.19219706131894218,
+      "nrmse_by_truth_std": 0.18664382241350141
+    },
+    "vy_m_s": {
+      "samples": 7900,
+      "rmse": 0.022420677145061473,
+      "mae": 0.013620327008419074,
+      "max_abs": 0.05702331038272322,
+      "bias": 0.0005505794239516376,
+      "nrmse_by_truth_std": 0.33044954100174107
+    },
+    "yaw_rate_rad_s": {
+      "samples": 7900,
+      "rmse": 0.004009878659785544,
+      "mae": 0.0023810025972229977,
+      "max_abs": 0.013027277841352596,
+      "bias": -0.0003156291989757,
+      "nrmse_by_truth_std": 0.07784298585887718
+    },
+    "omega_fl_rad_s": {
+      "samples": 7900,
+      "rmse": 0.5972244386763719,
+      "mae": 0.5328839004154126,
+      "max_abs": 0.9095987294673193,
+      "bias": 0.5328839004154126,
+      "nrmse_by_truth_std": 0.18536388514020005
+    },
+    "omega_fr_rad_s": {
+      "samples": 7900,
+      "rmse": 0.5941642355754182,
+      "mae": 0.5312763880836757,
+      "max_abs": 0.9074471395853081,
+      "bias": 0.5312763880836757,
+      "nrmse_by_truth_std": 0.18348241762174797
+    },
+    "omega_rl_rad_s": {
+      "samples": 7900,
+      "rmse": 0.5940219418158864,
+      "mae": 0.5310435404466974,
+      "max_abs": 0.9059654142288309,
+      "bias": 0.5310435404466974,
+      "nrmse_by_truth_std": 0.18434675003828102
+    },
+    "omega_rr_rad_s": {
+      "samples": 7900,
+      "rmse": 0.5914686213552607,
+      "mae": 0.5295376110636127,
+      "max_abs": 0.9042396101118229,
+      "bias": 0.5295376110636127,
+      "nrmse_by_truth_std": 0.18261086434821142
+    }
+  },
+  "augmented_rmse": {
+    "vx_m_s": {
+      "samples": 7900,
+      "rmse": 0.08193329232953532,
+      "mae": 0.07674016300692761,
+      "max_abs": 0.10678537152784973,
+      "bias": 0.07674016300692761,
+      "nrmse_by_truth_std": 0.07192413451107492
+    },
+    "vy_m_s": {
+      "samples": 7900,
+      "rmse": 0.01308988394333588,
+      "mae": 0.010596388316173504,
+      "max_abs": 0.03487970628321811,
+      "bias": -0.0007044015444015691,
+      "nrmse_by_truth_std": 0.19292665037969983
+    },
+    "yaw_rate_rad_s": {
+      "samples": 7900,
+      "rmse": 0.003567818175349719,
+      "mae": 0.002826654308446871,
+      "max_abs": 0.011396223521893751,
+      "bias": 0.0014739965904392016,
+      "nrmse_by_truth_std": 0.06926135260802298
+    },
+    "omega_fl_rad_s": {
+      "samples": 7900,
+      "rmse": 0.19363345568979076,
+      "mae": 0.16466957306115576,
+      "max_abs": 0.29296735502218496,
+      "bias": 0.1575977654823352,
+      "nrmse_by_truth_std": 0.060099097282976646
+    },
+    "omega_fr_rad_s": {
+      "samples": 7900,
+      "rmse": 0.19622106278891463,
+      "mae": 0.16604130662702926,
+      "max_abs": 0.3057626954855692,
+      "bias": 0.16425236473655164,
+      "nrmse_by_truth_std": 0.060594550855037004
+    },
+    "omega_rl_rad_s": {
+      "samples": 7900,
+      "rmse": 0.20552970836046044,
+      "mae": 0.1801999515900513,
+      "max_abs": 0.28847895971183846,
+      "bias": 0.17888054975800013,
+      "nrmse_by_truth_std": 0.06378339099182634
+    },
+    "omega_rr_rad_s": {
+      "samples": 7900,
+      "rmse": 0.20997388813649734,
+      "mae": 0.18631919259114885,
+      "max_abs": 0.29742429031027484,
+      "bias": 0.18631919259114885,
+      "nrmse_by_truth_std": 0.06482763720466199
+    }
+  },
+  "automatic_deployment": false,
+  "notes": [
+    "Both continuous curves initialize only once; recorded actual future inputs are replayed.",
+    "Derivative diagnostics and long rollout are different tests.",
+    "Ensemble disagreement/OOD gate is heuristic, not a stability or safety proof."
+  ]
+}

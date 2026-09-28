@@ -1,0 +1,10 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>7DOF 学习补偿</title>
+<style>body{font:16px/1.6 sans-serif;max-width:1240px;margin:30px auto;padding:20px;background:#f4f7fb;color:#1d2b3c}img{width:100%}td,th{padding:8px;border:1px solid #bbb}table{border-collapse:collapse}.note{background:#fff4dc;padding:15px}</style>
+<h1>7DOF 学习补偿对比</h1><p>E:\modelcodeE\DRL_MPC\DRL_MPC\carsim_rl\artifacts\dynamics7dof\open_loop_20260927_233218_823895\capture</p><p class="note">数据角色：TRAINING_EPISODE。
+蓝色为 CarSim，橙色为原模型，绿色为学习补偿。两种模型都只初始化一次，不重置到真值。
+共同有效覆盖率：100.0%。训练回合改善不等于泛化；只有完整留出回合才用于独立验证。
+未接管控制、未生成 Risk 标签；高分歧/超范围回退只是工程防护，不是安全证明。</p>
+<img src="states.svg" alt="三条状态曲线"><h2>连续预测 RMSE（SI）</h2>
+<table><tr><th>状态</th><th>原 7DOF</th><th>学习补偿</th></tr><tr><td>vx_m_s</td><td>0.21663974308016823</td><td>0.09636942402764835</td></tr><tr><td>vy_m_s</td><td>0.03375550186978767</td><td>0.017023971303665453</td></tr><tr><td>yaw_rate_rad_s</td><td>0.0075000159632773</td><td>0.004575512452513222</td></tr><tr><td>omega_fl_rad_s</td><td>0.6005861541712672</td><td>0.22771477108330473</td></tr><tr><td>omega_fr_rad_s</td><td>0.5964523384829928</td><td>0.23161688944343795</td></tr><tr><td>omega_rl_rad_s</td><td>0.5966944094500278</td><td>0.2406499735333141</td></tr><tr><td>omega_rr_rad_s</td><td>0.5930437275594103</td><td>0.24431531324456204</td></tr></table>
+<h2>认知不确定性代理与回退</h2><img src="uncertainty.svg" alt="分歧与回退">
+<p>完整指标见 <a href="evaluation.json">evaluation.json</a>。低网络分歧不保证低真实误差，尚未完成不确定性校准。</p></html>

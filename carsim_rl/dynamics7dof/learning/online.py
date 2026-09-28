@@ -14,6 +14,7 @@ import numpy as np
 from ..model import STATE_NAMES
 from .data import LabelStream, X_FLOOR
 from .ensemble import ResidualEnsemble, optimize, score_model
+from .symmetry import mirror_features
 
 
 def promotion_check(old_anchor, new_anchor, old_recent, new_recent):
@@ -22,7 +23,9 @@ def promotion_check(old_anchor, new_anchor, old_recent, new_recent):
     # Aggregate gains cannot hide a large regression of a single physical channel.
     channel_ok = np.all(np.asarray(new_recent['gated_rmse_si']) <=
                         np.maximum(1.1*np.asarray(old_recent['gated_rmse_si']), 1e-5))
-    return bool(anchor_ok and recent_ok and channel_ok)
+    anchor_channels_ok = np.all(np.asarray(new_anchor['gated_rmse_si']) <=
+                               np.maximum(1.1*np.asarray(old_anchor['gated_rmse_si']), 1e-5))
+    return bool(anchor_ok and recent_ok and channel_ok and anchor_channels_ok)
 
 
 class OnlineShadow:
@@ -30,6 +33,9 @@ class OnlineShadow:
         if update_every < 20 or capacity < 250:
             raise ValueError('Update spacing >=20 and buffer capacity >=250 required')
         self.model, self.buffers = ResidualEnsemble.load(checkpoint)
+        if adapt and not self.model.metadata.get('derivative_only_online_adaptation_allowed', True):
+            raise ValueError('This multi-step checkpoint is observation-only: derivative-only online updates '
+                             'would change its training objective. Use offline rollout fine-tuning first.')
         if set(self.buffers) != {'anchor_x', 'anchor_y', 'history_x', 'history_y'}:
             raise ValueError('Online updates require a checkpoint with frozen anchor and replay buffers')
         self.stream = LabelStream()
@@ -38,7 +44,9 @@ class OnlineShadow:
         self.rows, self.events = deque(maxlen=10000), deque(maxlen=2000)
         self.sum_base_sq, self.sum_error_sq, self.rejected_count = np.zeros(7), np.zeros(7), 0
         self.adapt, self.update_every = adapt, update_every
-        self.labels, self.version, self.attempt = 0, 0, 0
+        self.labels = 0
+        self.version = int(self.model.metadata.get('online_versions', 0))
+        self.attempt = int(self.model.metadata.get('online_adaptation_attempts', 0))
 
     def observe(self, time, state, controls, mu, valid=True):
         current, label = self.stream.observe(time, state, controls, mu, valid)
@@ -84,11 +92,12 @@ class OnlineShadow:
         candidate = deepcopy(self.model)
         # Normalization/output bounds remain frozen; extend INPUT coverage only to
         # observed fit rows, subject to the promotion gate. Never use holdout bounds.
-        candidate.scaler['lower'] = np.minimum(candidate.scaler['lower'], rx.min(0)-2*X_FLOOR)
-        candidate.scaler['upper'] = np.maximum(candidate.scaler['upper'], rx.max(0)+2*X_FLOOR)
+        bound_x = np.concatenate([rx, mirror_features(rx)]) if candidate.symmetry == 'mirror' else rx
+        candidate.scaler['lower'] = np.minimum(candidate.scaler['lower'], bound_x.min(0)-2*X_FLOOR)
+        candidate.scaler['upper'] = np.maximum(candidate.scaler['upper'], bound_x.max(0)+2*X_FLOOR)
         try:
             optimize(candidate.members, candidate.scaler, x, y, epochs=3, lr=1e-4,
-                     seed=9000+self.attempt, device='cpu')
+                     seed=9000+self.attempt, device='cpu', symmetry=candidate.symmetry)
             candidate.refresh()
             anchor = self.buffers['anchor_x'], self.buffers['anchor_y']
             old_a, new_a = score_model(self.model, *anchor), score_model(candidate, *anchor)
@@ -109,7 +118,7 @@ class OnlineShadow:
     def save(self, output, context=None):
         output = Path(output)
         output.mkdir(parents=True, exist_ok=False)
-        report = {'mode': 'shadow_only_no_control', 'adapt_enabled': self.adapt,
+        report = {'mode': 'shadow_only_no_control', 'adapt_enabled': self.adapt, 'symmetry': self.model.symmetry,
                   'version': self.version, 'labels': self.labels, 'events': list(self.events),
                   'logged_prediction_tail_rows': len(self.rows), 'prediction_log_capacity': self.rows.maxlen,
                   'context': context or {}, 'uncertainty_is_calibrated': False,
@@ -125,7 +134,13 @@ class OnlineShadow:
         with (output/'predictions.jsonl').open('x', encoding='utf-8') as f:
             for row in self.rows:
                 f.write(json.dumps(row, ensure_ascii=False)+'\n')
+        sources = list(self.model.metadata.get('online_adaptation_sources', []))
+        if self.adapt and self.labels and context and context.get('capture'):
+            source = {'capture': context['capture'], 'source_sha256': context.get('source_sha256', {})}
+            if source not in sources:
+                sources.append(source)
         self.model.metadata = dict(self.model.metadata, online_versions=self.version,
+                                   online_adaptation_attempts=self.attempt, online_adaptation_sources=sources,
                                    online_context=context or {}, deployment='shadow_only')
         self.model.save(output/'shadow_ensemble.pt', **self.buffers)
         return report

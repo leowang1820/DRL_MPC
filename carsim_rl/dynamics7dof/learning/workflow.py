@@ -16,10 +16,44 @@ from .online import OnlineShadow
 
 
 def source_role(model, info):
+    for source in model.metadata.get('online_adaptation_sources', []):
+        same_path = Path(source['capture']).resolve() == Path(info['capture']).resolve()
+        same_data = (source.get('source_sha256', {}).get('signals_si.csv') ==
+                     info['source_sha256']['signals_si.csv'])
+        if same_path or same_data:
+            return 'ADAPTATION_EPISODE_NOT_HELD_OUT'
+    # Backward-compatible provenance for the first prototype shadow snapshots.
+    old_context = model.metadata.get('online_context', {})
+    if model.metadata.get('online_versions', 0) and old_context.get('capture'):
+        if Path(old_context['capture']).resolve() == Path(info['capture']).resolve():
+            return 'ADAPTATION_EPISODE_NOT_HELD_OUT'
     for episode in model.metadata.get('episodes', []):
         if episode['source_sha256']['signals_si.csv'] == info['source_sha256']['signals_si.csv']:
-            return 'TRAINING_EPISODE' if episode['split'] == 'train' else 'HELD_OUT_EPISODE'
+            if episode['split'] == 'train':
+                return 'TRAINING_EPISODE'
+            if episode.get('role', model.metadata.get('validation_role')) == 'development':
+                return 'DEVELOPMENT_EPISODE_NOT_INDEPENDENT'
+            return 'HELD_OUT_EPISODE'
     return 'NEW_EPISODE_UNREVIEWED'
+
+
+def phase_metrics(elapsed, truth, baseline, augmented, common, excitation):
+    """Expose straight/turn/tail tradeoffs instead of hiding them in one RMSE."""
+    if not excitation or excitation.get('frequency_hz', 0) <= 0:
+        return {}
+    start = float(excitation['steer_start_s'])
+    end = start+float(excitation['steer_cycles'])/float(excitation['frequency_hz'])
+    phases = {'before_steering': (elapsed < start),
+              'steering_active': ((elapsed >= start) & (elapsed <= end)),
+              'after_steering_plus_0p5s': (elapsed >= end+.5)}
+    result = {}
+    for name, mask in phases.items():
+        mask = mask & common
+        result[name] = {'samples': int(mask.sum()), 'baseline': {}, 'augmented': {}}
+        for j, key in enumerate(STATE_NAMES):
+            result[name]['baseline'][key] = error_metrics(truth[mask, j], baseline[mask, j])
+            result[name]['augmented'][key] = error_metrics(truth[mask, j], augmented[mask, j])
+    return result
 
 
 def evaluate_checkpoint(checkpoint, capture, output):
@@ -64,6 +98,10 @@ def evaluate_checkpoint(checkpoint, capture, output):
               'common_coverage_fraction': float(common.sum()/max(1, eligible.sum())),
               'continuous_rollout_common_samples': int(common.sum()),
               'baseline_rmse': {}, 'augmented_rmse': {}, 'automatic_deployment': False,
+              'symmetry': model.symmetry,
+              'rollout_mean_fallback_fraction': float(np.mean(fallbacks[common])) if common.any() else None,
+              'phase_metrics': phase_metrics(elapsed, truth, baseline['predicted'], augmented, common,
+                                             meta.get('excitation')),
               'notes': ['Both continuous curves initialize only once; recorded actual future inputs are replayed.',
                         'Derivative diagnostics and long rollout are different tests.',
                         'Ensemble disagreement/OOD gate is heuristic, not a stability or safety proof.']}
@@ -86,16 +124,25 @@ def evaluate_checkpoint(checkpoint, capture, output):
     rows = []
     for k in STATE_NAMES:
         n, r = report['baseline_rmse'][k]['rmse'], report['augmented_rmse'][k]['rmse']
-        rows.append(f'<tr><td>{k}</td><td>{n if n is not None else "NA"}</td><td>{r if r is not None else "NA"}</td></tr>')
+        bn, an = report['baseline_rmse'][k]['mae'], report['augmented_rmse'][k]['mae']
+        rows.append(f'<tr><td>{k}</td><td>{n}</td><td>{r}</td><td>{bn}</td><td>{an}</td></tr>')
+    phase_rows = []
+    for phase, values in report['phase_metrics'].items():
+        for k in STATE_NAMES[:3]:
+            phase_rows.append(f'<tr><td>{phase}</td><td>{k}</td><td>{values["samples"]}</td>'
+                              f'<td>{values["baseline"][k]["rmse"]}</td><td>{values["augmented"][k]["rmse"]}</td></tr>')
     html = f'''<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>7DOF 学习补偿</title>
 <style>body{{font:16px/1.6 sans-serif;max-width:1240px;margin:30px auto;padding:20px;background:#f4f7fb;color:#1d2b3c}}img{{width:100%}}td,th{{padding:8px;border:1px solid #bbb}}table{{border-collapse:collapse}}.note{{background:#fff4dc;padding:15px}}</style>
 <h1>7DOF 学习补偿对比</h1><p>{escape(str(capture))}</p><p class="note">数据角色：{role}。
 蓝色为 CarSim，橙色为原模型，绿色为学习补偿。两种模型都只初始化一次，不重置到真值。
-共同有效覆盖率：{report['common_coverage_fraction']:.1%}。训练回合改善不等于泛化；只有完整留出回合才用于独立验证。
+共同有效覆盖率：{report['common_coverage_fraction']:.1%}。训练回合改善不等于泛化；已用于设计修改的开发对照回合也不是独立验证。
 未接管控制、未生成 Risk 标签；高分歧/超范围回退只是工程防护，不是安全证明。</p>
 <img src="states.svg" alt="三条状态曲线"><h2>连续预测 RMSE（SI）</h2>
-<table><tr><th>状态</th><th>原 7DOF</th><th>学习补偿</th></tr>{''.join(rows)}</table>
+<table><tr><th>状态</th><th>原模型 RMSE</th><th>补偿 RMSE</th><th>原模型 MAE</th><th>补偿 MAE</th></tr>{''.join(rows)}</table>
+<h2>分时段 RMSE（SI）</h2><p>转向前、正弦输入期间、转向结束 0.5 s 后分别统计；末段不保证已经达到平衡。</p>
+<table><tr><th>阶段</th><th>状态</th><th>样本</th><th>原模型</th><th>补偿</th></tr>{''.join(phase_rows)}</table>
 <h2>认知不确定性代理与回退</h2><img src="uncertainty.svg" alt="分歧与回退">
+<p>连续积分平均回退比例：{report['rollout_mean_fallback_fraction']}；与实测状态上的逐点诊断回退比例不是同一指标。</p>
 <p>完整指标见 <a href="evaluation.json">evaluation.json</a>。低网络分歧不保证低真实误差，尚未完成不确定性校准。</p></html>'''
     (out/'comparison.html').write_text(html, encoding='utf-8')
     print('Learned comparison:', out/'comparison.html', '|', role, flush=True)
@@ -109,7 +156,7 @@ def shadow_replay(checkpoint, capture, output, *, adapt=False, update_every=200)
     _, info = prepare_capture(capture)
     shadow = OnlineShadow(checkpoint, adapt=adapt, update_every=update_every)
     role = source_role(shadow.model, info)
-    if role == 'TRAINING_EPISODE':
+    if role in ('TRAINING_EPISODE', 'ADAPTATION_EPISODE_NOT_HELD_OUT'):
         raise ValueError('Chronological validation cannot replay an episode already used to train the initial weights')
     meta, data = load_capture(capture)
     x = np.column_stack([data[k] for k in STATE_NAMES])
@@ -121,6 +168,8 @@ def shadow_replay(checkpoint, capture, output, *, adapt=False, update_every=200)
     for name, digest in info['source_sha256'].items():
         if sha(capture/name) != digest:
             raise RuntimeError('Capture changed during shadow replay')
-    report = shadow.save(output, {'capture': str(capture), 'role': role, 'replayed_not_live_CarSim': True})
+    report = shadow.save(output, {'capture': str(capture), 'role_at_start': role,
+                                 'role_after_adaptation': 'ADAPTATION_EPISODE_NOT_HELD_OUT' if adapt else role,
+                                 'source_sha256': info['source_sha256'], 'replayed_not_live_CarSim': True})
     print('Shadow report:', output/'online_report.json', flush=True)
     return report

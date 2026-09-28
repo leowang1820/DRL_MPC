@@ -1,0 +1,298 @@
+{
+  "method": "measured_state_truncated_simulation_error",
+  "horizon_s": 0.4,
+  "integration_step_s": 0.0005,
+  "controls_sample_s": 0.001,
+  "updates": 40,
+  "batch_size": 8,
+  "learning_rate": 0.0001,
+  "device": "cpu",
+  "seed": 42,
+  "source_checkpoint": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\dynamics7dof\\residual_framework_v2\\model_balanced\\ensemble.pt",
+  "source_checkpoint_sha256": "89e66f3438cc2fa09249c2edaa9a82dfef137078c7709826610c3a58187d42f6",
+  "training_sources": [
+    {
+      "capture": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\dynamics7dof\\open_loop_20260927_233218_823895\\capture",
+      "source_sha256": {
+        "metadata.json": "0508070742781bbf9ab6da5e57a324e218259ff3e4f0ac9b35ce20eb942ffbd5",
+        "raw_exports.csv": "b0d507c7a71349153b493d9594e1db2284c3e9b87b1f37aa333eeb5f7279303a",
+        "signals_si.csv": "c686c25ed213919ba85801d962f282e564cde0b098a629222aa8068d929f9130"
+      },
+      "fit_windows": 189,
+      "anchor_windows": 12,
+      "state_scale_si": [
+        1.1713728737098283,
+        0.12689848236558585,
+        0.09565984174994141,
+        3.326900490100923,
+        3.326900490100925,
+        3.3247528841345604,
+        3.3247528841345524
+      ]
+    },
+    {
+      "capture": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\dynamics7dof\\open_loop_20260927_223412_368297\\capture",
+      "source_sha256": {
+        "metadata.json": "ac79196c61286c3b5dca0ca8e94445b81aa5344a3c63c471ac78d706ec63109a",
+        "raw_exports.csv": "bc97a579bceac76b071128cd6b42f2aa5b3a34f5b06573e1d2e1395b0fce8d46",
+        "signals_si.csv": "d5145df00cbe980ce896cfe3de0a263bd648e9ac0c3abdd45a81577f1dd6b7ce"
+      },
+      "fit_windows": 189,
+      "anchor_windows": 12,
+      "state_scale_si": [
+        0.740949776921806,
+        0.02,
+        0.014564889956546631,
+        2.063552187215728,
+        2.063552187215732,
+        2.0530393022543665,
+        2.0530393022543656
+      ]
+    }
+  ],
+  "initial_internal_anchor": {
+    "normalized_state_mse": 0.010122602254531708,
+    "invalid_member_windows": 0,
+    "windows": 24,
+    "independent_validation": false
+  },
+  "selected_update": 40,
+  "selected_internal_anchor_mse": 0.0030650715758020943,
+  "history": [
+    {
+      "update": 1,
+      "train_multistep_state_mse": 0.006466415595631285,
+      "gradient_norm_before_clip": 0.09711290539663982
+    },
+    {
+      "update": 2,
+      "train_multistep_state_mse": 0.006598301151640829,
+      "gradient_norm_before_clip": 0.9238014477231298
+    },
+    {
+      "update": 3,
+      "train_multistep_state_mse": 0.007030497865324311,
+      "gradient_norm_before_clip": 0.16690758504345224
+    },
+    {
+      "update": 4,
+      "train_multistep_state_mse": 0.009676769609731057,
+      "gradient_norm_before_clip": 0.13528117645173426
+    },
+    {
+      "update": 5,
+      "train_multistep_state_mse": 0.003234734576641433,
+      "gradient_norm_before_clip": 0.047484240067775164
+    },
+    {
+      "update": 6,
+      "train_multistep_state_mse": 0.008434517402109204,
+      "gradient_norm_before_clip": 0.14563144667814415
+    },
+    {
+      "update": 7,
+      "train_multistep_state_mse": 0.004149234755811827,
+      "gradient_norm_before_clip": 0.055948821449927355
+    },
+    {
+      "update": 8,
+      "train_multistep_state_mse": 0.004108950841826961,
+      "gradient_norm_before_clip": 0.0803630902760953
+    },
+    {
+      "update": 9,
+      "train_multistep_state_mse": 0.007402813224327314,
+      "gradient_norm_before_clip": 0.1415137253173516
+    },
+    {
+      "update": 10,
+      "train_multistep_state_mse": 0.004024171831883083,
+      "gradient_norm_before_clip": 0.05193401995367788,
+      "internal_anchor": {
+        "normalized_state_mse": 0.007446424843494086,
+        "invalid_member_windows": 0,
+        "windows": 24,
+        "independent_validation": false
+      }
+    },
+    {
+      "update": 11,
+      "train_multistep_state_mse": 0.0075913394596950215,
+      "gradient_norm_before_clip": 0.1978595978030207
+    },
+    {
+      "update": 12,
+      "train_multistep_state_mse": 0.005030752645544358,
+      "gradient_norm_before_clip": 0.06864724269821523
+    },
+    {
+      "update": 13,
+      "train_multistep_state_mse": 0.00878874707390496,
+      "gradient_norm_before_clip": 0.24832264270321863
+    },
+    {
+      "update": 14,
+      "train_multistep_state_mse": 0.004096170085714338,
+      "gradient_norm_before_clip": 0.08837205188294035
+    },
+    {
+      "update": 15,
+      "train_multistep_state_mse": 0.002052336031955129,
+      "gradient_norm_before_clip": 0.043541929915944126
+    },
+    {
+      "update": 16,
+      "train_multistep_state_mse": 0.0083782850370829,
+      "gradient_norm_before_clip": 0.13870119507507914
+    },
+    {
+      "update": 17,
+      "train_multistep_state_mse": 0.0069375995563611265,
+      "gradient_norm_before_clip": 0.16025879848180544
+    },
+    {
+      "update": 18,
+      "train_multistep_state_mse": 0.002993355710317868,
+      "gradient_norm_before_clip": 0.04243371865162688
+    },
+    {
+      "update": 19,
+      "train_multistep_state_mse": 0.007102201902651287,
+      "gradient_norm_before_clip": 0.15022344379265365
+    },
+    {
+      "update": 20,
+      "train_multistep_state_mse": 0.0051448702160110295,
+      "gradient_norm_before_clip": 0.06205629475141584,
+      "internal_anchor": {
+        "normalized_state_mse": 0.004820629856383078,
+        "invalid_member_windows": 0,
+        "windows": 24,
+        "independent_validation": false
+      }
+    },
+    {
+      "update": 21,
+      "train_multistep_state_mse": 0.0042298186899716785,
+      "gradient_norm_before_clip": 0.08196414099455643
+    },
+    {
+      "update": 22,
+      "train_multistep_state_mse": 0.003138173184590282,
+      "gradient_norm_before_clip": 0.09821071799310514
+    },
+    {
+      "update": 23,
+      "train_multistep_state_mse": 0.00487081123790357,
+      "gradient_norm_before_clip": 0.05912460265164252
+    },
+    {
+      "update": 24,
+      "train_multistep_state_mse": 0.0045743266864119725,
+      "gradient_norm_before_clip": 0.2057206505882835
+    },
+    {
+      "update": 25,
+      "train_multistep_state_mse": 0.003401827709265968,
+      "gradient_norm_before_clip": 0.11635511649421668
+    },
+    {
+      "update": 26,
+      "train_multistep_state_mse": 0.003702019427575949,
+      "gradient_norm_before_clip": 0.057061754690479284
+    },
+    {
+      "update": 27,
+      "train_multistep_state_mse": 0.005492469769349404,
+      "gradient_norm_before_clip": 0.24605798902078427
+    },
+    {
+      "update": 28,
+      "train_multistep_state_mse": 0.004290549952364126,
+      "gradient_norm_before_clip": 0.13292694584969095
+    },
+    {
+      "update": 29,
+      "train_multistep_state_mse": 0.001899151083672116,
+      "gradient_norm_before_clip": 0.02198769482057887
+    },
+    {
+      "update": 30,
+      "train_multistep_state_mse": 0.00350475954513006,
+      "gradient_norm_before_clip": 0.04406173886622645,
+      "internal_anchor": {
+        "normalized_state_mse": 0.0037046277273919148,
+        "invalid_member_windows": 0,
+        "windows": 24,
+        "independent_validation": false
+      }
+    },
+    {
+      "update": 31,
+      "train_multistep_state_mse": 0.005258609545485573,
+      "gradient_norm_before_clip": 0.087819955957881
+    },
+    {
+      "update": 32,
+      "train_multistep_state_mse": 0.0044615397245356065,
+      "gradient_norm_before_clip": 0.07896329375566764
+    },
+    {
+      "update": 33,
+      "train_multistep_state_mse": 0.0033865085736387206,
+      "gradient_norm_before_clip": 0.041331733672949525
+    },
+    {
+      "update": 34,
+      "train_multistep_state_mse": 0.003217859074881448,
+      "gradient_norm_before_clip": 0.06330468923912183
+    },
+    {
+      "update": 35,
+      "train_multistep_state_mse": 0.0016971028319336823,
+      "gradient_norm_before_clip": 0.012990418160592385
+    },
+    {
+      "update": 36,
+      "train_multistep_state_mse": 0.00387180840586742,
+      "gradient_norm_before_clip": 0.06101524954995728
+    },
+    {
+      "update": 37,
+      "train_multistep_state_mse": 0.0032627882861236313,
+      "gradient_norm_before_clip": 0.06056051667304598
+    },
+    {
+      "update": 38,
+      "train_multistep_state_mse": 0.0038245981038470436,
+      "gradient_norm_before_clip": 0.0536821691877986
+    },
+    {
+      "update": 39,
+      "train_multistep_state_mse": 0.004824568526810286,
+      "gradient_norm_before_clip": 0.12716323634045038
+    },
+    {
+      "update": 40,
+      "train_multistep_state_mse": 0.003062769174977035,
+      "gradient_norm_before_clip": 0.07260364537752269,
+      "internal_anchor": {
+        "normalized_state_mse": 0.0030650715758020943,
+        "invalid_member_windows": 0,
+        "windows": 24,
+        "independent_validation": false
+      }
+    }
+  ],
+  "optimization_uses_uncertainty_gate": false,
+  "continuous_ensemble_rollout_required": true,
+  "automatic_deployment": false,
+  "notes": [
+    "No validation or development samples used for gradients, normalization or checkpoint selection.",
+    "Initial state measured; initial load memory causal, then evolves with predicted states.",
+    "Targets are recorded states, not finite-difference derivative labels.",
+    "Each member trains its own trajectory; deployment uses ensemble mean and full gates.",
+    "Short-window improvement is not a long-rollout or closed-loop guarantee.",
+    "Not a replication of SUBNET or sparse off-white identification; no inherited theorem."
+  ]
+}

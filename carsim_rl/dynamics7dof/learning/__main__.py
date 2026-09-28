@@ -11,6 +11,8 @@ def main(argv=None):
     build.add_argument('--validation', action='append', required=True)
     build.add_argument('--output', required=True)
     build.add_argument('--stride', type=int, default=5)
+    build.add_argument('--validation-role', choices=('held_out', 'development'), default='held_out',
+                       help='Use development for an episode already used to diagnose/tune this model')
     train = sub.add_parser('train', help='Train bootstrapped independent residual networks')
     train.add_argument('--dataset', required=True)
     train.add_argument('--output', required=True)
@@ -19,6 +21,10 @@ def main(argv=None):
     train.add_argument('--members', type=int, default=5)
     train.add_argument('--device', default='cpu')
     train.add_argument('--seed', type=int, default=42)
+    train.add_argument('--symmetry', choices=('mirror', 'none'), default='mirror',
+                       help='mirror assumes flat uniform road and left/right symmetric vehicle; none retains legacy architecture')
+    train.add_argument('--loss-weighting', choices=('episode-rms', 'global'), default='episode-rms',
+                       help='FIT-only episode/channel balancing, or legacy global normalized MSE')
     for name in ('evaluate', 'shadow'):
         cmd = sub.add_parser(name)
         cmd.add_argument('--checkpoint', required=True)
@@ -30,7 +36,7 @@ def main(argv=None):
     args = p.parse_args(argv)
     if args.command == 'build':
         from .data import build_dataset
-        build_dataset(args.train, args.validation, args.output, args.stride)
+        build_dataset(args.train, args.validation, args.output, args.stride, args.validation_role)
     else:
         import torch
         # Small networks in this workflow; avoid excessive BLAS thread overhead.
@@ -38,7 +44,8 @@ def main(argv=None):
         if args.command == 'train':
             from .ensemble import train_dataset
             train_dataset(args.dataset, args.output, epochs=args.epochs, hidden=args.hidden,
-                          count=args.members, device=args.device, seed=args.seed)
+                          count=args.members, device=args.device, seed=args.seed, symmetry=args.symmetry,
+                          loss_weighting=args.loss_weighting)
         elif args.command == 'evaluate':
             from .workflow import evaluate_checkpoint
             evaluate_checkpoint(args.checkpoint, args.capture, args.output)

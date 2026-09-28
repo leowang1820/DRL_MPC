@@ -1,0 +1,44 @@
+{
+  "mode": "shadow_only_no_control",
+  "adapt_enabled": false,
+  "version": 0,
+  "labels": 1579,
+  "events": [],
+  "logged_prediction_tail_rows": 1579,
+  "prediction_log_capacity": 10000,
+  "context": {
+    "live_CarSim_observer": true,
+    "capture": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\dynamics7dof\\open_loop_20260928_094104_829627\\capture",
+    "source_sha256": {
+      "signals_si.csv": "a52220272ea68a247924c1402ce71f7519ed3e8cea6ff7c2f148a4cee87eabdd"
+    },
+    "controls_unchanged_by_learning": true,
+    "observer_active_at_end": true
+  },
+  "uncertainty_is_calibrated": false,
+  "notes": [
+    "Errors saved at prediction time BEFORE delayed targets/updates.",
+    "Frozen replay anchor is an adaptation guard, not independent validation.",
+    "No hard real-time guarantee; wall time may increase.",
+    "No action commands or Risk labels are generated."
+  ],
+  "prequential_baseline_rmse_si": {
+    "vx_m_s": 0.17162566596071585,
+    "vy_m_s": 0.3359040606171525,
+    "yaw_rate_rad_s": 0.06549343777834697,
+    "omega_fl_rad_s": 17.696553774594577,
+    "omega_fr_rad_s": 18.1188150877081,
+    "omega_rl_rad_s": 11.195330740269942,
+    "omega_rr_rad_s": 11.07535838370723
+  },
+  "prequential_corrected_rmse_si": {
+    "vx_m_s": 0.02233034443141572,
+    "vy_m_s": 0.0538642452121234,
+    "yaw_rate_rad_s": 0.0371652208506441,
+    "omega_fl_rad_s": 5.667713325251654,
+    "omega_fr_rad_s": 4.494953049171063,
+    "omega_rl_rad_s": 2.8967839808512412,
+    "omega_rr_rad_s": 3.108203029625323
+  },
+  "rejection_fraction": 0.0
+}

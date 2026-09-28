@@ -8,6 +8,10 @@
 正弦转向＋驱动/制动开环实验、连续预测曲线及误差指标，见 [OPEN_LOOP_GUIDE.md](OPEN_LOOP_GUIDE.md)。
 入口 `python -m dynamics7dof.open_loop` 默认只读；`--run` 才启动真实 CarSim，`--replay` 仅离线重放。
 
+第一层学习补偿框架现已加入 [learning/README.md](learning/README.md)：残差数据集、5 网络 ensemble、
+连续预测评估、顺序在线回放及可选真实 CarSim 观察器。初步训练回合改善不代表全工况通过，
+独立工况和在线更新的实际限制均在该文档与运行报告中保留。
+
 物理模型和离线示例不加载 CarSim DLL、不导入 SAC、不修改已有模型、参考路径和训练日志。
 它保留用户 MATLAB 物理部分的行为，先让逐项比较有据可查；不是已经修正/标定完成的新模型。
 第二阶段新增的 `collect.py` 在实际采集模式下会运行 CarSim，使用方法见 `CAPTURE_GUIDE.md`。

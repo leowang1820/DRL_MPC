@@ -2,6 +2,10 @@
 
 入口：`python -m dynamics7dof.open_loop`。不接入 SAC、Ensemble 或轨迹跟踪器，不改原 7DOF 参数/轮胎拟合。
 
+更新：上述为默认行为。现可用 `--learning-model 检查点路径` 添加残差预测观察器，
+再加 `--learn-online` 才允许候选网络在线更新；两者都不接管车辆控制。
+完整说明见 [learning/README.md](learning/README.md)。不传这些参数时保持原实验行为。
+
 ## 1. 本实验比较什么
 
 当前 CarSim 的三个输入是油门、制动压力、方向盘角，不能直接传入两个前轮角和四轮扭矩。因此采用：
