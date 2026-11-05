@@ -5,6 +5,7 @@
 - 日常入口和命令：见 `carsim_rl/README.md`。
 - CarSim DLC 配置：见 `carsim_rl/DLC_GUIDE.md`。
 - 完整训练和续训：见 `carsim_rl/TRAINING_GUIDE.md`。
+- 新 World Model 离线框架：见 `carsim_rl/wm_recovery/README.md`（独立模块，保留原论文参数）。
 - Word 操作手册：保留在 `carsim_rl/docs/`。
 
 2026-09-23 已清理调试脚本、旧训练入口及通用示例。历史代码备份位于本项目上一级的
