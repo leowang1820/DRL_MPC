@@ -1,0 +1,5 @@
+{
+  "status": "synthetic_workflow_completed",
+  "output": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\wm_recovery\\my_synthetic_demo_02",
+  "claim": "Only data/training/calibration/evaluation code paths were exercised. No CarSim validation."
+}
