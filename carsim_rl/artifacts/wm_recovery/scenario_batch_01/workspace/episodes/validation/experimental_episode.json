@@ -1,0 +1,14 @@
+{
+  "format": "wm_recovery_experimental_episode_manifest_v1",
+  "trajectory_id": "carsim_experimental_validation",
+  "condition_id": "scenario_validation_sine_071",
+  "split": "validation",
+  "actual_mu": 0.8,
+  "candidate_path": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\wm_recovery\\scenario_batch_01\\candidate_validation",
+  "candidate_sha256": "646268f5c688f30ab75ca45817bff5ee3cbbb8fae2bed7c7567342a6282e76d2",
+  "raw_source_sha256": "c220a301d31bd74c7ccb471ad703e1756db645af9ba21b56f8e2389e3c2fe566",
+  "assumption_acknowledged": true,
+  "source_kind": "carsim_experimental",
+  "ready_for_wm_training": false,
+  "note": "仅用于用户明确开启的开发性实验；真实左右前轮转角分别保留在 candidate.npz；不宣称轮端净转矩、制动等物理语义已经验证。"
+}
