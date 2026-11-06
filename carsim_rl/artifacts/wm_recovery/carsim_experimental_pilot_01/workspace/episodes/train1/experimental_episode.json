@@ -1,0 +1,14 @@
+{
+  "format": "wm_recovery_experimental_episode_manifest_v1",
+  "trajectory_id": "carsim_experimental_train1",
+  "condition_id": "pilot_existing_train",
+  "split": "train",
+  "actual_mu": 0.8,
+  "candidate_path": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\wm_recovery\\carsim_candidate_01",
+  "candidate_sha256": "d14b0046f79f92f7682e3c753828e6216b20f65a74c756b1ba95dcb78527dccf",
+  "raw_source_sha256": "d47be0cf16e116c28f5a3651daf65c545809fa6d3814a43ab814831c3e966f73",
+  "assumption_acknowledged": true,
+  "source_kind": "carsim_experimental",
+  "ready_for_wm_training": false,
+  "note": "该清单仅在环境开关显式开启时可用于程序开发实验；名义输入不是实际前轮角度/轮端净转矩的物理证明"
+}

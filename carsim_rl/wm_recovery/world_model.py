@@ -38,8 +38,16 @@ class WorldModel(nn.Module):
         self.metadata = {}
 
     def tensor(self, value):
-        return torch.as_tensor(value, dtype=self.feature_mean.dtype, device=self.feature_mean.device)
+        # 如果 NumPy 数组是只读的，先复制成可写数组
+        if getattr(value, "flags", None) is not None and not value.flags.writeable:
+            value = value.copy()
 
+        # 然后安全地转换为 PyTorch Tensor
+        return torch.as_tensor(
+            value,
+            dtype=self.feature_mean.dtype,
+            device=self.feature_mean.device
+        )
     def nominal(self, state, applied, memory):
         invalid = torch.zeros(state.shape[:-1], dtype=torch.bool, device=state.device)
         mu = state.new_full(state.shape[:-1], .8)

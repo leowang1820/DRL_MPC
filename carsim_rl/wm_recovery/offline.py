@@ -32,9 +32,26 @@ class Episode:
     metadata: dict
     source_sha256: str
 
+    @property
+    def model_input(self):
+        """返回供 7DOF 与网络使用的输入。
+
+        严格 V1：这是已核实的实际输入；
+        CarSim 实验路径：这是显式标记的同角命令近似。
+        保留 applied 属性仅用于兼容原有训练与推理代码。
+        """
+        return self.applied
+
     @classmethod
     def load(cls, directory):
         directory = Path(directory)
+
+        # 新实验路径需要目录里的独立清单与显式环境开关。
+        # 不会改变原有 V1 的任何安全检查和格式要求。
+        if (directory / "experimental_episode.json").is_file():
+            from .carsim_experimental import load_experimental_episode
+            return load_experimental_episode(directory)
+
         meta = json.loads((directory / "metadata.json").read_text(encoding="utf-8"))
         if meta.get("format") != FORMAT:
             raise ValueError("Unsupported trajectory format; old captures need an explicit converter")
@@ -109,7 +126,9 @@ def audit_partition(episodes):
 
 
 def controls_at(episode, index):
-    return Controls(episode.applied[index, :2], episode.applied[index, 2:])
+    """名义物理模型使用 model_input，保留旧 V1 语义兼容。"""
+    u = episode.model_input[index]
+    return Controls(u[:2], u[2:])
 
 
 def _scores(predicted, truth, valid):
@@ -217,3 +236,188 @@ def evaluate_nominal(episode, *, max_substep_s, model=None, horizon_s=1.0):
               "horizon_end_indices": np.array(endpoints, dtype=int),
               "horizon_prediction": np.asarray(predicted).reshape(-1, 7)}
     return report, arrays
+
+
+# ============================================================
+# CarSim 候选轨迹 V1：只读加载器，故意不进入 Episode.load 的正式训练路径
+# ============================================================
+
+CANDIDATE_FORMAT = "wm_recovery_carsim_candidate_v1"
+
+# 与 carsim_candidate.py 写出的数组顺序一致，用于验证内容 SHA256。
+_CANDIDATE_KEYS = (
+    "time_s",
+    "state_si",
+    "command_si",
+    "nominal_7dof_input_si",
+    "measured_steer_rad",
+    "reported_external_torque_nm",
+    "reported_accel_mps2",
+    "import_native",
+    "my_dr_native",
+    "nominal_initial_load_memory_mps2",
+)
+
+
+@dataclass(frozen=True)
+class CandidateEpisode:
+    """可审计但不可直接训练的真实 CarSim 候选轨迹。
+
+    和正式 Episode 的区别：
+    - nominal_input 是同角指令近似，不是测得的实际执行器状态。
+    - measured_steer 始终保存左右两个独立测量值。
+    - CarSim Ax/Ay 仅用于诊断，不作为参考模型的 LoadMemory。
+    - 本类故意没有 applied 字段，以防误传给旧训练管线。
+    """
+
+    time: np.ndarray
+    state: np.ndarray
+    command: np.ndarray
+    nominal_input: np.ndarray
+    measured_steer: np.ndarray
+    reported_external_torque: np.ndarray
+    measured_ax_ay: np.ndarray
+    import_native: np.ndarray
+    my_dr_native: np.ndarray
+    initial_memory: LoadMemory
+    metadata: dict
+    source_sha256: str
+
+    @classmethod
+    def load(cls, directory):
+        """验证候选格式、通道时序、控制含义和物理数组指纹。"""
+
+        directory = Path(directory)
+        metadata_file = directory / "candidate_report.json"
+        array_file = directory / "candidate.npz"
+
+        meta = json.loads(metadata_file.read_text(encoding="utf-8"))
+        if meta.get("format") != CANDIDATE_FORMAT:
+            raise ValueError("不是受支持的 CarSim 候选格式")
+        if meta.get("status") != "candidate_created_not_training_ready":
+            raise ValueError("候选轨迹状态与只读数据契约不一致")
+        if meta.get("ready_for_wm_training") is not False:
+            raise ValueError("候选格式不能声明为已批准训练")
+        if meta.get("model_input_definition") != (
+            "equal_front_commanded_steer_plus_four_commanded_external_torques"
+        ):
+            raise ValueError("名义控制输入定义未被明确声明")
+        if meta.get("interval_alignment") != (
+            "command_i_holds_from_t_i_to_t_i_plus_1"
+        ):
+            raise ValueError("候选数据未声明正确的区间控制时间语义")
+        if meta.get("split") != "unassigned":
+            raise ValueError("候选数据不得冒充已经正式分配的训练分区")
+
+        with np.load(array_file, allow_pickle=False) as archive:
+            if set(archive.files) != set(_CANDIDATE_KEYS):
+                raise ValueError(
+                    "候选文件字段与固定格式不一致，"
+                    f"期望 {_CANDIDATE_KEYS}，实际 {archive.files}"
+                )
+            arrays = {
+                name: np.asarray(archive[name], dtype=np.float64).copy()
+                for name in _CANDIDATE_KEYS
+            }
+
+        for name, array in arrays.items():
+            if not np.all(np.isfinite(array)):
+                raise ValueError(f"候选数据字段 {name} 含非有限值")
+
+        time = arrays["time_s"]
+        if time.ndim != 1 or len(time) < 2:
+            raise ValueError("候选数据至少需要两个状态采样时刻")
+        n = len(time) - 1
+        expected_shapes = {
+            "state_si": (n + 1, 7),
+            "command_si": (n, 5),
+            "nominal_7dof_input_si": (n, 6),
+            "measured_steer_rad": (n + 1, 2),
+            "reported_external_torque_nm": (n + 1, 4),
+            "reported_accel_mps2": (n + 1, 2),
+            "import_native": (n, 6),
+            "my_dr_native": (n + 1, 4),
+            "nominal_initial_load_memory_mps2": (2,),
+        }
+        for name, shape in expected_shapes.items():
+            if arrays[name].shape != shape:
+                raise ValueError(
+                    f"{name} 的形状应为 {shape}，实际为 {arrays[name].shape}"
+                )
+        dt = np.diff(time)
+        dt_declared = meta.get("dt_s")
+        if (
+            np.any(dt <= 0)
+            or isinstance(dt_declared, bool)
+            or not isinstance(dt_declared, (int, float))
+            or not math.isfinite(dt_declared)
+            or dt_declared <= 0
+            or not np.allclose(dt, dt_declared, rtol=0, atol=1e-8)
+        ):
+            raise ValueError("候选时间栅格与标记采样周期不匹配")
+        if meta.get("samples") != n + 1 or meta.get("intervals") != n:
+            raise ValueError("候选数据样本数与报告不一致")
+
+        # 原始 CarSim Import 为 [四轮 N-m, 左前 deg, 右前 deg]。
+        # 名义 7DOF 输入为 [左前 rad, 右前 rad, 四轮 N-m]。
+        cmd = arrays["command_si"]
+        nominal = arrays["nominal_7dof_input_si"]
+        imp = arrays["import_native"]
+        expected_nominal = np.column_stack((
+            cmd[:, 4], cmd[:, 4], cmd[:, :4]
+        ))
+        expected_import = np.column_stack((
+            cmd[:, :4], np.rad2deg(cmd[:, 4]), np.rad2deg(cmd[:, 4])
+        ))
+        if not np.allclose(nominal, expected_nominal, rtol=0, atol=1e-12):
+            raise ValueError("名义同角输入与五维控制指令不一致")
+        if not np.allclose(imp, expected_import, rtol=0, atol=1e-8):
+            raise ValueError("六维 Import 不符合 CarSim 原生单位及通道顺序")
+        if (
+            np.any(np.abs(nominal[:, :2]) >= math.pi / 2)
+            or np.any(np.abs(arrays["measured_steer_rad"]) >= math.pi / 2)
+        ):
+            raise ValueError("前轮角度超出受支持的范围")
+
+        # 只核对外加转矩回显；My_Dr 为另一个物理量，不当作已验证净力矩。
+        echo_match = bool(np.allclose(
+            arrays["reported_external_torque_nm"][1:],
+            imp[:, :4], rtol=0, atol=1e-7
+        ))
+        if meta.get("torque_echo_matches") is not echo_match:
+            raise ValueError("候选报告的转矩回显结论与实测数组不一致")
+
+        memory = arrays["nominal_initial_load_memory_mps2"]
+        if not np.array_equal(memory, np.zeros(2)):
+            raise ValueError("候选格式约定名义模型从零载荷记忆开始")
+
+        # 验证内容指纹；任何数值改动都不能静默通过。
+        digest = hashlib.sha256()
+        for name in _CANDIDATE_KEYS:
+            array = arrays[name]
+            digest.update(name.encode("ascii"))
+            digest.update(str(array.shape).encode("ascii"))
+            digest.update(
+                np.ascontiguousarray(array, dtype="<f8").tobytes()
+            )
+        fingerprint = digest.hexdigest()
+        if fingerprint != meta.get("canonical_physical_arrays_sha256"):
+            raise ValueError("候选物理数组 SHA256 不匹配，数据可能被修改")
+
+        # 不主动强制左右真实角度相等，也不覆盖原始左右测量值。
+        for array in arrays.values():
+            array.setflags(write=False)
+        return cls(
+            time=arrays["time_s"],
+            state=arrays["state_si"],
+            command=arrays["command_si"],
+            nominal_input=arrays["nominal_7dof_input_si"],
+            measured_steer=arrays["measured_steer_rad"],
+            reported_external_torque=arrays["reported_external_torque_nm"],
+            measured_ax_ay=arrays["reported_accel_mps2"],
+            import_native=arrays["import_native"],
+            my_dr_native=arrays["my_dr_native"],
+            initial_memory=LoadMemory(*memory),
+            metadata=meta,
+            source_sha256=fingerprint,
+        )

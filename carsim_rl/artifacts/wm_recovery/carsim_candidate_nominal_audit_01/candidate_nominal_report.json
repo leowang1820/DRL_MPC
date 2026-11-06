@@ -1,0 +1,50 @@
+{
+  "format": "wm_recovery_carsim_candidate_nominal_audit_v1",
+  "status": "diagnostic_only",
+  "candidate_sha256": "d14b0046f79f92f7682e3c753828e6216b20f65a74c756b1ba95dcb78527dccf",
+  "intervals": 600,
+  "valid_intervals": 600,
+  "coverage": 1.0,
+  "max_substep_s": 0.0005,
+  "nominal_mu": 0.8,
+  "one_step_scores_si": {
+    "rmse": {
+      "vx_m_s": 3.8137460207283087e-05,
+      "vy_m_s": 0.00020784971667640853,
+      "yaw_rate_rad_s": 0.00010545613234647554,
+      "omega_fl_rad_s": 0.0032205581026646317,
+      "omega_fr_rad_s": 0.003297040646627533,
+      "omega_rl_rad_s": 0.0027655807100844757,
+      "omega_rr_rad_s": 0.002707786622478021
+    },
+    "mae": {
+      "vx_m_s": 2.9853887525253716e-05,
+      "vy_m_s": 0.00013465180122183991,
+      "yaw_rate_rad_s": 6.788774724038344e-05,
+      "omega_fl_rad_s": 0.001946346395020626,
+      "omega_fr_rad_s": 0.001952099069884401,
+      "omega_rl_rad_s": 0.001810517049135368,
+      "omega_rr_rad_s": 0.0018163804165793884
+    }
+  },
+  "first_failure": null,
+  "nominal_input": "common_command_steer_plus_external_torque",
+  "measured_steer_preserved": true,
+  "carsim_ax_ay_used_in_load_memory": false,
+  "reference_force_memory_carried": true,
+  "other_wheel_actuation_verified_zero": false,
+  "friction_brake_actuation_verified_zero": false,
+  "ready_for_wm_training": false,
+  "warning": "结果仅用于检查候选数据与 7DOF 预测接口；尚不能认定外加转矩为轮端总转矩，也不能作为论文正式预测精度",
+  "my_dr_native_max_abs_by_wheel": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "my_dr_native_all_zero_with_1e_minus_8_tolerance": true,
+  "actual_steer_max_difference_deg": 0.00684375248687265,
+  "friction_brake_verified_zero": false,
+  "net_shaft_torque_verified": false,
+  "note": "My_Dr 原生输出接近零仅能说明该观测变量接近零；仍需确认制动器配置和轮端净转矩定义。"
+}

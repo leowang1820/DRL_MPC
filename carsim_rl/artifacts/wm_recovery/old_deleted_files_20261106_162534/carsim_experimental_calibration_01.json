@@ -1,0 +1,35 @@
+{
+  "settings": {
+    "window_steps": 10,
+    "exceed_steps": 3,
+    "recover_steps": 10,
+    "quantile": 0.99
+  },
+  "uncertainty_threshold": 0.0005675215415616613,
+  "residual_threshold": 2.5412846182464293,
+  "residual_scale": [
+    0.001,
+    0.001,
+    0.00010052832345570335,
+    0.02,
+    0.02,
+    0.02,
+    0.02
+  ],
+  "calibration_windows": 581,
+  "meaning": "empirical nominal validation quantiles; not calibrated failure probabilities",
+  "format": "wm_recovery_confidence_v1",
+  "checkpoint_sha256": "2a4b9b7a25dada441c12decfa6bf5eca61a72ca4727e671184e2db2ccfbcc63b",
+  "calibration_trajectories": [
+    {
+      "trajectory_id": "carsim_experimental_validation",
+      "condition_id": "pilot_validation_inputs",
+      "sha256": "646268f5c688f30ab75ca45817bff5ee3cbbb8fae2bed7c7567342a6282e76d2",
+      "hash_basis": "canonical_physical_arrays",
+      "source_kind": "carsim_experimental",
+      "split": "validation",
+      "windows": 586
+    }
+  ],
+  "synthetic_demo_only": false
+}

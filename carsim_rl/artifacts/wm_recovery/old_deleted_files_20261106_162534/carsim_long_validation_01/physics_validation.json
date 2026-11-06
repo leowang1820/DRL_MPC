@@ -1,0 +1,170 @@
+{
+  "status": "long_capture_kinematic_screen_completed",
+  "duration_s": 6.000000000000338,
+  "samples": 601,
+  "import_and_time_checked_by": "wm_recovery.carsim_si.load_si_view",
+  "reported_torque_matches_import": true,
+  "max_torque_echo_error_nm": 0.0,
+  "ax_comparison": {
+    "screening": "NUMERICAL_SCREEN_GOOD",
+    "screen_rmse_limit_mps2": 0.15,
+    "samples": 533,
+    "rmse_mps2": 5.6588769460355696e-05,
+    "mae_mps2": 3.1816292035374224e-05,
+    "bias_mps2": -2.7092010877618453e-07,
+    "p95_abs_error_mps2": 0.0001414415839426214,
+    "measured_std_mps2": 0.06195438659604773,
+    "measured_range_mps2": [
+      -0.16628827056455178,
+      0.11742680107346774
+    ],
+    "correlation": 0.9999996074045877,
+    "rmse_if_sign_reversed_mps2": 0.12645951299652988,
+    "best_lag_samples_diagnostic_only": "0"
+  },
+  "ay_comparison": {
+    "screening": "NUMERICAL_SCREEN_GOOD",
+    "screen_rmse_limit_mps2": 0.15,
+    "samples": 533,
+    "rmse_mps2": 7.337579200441501e-05,
+    "mae_mps2": 5.181035370289247e-05,
+    "bias_mps2": 1.7442650045843956e-06,
+    "p95_abs_error_mps2": 0.0001478990484853368,
+    "measured_std_mps2": 0.06738502340404426,
+    "measured_range_mps2": [
+      -0.1142312207426495,
+      0.1684687806121365
+    ],
+    "correlation": 0.9999994074930492,
+    "rmse_if_sign_reversed_mps2": 0.13552784993306669,
+    "best_lag_samples_diagnostic_only": "0"
+  },
+  "phase_comparisons": {
+    "longitudinal": {
+      "ax": {
+        "screening": "NUMERICAL_SCREEN_GOOD",
+        "screen_rmse_limit_mps2": 0.15,
+        "samples": 171,
+        "rmse_mps2": 9.055064614425025e-05,
+        "mae_mps2": 6.919436344714864e-05,
+        "bias_mps2": 8.189550865418905e-07,
+        "p95_abs_error_mps2": 0.00017988288554099396,
+        "measured_std_mps2": 0.09165626394928254,
+        "measured_range_mps2": [
+          -0.16628827056455178,
+          0.11742680107346774
+        ],
+        "correlation": 0.9999995359361173,
+        "rmse_if_sign_reversed_mps2": 0.18698831646240888,
+        "best_lag_samples_diagnostic_only": "0"
+      },
+      "ay": {
+        "screening": "WEAK_ACCELERATION_EXCITATION",
+        "screen_rmse_limit_mps2": 0.15,
+        "samples": 171,
+        "rmse_mps2": 5.382777698336193e-16,
+        "mae_mps2": 4.427886593046313e-16,
+        "bias_mps2": -2.2873568817177187e-18,
+        "p95_abs_error_mps2": 1.0080044712437956e-15,
+        "measured_std_mps2": 1.922005291106016e-15,
+        "measured_range_mps2": [
+          -2.4960328443014403e-15,
+          6.571240694478267e-15
+        ],
+        "correlation": null,
+        "rmse_if_sign_reversed_mps2": 5.8536653189184894e-15,
+        "best_lag_samples_diagnostic_only": "0"
+      }
+    },
+    "steering": {
+      "ax": {
+        "screening": "WEAK_ACCELERATION_EXCITATION",
+        "screen_rmse_limit_mps2": 0.15,
+        "samples": 170,
+        "rmse_mps2": 5.537053301972661e-06,
+        "mae_mps2": 4.150175845734879e-06,
+        "bias_mps2": 1.8184445523351137e-07,
+        "p95_abs_error_mps2": 1.1984879160663133e-05,
+        "measured_std_mps2": 0.00016095590508177283,
+        "measured_range_mps2": [
+          -0.002828104629349014,
+          -0.0022792892959402674
+        ],
+        "correlation": 0.9994151856782955,
+        "rmse_if_sign_reversed_mps2": 0.005009870093933783,
+        "best_lag_samples_diagnostic_only": "0"
+      },
+      "ay": {
+        "screening": "NUMERICAL_SCREEN_GOOD",
+        "screen_rmse_limit_mps2": 0.15,
+        "samples": 170,
+        "rmse_mps2": 0.00010320191435982163,
+        "mae_mps2": 9.110847288084438e-05,
+        "bias_mps2": 4.598795582397028e-06,
+        "p95_abs_error_mps2": 0.00018065540324305854,
+        "measured_std_mps2": 0.0941436121559069,
+        "measured_range_mps2": [
+          -0.1142312207426495,
+          0.1684687806121365
+        ],
+        "correlation": 0.9999994003542177,
+        "rmse_if_sign_reversed_mps2": 0.19359668715064288,
+        "best_lag_samples_diagnostic_only": "0"
+      }
+    },
+    "mixed": {
+      "ax": {
+        "screening": "NUMERICAL_SCREEN_GOOD",
+        "screen_rmse_limit_mps2": 0.15,
+        "samples": 169,
+        "rmse_mps2": 2.26446124093321e-05,
+        "mae_mps2": 1.966319236152818e-05,
+        "bias_mps2": 2.620957661840692e-07,
+        "p95_abs_error_mps2": 3.817544270758866e-05,
+        "measured_std_mps2": 0.05839020105071255,
+        "measured_range_mps2": [
+          -0.1182079428314009,
+          0.06374158436545517
+        ],
+        "correlation": 0.9999999566966,
+        "rmse_if_sign_reversed_mps2": 0.12260242458576327,
+        "best_lag_samples_diagnostic_only": "0"
+      },
+      "ay": {
+        "screening": "NUMERICAL_SCREEN_GOOD",
+        "screen_rmse_limit_mps2": 0.15,
+        "samples": 169,
+        "rmse_mps2": 7.869741199824311e-05,
+        "mae_mps2": 6.95331618524939e-05,
+        "bias_mps2": 3.0962827170796565e-06,
+        "p95_abs_error_mps2": 0.0001415568509509163,
+        "measured_std_mps2": 0.07110836224615635,
+        "measured_range_mps2": [
+          -0.10964598499897933,
+          0.10788324375247547
+        ],
+        "correlation": 0.9999993885750262,
+        "rmse_if_sign_reversed_mps2": 0.14221658553681057,
+        "best_lag_samples_diagnostic_only": "0"
+      }
+    }
+  },
+  "max_left_right_steer_difference_deg": 0.00684375248687265,
+  "wheel_linear_speed_minus_vx_median_mps": [
+    -8.03316359583306e-05,
+    -4.1457499397878905e-05,
+    -0.00010841088187873993,
+    -0.00010855528970310502
+  ],
+  "ax_ay_physical_semantics_fully_verified": false,
+  "loadmemory_runtime_causality_verified": false,
+  "nominal_input_is_equal_angle_command_approximation": true,
+  "car_vehicle_parameters_and_mu": "user_confirmed",
+  "ready_for_wm_training": false,
+  "interpretation": [
+    "运动学使用平面质心公式，完整三维滚转、俯仰等项未建模",
+    "导数使用离线邻域采样，仅作验证，不能输入在线预测器",
+    "LoadMemory 来源与微步更新仍需要核对静态调用报告",
+    "名义同角转向为建模近似，真实两个转角仍分别保存"
+  ]
+}

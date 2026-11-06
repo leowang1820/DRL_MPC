@@ -1,0 +1,352 @@
+{
+  "format": "wm_recovery_evaluation_v1",
+  "source": {
+    "trajectory_id": "carsim_experimental_test",
+    "condition_id": "pilot_test_inputs",
+    "sha256": "110e148f3589ed422e53ad1d2b91fa9f7966bb9672c54abe7928cc0fc903ef06",
+    "hash_basis": "canonical_physical_arrays",
+    "source_kind": "carsim_experimental",
+    "split": "test",
+    "windows": 586
+  },
+  "checkpoint_sha256": "2a4b9b7a25dada441c12decfa6bf5eca61a72ca4727e671184e2db2ccfbcc63b",
+  "synthetic_demo_only": false,
+  "nominal_mu_used": 0.8,
+  "actual_mu_metadata_only": 0.8,
+  "one_step": {
+    "world_model": {
+      "valid_samples": 590,
+      "total_samples": 590,
+      "coverage": 1.0,
+      "rmse": {
+        "vx_m_s": 4.846957330382561e-05,
+        "vy_m_s": 0.00029753912865239146,
+        "yaw_rate_rad_s": 0.00011578773365528628,
+        "omega_fl_rad_s": 0.0070646781844613486,
+        "omega_fr_rad_s": 0.007211801483676796,
+        "omega_rl_rad_s": 0.005551736980900288,
+        "omega_rr_rad_s": 0.005430416914285318
+      },
+      "mae": {
+        "vx_m_s": 3.763047535119662e-05,
+        "vy_m_s": 0.00022290282779296696,
+        "yaw_rate_rad_s": 8.61724707288383e-05,
+        "omega_fl_rad_s": 0.005247995226079584,
+        "omega_fr_rad_s": 0.005326528058012745,
+        "omega_rl_rad_s": 0.003993652577874675,
+        "omega_rr_rad_s": 0.003922996803137998
+      }
+    },
+    "nominal_common_mask": {
+      "valid_samples": 590,
+      "total_samples": 590,
+      "coverage": 1.0,
+      "rmse": {
+        "vx_m_s": 5.027281899409087e-05,
+        "vy_m_s": 0.0003844078165105374,
+        "yaw_rate_rad_s": 0.00015839207453676883,
+        "omega_fl_rad_s": 0.008424591702855005,
+        "omega_fr_rad_s": 0.008554264047053003,
+        "omega_rl_rad_s": 0.006289013001205653,
+        "omega_rr_rad_s": 0.006304063783632312
+      },
+      "mae": {
+        "vx_m_s": 3.898827937087621e-05,
+        "vy_m_s": 0.0002902327646566621,
+        "yaw_rate_rad_s": 0.00011243164220020077,
+        "omega_fl_rad_s": 0.006099480009994578,
+        "omega_fr_rad_s": 0.006213396908259681,
+        "omega_rl_rad_s": 0.0046190921374693735,
+        "omega_rr_rad_s": 0.004595414173822284
+      }
+    },
+    "persistence_common_mask": {
+      "valid_samples": 590,
+      "total_samples": 590,
+      "coverage": 1.0,
+      "rmse": {
+        "vx_m_s": 0.0006898972252159496,
+        "vy_m_s": 0.00043779628582157887,
+        "yaw_rate_rad_s": 0.00040393698716471605,
+        "omega_fl_rad_s": 0.001990260861763301,
+        "omega_fr_rad_s": 0.0023854319120775102,
+        "omega_rl_rad_s": 0.0019957317084906734,
+        "omega_rr_rad_s": 0.0023950878596688324
+      },
+      "mae": {
+        "vx_m_s": 0.0005136986351067485,
+        "vy_m_s": 0.00032974399849237143,
+        "yaw_rate_rad_s": 0.00030448531695483234,
+        "omega_fl_rad_s": 0.0014453781162477013,
+        "omega_fr_rad_s": 0.001517656055898159,
+        "omega_rl_rad_s": 0.0014452560017239684,
+        "omega_rr_rad_s": 0.0015334986733565711
+      }
+    }
+  },
+  "rolling_horizon": {
+    "horizon_s": 1.0,
+    "windows": 50,
+    "world_model": {
+      "valid_samples": 50,
+      "total_samples": 50,
+      "coverage": 1.0,
+      "rmse": {
+        "vx_m_s": 0.0012491816984834215,
+        "vy_m_s": 0.0022778839611533467,
+        "yaw_rate_rad_s": 0.0007603214424376189,
+        "omega_fl_rad_s": 0.00914677544938505,
+        "omega_fr_rad_s": 0.009298353618236482,
+        "omega_rl_rad_s": 0.00935213186630958,
+        "omega_rr_rad_s": 0.008970583548968144
+      },
+      "mae": {
+        "vx_m_s": 0.0008910404884822043,
+        "vy_m_s": 0.0017245812218500474,
+        "yaw_rate_rad_s": 0.0005985993147744252,
+        "omega_fl_rad_s": 0.007265974771103742,
+        "omega_fr_rad_s": 0.0071348443951045224,
+        "omega_rl_rad_s": 0.006954447949806379,
+        "omega_rr_rad_s": 0.00654842381556449
+      }
+    },
+    "nominal": {
+      "valid_samples": 50,
+      "total_samples": 50,
+      "coverage": 1.0,
+      "rmse": {
+        "vx_m_s": 0.0035052602519396016,
+        "vy_m_s": 0.002825568168086511,
+        "yaw_rate_rad_s": 0.00101580496671867,
+        "omega_fl_rad_s": 0.014631160338445845,
+        "omega_fr_rad_s": 0.015633911253030007,
+        "omega_rl_rad_s": 0.01519513320168936,
+        "omega_rr_rad_s": 0.015726773020037953
+      },
+      "mae": {
+        "vx_m_s": 0.002898625057785935,
+        "vy_m_s": 0.002189023262436911,
+        "yaw_rate_rad_s": 0.0007710858229887885,
+        "omega_fl_rad_s": 0.011691422365135153,
+        "omega_fr_rad_s": 0.012387463600266244,
+        "omega_rl_rad_s": 0.011739369234504977,
+        "omega_rr_rad_s": 0.012649957391840659
+      }
+    },
+    "world_model_common_mask": {
+      "valid_samples": 50,
+      "total_samples": 50,
+      "coverage": 1.0,
+      "rmse": {
+        "vx_m_s": 0.0012491816984834215,
+        "vy_m_s": 0.0022778839611533467,
+        "yaw_rate_rad_s": 0.0007603214424376189,
+        "omega_fl_rad_s": 0.00914677544938505,
+        "omega_fr_rad_s": 0.009298353618236482,
+        "omega_rl_rad_s": 0.00935213186630958,
+        "omega_rr_rad_s": 0.008970583548968144
+      },
+      "mae": {
+        "vx_m_s": 0.0008910404884822043,
+        "vy_m_s": 0.0017245812218500474,
+        "yaw_rate_rad_s": 0.0005985993147744252,
+        "omega_fl_rad_s": 0.007265974771103742,
+        "omega_fr_rad_s": 0.0071348443951045224,
+        "omega_rl_rad_s": 0.006954447949806379,
+        "omega_rr_rad_s": 0.00654842381556449
+      }
+    },
+    "nominal_common_mask": {
+      "valid_samples": 50,
+      "total_samples": 50,
+      "coverage": 1.0,
+      "rmse": {
+        "vx_m_s": 0.0035052602519396016,
+        "vy_m_s": 0.002825568168086511,
+        "yaw_rate_rad_s": 0.00101580496671867,
+        "omega_fl_rad_s": 0.014631160338445845,
+        "omega_fr_rad_s": 0.015633911253030007,
+        "omega_rl_rad_s": 0.01519513320168936,
+        "omega_rr_rad_s": 0.015726773020037953
+      },
+      "mae": {
+        "vx_m_s": 0.002898625057785935,
+        "vy_m_s": 0.002189023262436911,
+        "yaw_rate_rad_s": 0.0007710858229887885,
+        "omega_fl_rad_s": 0.011691422365135153,
+        "omega_fr_rad_s": 0.012387463600266244,
+        "omega_rl_rad_s": 0.011739369234504977,
+        "omega_rr_rad_s": 0.012649957391840659
+      }
+    },
+    "persistence_common_mask": {
+      "valid_samples": 50,
+      "total_samples": 50,
+      "coverage": 1.0,
+      "rmse": {
+        "vx_m_s": 0.0610728986943446,
+        "vy_m_s": 0.020946801822819383,
+        "yaw_rate_rad_s": 0.019492389263834512,
+        "omega_fl_rad_s": 0.16717769296048954,
+        "omega_fr_rad_s": 0.1915421247111348,
+        "omega_rl_rad_s": 0.1672365958740876,
+        "omega_rr_rad_s": 0.1920295988511399
+      },
+      "mae": {
+        "vx_m_s": 0.04918808759363721,
+        "vy_m_s": 0.017257209637753634,
+        "yaw_rate_rad_s": 0.016036131731741135,
+        "omega_fl_rad_s": 0.13863307934967586,
+        "omega_fr_rad_s": 0.14056805076956835,
+        "omega_rl_rad_s": 0.138576717274399,
+        "omega_rr_rad_s": 0.1408016038246788
+      }
+    }
+  },
+  "continuous": {
+    "world_model": {
+      "valid_samples": 590,
+      "total_samples": 590,
+      "coverage": 1.0,
+      "rmse": {
+        "vx_m_s": 0.0015372525228853013,
+        "vy_m_s": 0.002115819886355643,
+        "yaw_rate_rad_s": 0.0007048034684597165,
+        "omega_fl_rad_s": 0.008243789056640667,
+        "omega_fr_rad_s": 0.008435576302574467,
+        "omega_rl_rad_s": 0.008259987159129612,
+        "omega_rr_rad_s": 0.008077410793562287
+      },
+      "mae": {
+        "vx_m_s": 0.0011285799229603724,
+        "vy_m_s": 0.0015395959704425618,
+        "yaw_rate_rad_s": 0.0005342802874746715,
+        "omega_fl_rad_s": 0.006791269390004058,
+        "omega_fr_rad_s": 0.00671985500829983,
+        "omega_rl_rad_s": 0.006472026913342559,
+        "omega_rr_rad_s": 0.006290736413253935
+      }
+    },
+    "nominal": {
+      "valid_samples": 590,
+      "total_samples": 590,
+      "coverage": 1.0,
+      "rmse": {
+        "vx_m_s": 0.0077823121508693565,
+        "vy_m_s": 0.002619170313591756,
+        "yaw_rate_rad_s": 0.000940250219490932,
+        "omega_fl_rad_s": 0.023911686351917517,
+        "omega_fr_rad_s": 0.02410566732103082,
+        "omega_rl_rad_s": 0.024185132236678824,
+        "omega_rr_rad_s": 0.023899471049613864
+      },
+      "mae": {
+        "vx_m_s": 0.006428516161789838,
+        "vy_m_s": 0.001926918982927215,
+        "yaw_rate_rad_s": 0.0006806392593449506,
+        "omega_fl_rad_s": 0.01951146521424822,
+        "omega_fr_rad_s": 0.019886748211311693,
+        "omega_rl_rad_s": 0.019650086058874,
+        "omega_rr_rad_s": 0.01948555533547723
+      }
+    },
+    "world_model_common_mask": {
+      "valid_samples": 590,
+      "total_samples": 590,
+      "coverage": 1.0,
+      "rmse": {
+        "vx_m_s": 0.0015372525228853013,
+        "vy_m_s": 0.002115819886355643,
+        "yaw_rate_rad_s": 0.0007048034684597165,
+        "omega_fl_rad_s": 0.008243789056640667,
+        "omega_fr_rad_s": 0.008435576302574467,
+        "omega_rl_rad_s": 0.008259987159129612,
+        "omega_rr_rad_s": 0.008077410793562287
+      },
+      "mae": {
+        "vx_m_s": 0.0011285799229603724,
+        "vy_m_s": 0.0015395959704425618,
+        "yaw_rate_rad_s": 0.0005342802874746715,
+        "omega_fl_rad_s": 0.006791269390004058,
+        "omega_fr_rad_s": 0.00671985500829983,
+        "omega_rl_rad_s": 0.006472026913342559,
+        "omega_rr_rad_s": 0.006290736413253935
+      }
+    },
+    "nominal_common_mask": {
+      "valid_samples": 590,
+      "total_samples": 590,
+      "coverage": 1.0,
+      "rmse": {
+        "vx_m_s": 0.0077823121508693565,
+        "vy_m_s": 0.002619170313591756,
+        "yaw_rate_rad_s": 0.000940250219490932,
+        "omega_fl_rad_s": 0.023911686351917517,
+        "omega_fr_rad_s": 0.02410566732103082,
+        "omega_rl_rad_s": 0.024185132236678824,
+        "omega_rr_rad_s": 0.023899471049613864
+      },
+      "mae": {
+        "vx_m_s": 0.006428516161789838,
+        "vy_m_s": 0.001926918982927215,
+        "yaw_rate_rad_s": 0.0006806392593449506,
+        "omega_fl_rad_s": 0.01951146521424822,
+        "omega_fr_rad_s": 0.019886748211311693,
+        "omega_rl_rad_s": 0.019650086058874,
+        "omega_rr_rad_s": 0.01948555533547723
+      }
+    },
+    "reset_after_initialization": false
+  },
+  "uncertainty_vs_error": {
+    "pearson_correlation": 0.5668712858092766,
+    "increasing_uncertainty_bins": [
+      {
+        "samples": 148,
+        "mean_uncertainty": 1.482269467333936e-05,
+        "mean_normalized_prediction_error": 0.018809456694676006
+      },
+      {
+        "samples": 148,
+        "mean_uncertainty": 8.173833995846178e-05,
+        "mean_normalized_prediction_error": 0.06455449863906047
+      },
+      {
+        "samples": 147,
+        "mean_uncertainty": 0.0001957822309229307,
+        "mean_normalized_prediction_error": 0.052407776638869266
+      },
+      {
+        "samples": 147,
+        "mean_uncertainty": 0.0004056867497420664,
+        "mean_normalized_prediction_error": 0.08440415952045048
+      }
+    ],
+    "interpretation": "descriptive association; low disagreement does not guarantee low error"
+  },
+  "confidence": {
+    "ensemble_only": {
+      "untrusted_samples": 0,
+      "unavailable_window_samples": 9,
+      "untrusted_fraction_after_window": 0.0,
+      "nominal_alarm_fraction": 0.0
+    },
+    "residual_only": {
+      "untrusted_samples": 58,
+      "unavailable_window_samples": 9,
+      "untrusted_fraction_after_window": 0.09982788296041308,
+      "nominal_alarm_fraction": 0.09982788296041308
+    },
+    "joint": {
+      "untrusted_samples": 58,
+      "unavailable_window_samples": 9,
+      "untrusted_fraction_after_window": 0.09982788296041308,
+      "nominal_alarm_fraction": 0.09982788296041308
+    }
+  },
+  "notes": [
+    "Risk/SE/recovery labels are not part of this first-stage evaluation.",
+    "No real CarSim accuracy or unknown-friction detection claim follows from synthetic data.",
+    "Residual gate uses the next observed state and is available at that observation time."
+  ]
+}

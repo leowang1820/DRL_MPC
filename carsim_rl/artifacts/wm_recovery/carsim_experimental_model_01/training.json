@@ -1,0 +1,77 @@
+{
+  "config": {
+    "prediction_dt_s": 0.01,
+    "history_steps": 10,
+    "physics_substep_s": 0.0005,
+    "ensemble_size": 5,
+    "hidden_width": 64,
+    "rollout_steps": 5,
+    "rollout_loss_weight": 1.0,
+    "seed": 42
+  },
+  "metadata": {
+    "training_trajectories": [
+      {
+        "trajectory_id": "carsim_experimental_train1",
+        "condition_id": "pilot_existing_train",
+        "sha256": "d14b0046f79f92f7682e3c753828e6216b20f65a74c756b1ba95dcb78527dccf",
+        "hash_basis": "canonical_physical_arrays",
+        "source_kind": "carsim_experimental",
+        "split": "train",
+        "windows": 586
+      },
+      {
+        "trajectory_id": "carsim_experimental_train2",
+        "condition_id": "pilot_new_train",
+        "sha256": "04e04dd1c567b2458d5652e244aa35c334033ffbd003a82804bbfe675641763a",
+        "hash_basis": "canonical_physical_arrays",
+        "source_kind": "carsim_experimental",
+        "split": "train",
+        "windows": 586
+      }
+    ],
+    "bootstrap_trajectory_ids": [
+      [
+        "carsim_experimental_train1",
+        "carsim_experimental_train1"
+      ],
+      [
+        "carsim_experimental_train2",
+        "carsim_experimental_train1"
+      ],
+      [
+        "carsim_experimental_train1",
+        "carsim_experimental_train2"
+      ],
+      [
+        "carsim_experimental_train1",
+        "carsim_experimental_train1"
+      ],
+      [
+        "carsim_experimental_train1",
+        "carsim_experimental_train1"
+      ]
+    ],
+    "bootstrap_unit": "whole_trajectory",
+    "scaler_source": "training_partition_only",
+    "synthetic_demo_only": false,
+    "epochs": 1,
+    "batch_size": 32,
+    "learning_rate": 0.001,
+    "multi_step_teacher_forcing": false,
+    "loss": "mean(square(first_state_error / residual_scale)) + rollout_loss_weight * mean(square(rollout_state_error / state_scale))"
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "member_loss": [
+        0.13593456658771888,
+        0.12449689451941233,
+        0.1245742163478649,
+        0.13905210648695876,
+        0.13690049922005929
+      ]
+    }
+  ],
+  "status": "trained_offline_not_validated_for_control"
+}

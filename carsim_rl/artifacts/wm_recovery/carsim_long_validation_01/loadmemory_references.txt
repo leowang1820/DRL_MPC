@@ -661,6 +661,32 @@ class LoadMemory:
 82:         np.testing.assert_allclose(predictions[0,0].detach().numpy(), expected, atol=1e-10)
 ---
 
+=== wm_recovery\carsim_candidate.py ===
+113:         "import_native": original_imports,
+114:         "my_dr_native": my_dr_native,
+115:         # 该数值是名义模型初始化约定，不是 CarSim 测得的 LoadMemory
+116:         "nominal_initial_load_memory_mps2": np.zeros(2, dtype=np.float64),
+117:     }
+---
+114:         "my_dr_native": my_dr_native,
+115:         # 该数值是名义模型初始化约定，不是 CarSim 测得的 LoadMemory
+116:         "nominal_initial_load_memory_mps2": np.zeros(2, dtype=np.float64),
+117:     }
+118:     if any(not np.all(np.isfinite(a)) for a in arrays.values()):
+---
+155:             np.rad2deg(np.max(np.abs(measured_difference)))
+156:         ),
+157:         "load_memory_initialization": (
+158:             "reference_7dof_zero_by_model_convention_not_carsim_ax_ay"
+159:         ),
+---
+161:         "other_wheel_actuation_verified_zero": False,
+162:         "friction_brake_actuation_verified_zero": False,
+163:         "load_memory_runtime_causality_verified": False,
+164:         "ready_for_wm_training": False,
+165:         "reasons_not_training_ready": [
+---
+
 === wm_recovery\config.py ===
 55:         "residual_definition": "discrete_next_state_increment",
 56:         "history_definition": "past_state_and_actual_input_oldest_first_excluding_current",
@@ -670,17 +696,35 @@ class LoadMemory:
 ---
 
 === wm_recovery\dataset.py ===
-40:         memories.append([memory.ax_m_s2, memory.ay_m_s2])
-41:         p = model.predict(episode.state[i], controls_at(episode, i), mu=NOMINAL_MU,
-42:                           load_memory=memory, horizon_s=config.prediction_dt_s, substeps=config.substeps)
-43:         nominal.append(p.state)
-44:         valid.append(not p.flags)
+41:         memories.append([memory.ax_m_s2, memory.ay_m_s2])
+42:         p = model.predict(episode.state[i], controls_at(episode, i), mu=NOMINAL_MU,
+43:                           load_memory=memory, horizon_s=config.prediction_dt_s, substeps=config.substeps)
+44:         nominal.append(p.state)
+45:         valid.append(not p.flags)
 ---
-43:         nominal.append(p.state)
-44:         valid.append(not p.flags)
-45:         memory = p.load_memory
-46:     valid = np.asarray(valid, dtype=bool)
-47:     # Once nominal load memory is invalid, subsequent anchors are also unverified.
+44:         nominal.append(p.state)
+45:         valid.append(not p.flags)
+46:         memory = p.load_memory
+47:     valid = np.asarray(valid, dtype=bool)
+48:     # Once nominal load memory is invalid, subsequent anchors are also unverified.
+---
+195:                 controls,
+196:                 mu=NOMINAL_MU,
+197:                 load_memory=memory,
+198:                 horizon_s=dt,
+199:                 substeps=steps,
+---
+213:         # 记忆只来自原始 7DOF 的力学运算，绝不覆盖成 CarSim Ax/Ay。
+214:         predicted[i] = step.state
+215:         memory = step.load_memory
+216:         valid[i] = True
+217: 
+---
+243:         "nominal_input": "common_command_steer_plus_external_torque",
+244:         "measured_steer_preserved": True,
+245:         "carsim_ax_ay_used_in_load_memory": False,
+246:         "reference_force_memory_carried": True,
+247:         "other_wheel_actuation_verified_zero":
 ---
 
 === wm_recovery\offline.py ===
@@ -696,41 +740,77 @@ class LoadMemory:
 32:     metadata: dict
 33:     source_sha256: str
 ---
-75:             applied = finite_array(data["applied_input"], (n - 1, 6), "applied_input")
-76:             command = finite_array(data["command"], (n - 1, 5), "command")
-77:             memory = finite_array(data["initial_load_memory_m_s2"], (2,), "initial_load_memory_m_s2")
-78:         if np.any(np.abs(applied[:, :2]) >= np.pi / 2) or np.any(np.abs(command[:, 4]) >= np.pi / 2):
-79:             raise ValueError("Steering columns must contain radians inside (-pi/2, pi/2)")
+92:             applied = finite_array(data["applied_input"], (n - 1, 6), "applied_input")
+93:             command = finite_array(data["command"], (n - 1, 5), "command")
+94:             memory = finite_array(data["initial_load_memory_m_s2"], (2,), "initial_load_memory_m_s2")
+95:         if np.any(np.abs(applied[:, :2]) >= np.pi / 2) or np.any(np.abs(command[:, 4]) >= np.pi / 2):
+96:             raise ValueError("Steering columns must contain radians inside (-pi/2, pi/2)")
 ---
-91:             digest.update(str(array.shape).encode("ascii"))
-92:             digest.update(np.ascontiguousarray(array, dtype="<f8").tobytes())
-93:         return cls(time.copy(), state, applied, command, LoadMemory(*memory), meta, digest.hexdigest())
-94: 
-95: 
+108:             digest.update(str(array.shape).encode("ascii"))
+109:             digest.update(np.ascontiguousarray(array, dtype="<f8").tobytes())
+110:         return cls(time.copy(), state, applied, command, LoadMemory(*memory), meta, digest.hexdigest())
+111: 
+112: 
 ---
-149:         dt = float(episode.time[index + 1] - episode.time[index])
-150:         return model.predict(state, controls_at(episode, index), mu=NOMINAL_MU,
-151:                              load_memory=memory, horizon_s=dt,
-152:                              substeps=max(1, math.ceil(dt / max_substep_s)))
-153: 
+168:         dt = float(episode.time[index + 1] - episode.time[index])
+169:         return model.predict(state, controls_at(episode, index), mu=NOMINAL_MU,
+170:                              load_memory=memory, horizon_s=dt,
+171:                              substeps=max(1, math.ceil(dt / max_substep_s)))
+172: 
 ---
-159:             if observer_alive:
-160:                 one[i], one_valid[i] = p.state, True
-161:                 memories.append(p.load_memory)
-162:         if free_alive:
-163:             p = step(free_state, free_memory, i)
+178:             if observer_alive:
+179:                 one[i], one_valid[i] = p.state, True
+180:                 memories.append(p.load_memory)
+181:         if free_alive:
+182:             p = step(free_state, free_memory, i)
 ---
-165:             free_alive = not p.flags
-166:             if free_alive:
-167:                 free[i], free_valid[i], free_state, free_memory = p.state, True, p.state, p.load_memory
-168: 
-169:     endpoints, starts, predicted, targets, horizon_valid = [], [], [], [], []
+184:             free_alive = not p.flags
+185:             if free_alive:
+186:                 free[i], free_valid[i], free_state, free_memory = p.state, True, p.state, p.load_memory
+187: 
+188:     endpoints, starts, predicted, targets, horizon_valid = [], [], [], [], []
 ---
-183:                     good = False
-184:                     break
-185:                 x, memory = p.state, p.load_memory
-186:         starts.append(i)
-187:         endpoints.append(j)
+202:                     good = False
+203:                     break
+204:                 x, memory = p.state, p.load_memory
+205:         starts.append(i)
+206:         endpoints.append(j)
+---
+256:     "import_native",
+257:     "my_dr_native",
+258:     "nominal_initial_load_memory_mps2",
+259: )
+260: 
+---
+267:     - nominal_input 是同角指令近似，不是测得的实际执行器状态。
+268:     - measured_steer 始终保存左右两个独立测量值。
+269:     - CarSim Ax/Ay 仅用于诊断，不作为参考模型的 LoadMemory。
+270:     - 本类故意没有 applied 字段，以防误传给旧训练管线。
+271:     """
+---
+280:     import_native: np.ndarray
+281:     my_dr_native: np.ndarray
+282:     initial_memory: LoadMemory
+283:     metadata: dict
+284:     source_sha256: str
+---
+338:             "import_native": (n, 6),
+339:             "my_dr_native": (n + 1, 4),
+340:             "nominal_initial_load_memory_mps2": (2,),
+341:         }
+342:         for name, shape in expected_shapes.items():
+---
+388:             raise ValueError("候选报告的转矩回显结论与实测数组不一致")
+389: 
+390:         memory = arrays["nominal_initial_load_memory_mps2"]
+391:         if not np.array_equal(memory, np.zeros(2)):
+392:             raise ValueError("候选格式约定名义模型从零载荷记忆开始")
+---
+418:             import_native=arrays["import_native"],
+419:             my_dr_native=arrays["my_dr_native"],
+420:             initial_memory=LoadMemory(*memory),
+421:             metadata=meta,
+422:             source_sha256=fingerprint,
 ---
 
 === wm_recovery\synthetic.py ===
@@ -765,6 +845,106 @@ class LoadMemory:
 56: 
 ---
 
+=== wm_recovery\tests\test_candidate_pipeline.py ===
+12: import numpy as np
+13: 
+14: from dynamics7dof.model import LoadMemory
+15: from wm_recovery.carsim_candidate import create_candidate
+16: from wm_recovery.carsim_export_schema import EXPORT_NAMES
+---
+37:             self.assertAlmostEqual(ep.nominal_input[0, 1],
+38:                                    math.radians(.2))
+39:             self.assertEqual(ep.initial_memory, LoadMemory(0, 0))
+40:             self.assertFalse(ep.metadata["ready_for_wm_training"])
+41:             # 不能误用旧版训练所需的 applied 字段。
+---
+62:                 CandidateEpisode.load(target)
+63: 
+64:     def test_causal_load_memory_from_physics_not_carsim(self):
+65:         """模型记忆来自上个微步模型预测，不来自已记录的 Ax/Ay。"""
+66:         with tempfile.TemporaryDirectory() as temp:
+---
+96: 
+97:             class FakeModel:
+98:                 def predict(self, state, controls, *, mu, load_memory,
+99:                             horizon_s, substeps):
+100:                     calls.append((
+---
+101:                         np.asarray(controls.front_steer_rad).copy(),
+102:                         np.array([
+103:                             load_memory.ax_m_s2,
+104:                             load_memory.ay_m_s2,
+105:                         ]),
+---
+102:                         np.array([
+103:                             load_memory.ax_m_s2,
+104:                             load_memory.ay_m_s2,
+105:                         ]),
+106:                         mu,
+---
+111:                         state=np.asarray(state) + .01,
+112:                         flags=(),
+113:                         load_memory=LoadMemory(
+114:                             load_memory.ax_m_s2 + .1,
+115:                             load_memory.ay_m_s2 + .2,
+---
+112:                         flags=(),
+113:                         load_memory=LoadMemory(
+114:                             load_memory.ax_m_s2 + .1,
+115:                             load_memory.ay_m_s2 + .2,
+116:                         ),
+---
+113:                         load_memory=LoadMemory(
+114:                             load_memory.ax_m_s2 + .1,
+115:                             load_memory.ay_m_s2 + .2,
+116:                         ),
+117:                     )
+---
+136:             self.assertTrue(result.valid.all())
+137:             self.assertFalse(
+138:                 result.report["carsim_ax_ay_used_in_load_memory"]
+139:             )
+140:             self.assertFalse(result.report["ready_for_wm_training"])
+---
+
+=== wm_recovery\tests\test_carsim_experimental.py ===
+15: import numpy as np
+16: 
+17: from dynamics7dof.model import LoadMemory
+18: from wm_recovery.carsim_candidate import create_candidate
+19: from wm_recovery.carsim_export_schema import EXPORT_NAMES
+---
+114:                 ep.applied[:, 0], ep.applied[:, 1]
+115:             ))
+116:             self.assertEqual(ep.initial_memory, LoadMemory(0, 0))
+117:             self.assertFalse(ep.metadata["ready_for_wm_training"])
+118:             self.assertTrue(ep.metadata["experimental_training_only"])
+---
+211: 
+212:             class FakeModel:
+213:                 def predict(self, state, controls, *, mu, load_memory,
+214:                             horizon_s, substeps):
+215:                     return SimpleNamespace(
+---
+216:                         state=np.asarray(state, dtype=float).copy(),
+217:                         flags=(),
+218:                         load_memory=LoadMemory(
+219:                             load_memory.ax_m_s2+.01,
+220:                             load_memory.ay_m_s2+.02
+---
+217:                         flags=(),
+218:                         load_memory=LoadMemory(
+219:                             load_memory.ax_m_s2+.01,
+220:                             load_memory.ay_m_s2+.02
+221:                         ),
+---
+218:                         load_memory=LoadMemory(
+219:                             load_memory.ax_m_s2+.01,
+220:                             load_memory.ay_m_s2+.02
+221:                         ),
+222:                     )
+---
+
 === wm_recovery\tests\test_foundation.py ===
 28:     np.savez(root / "trajectory.npz", time_s=time, state=state,
 29:              applied_input=np.zeros((len(time) - 1, 6)), command=np.zeros((len(time) - 1, 5)),
@@ -794,9 +974,9 @@ class LoadMemory:
 ---
 
 === wm_recovery\world_model.py ===
-93:         return {"members": values.cpu().numpy(), "mean": mean.cpu().numpy(),
-94:                 "variance": values.var(0, unbiased=True).cpu().numpy(), "uncertainty": float(uncertainty),
-95:                 "next_load_memory": torch.stack(memories).mean(0).cpu().numpy(),
-96:                 "valid": not bool(torch.stack(invalid).any())}
-97: 
+101:         return {"members": values.cpu().numpy(), "mean": mean.cpu().numpy(),
+102:                 "variance": values.var(0, unbiased=True).cpu().numpy(), "uncertainty": float(uncertainty),
+103:                 "next_load_memory": torch.stack(memories).mean(0).cpu().numpy(),
+104:                 "valid": not bool(torch.stack(invalid).any())}
+105: 
 ---
