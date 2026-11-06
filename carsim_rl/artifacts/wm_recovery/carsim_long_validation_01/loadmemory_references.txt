@@ -1,0 +1,802 @@
+静态源码检查：供人工复核初始化、微步更新与是否使用未来数据。
+
+=== LoadMemory 定义 ===
+@dataclass(frozen=True)
+class LoadMemory:
+    """Previous force-derived ax/ay, matching MATLAB ax_cur/ay_cur.
+
+    These are not dvx/dt and dvy/dt. The original empirical lateral damping
+    is not included in ay. Keep that distinction in later data alignment.
+    """
+
+    ax_m_s2: float
+    ay_m_s2: float
+
+    def __post_init__(self):
+        if not all(math.isfinite(v) for v in (self.ax_m_s2, self.ay_m_s2)):
+            raise ValueError("load memory must be finite")
+
+
+=== dynamics7dof\__init__.py ===
+2: 
+3: from .model import (
+4:     STATE_NAMES, WHEEL_ORDER, Controls, ForceEvaluation, LoadMemory,
+5:     Prediction, Reference7DOF, TireFit, VehicleParameters,
+6: )
+---
+7: 
+8: __all__ = [
+9:     "STATE_NAMES", "WHEEL_ORDER", "Controls", "ForceEvaluation", "LoadMemory",
+10:     "Prediction", "Reference7DOF", "TireFit", "VehicleParameters",
+11: ]
+---
+
+=== dynamics7dof\__main__.py ===
+7: import numpy as np
+8: 
+9: from .model import STATE_NAMES, Controls, LoadMemory, Reference7DOF
+10: 
+11: 
+---
+25:     initial = np.r_[vx, 0.0, 0.0, np.full(4, vx / model.vehicle.wheel_radius_m)]
+26:     controls = Controls(np.full(2, math.radians(args.front_steer_deg)), np.zeros(4))
+27:     result = model.predict(initial, controls, mu=args.mu, load_memory=LoadMemory(0.0, 0.0),
+28:                            horizon_s=args.horizon, substeps=args.substeps)
+29:     print("REFERENCE PORT ONLY: no CarSim comparison and no physical validation yet.")
+---
+
+=== dynamics7dof\audit.py ===
+30:     "Per-export state/force timestamp alignment is not yet physically verified.",
+31:     "Signed drive + brake is only a candidate net torque; wheel torque balance remains unverified.",
+32:     "CarSim Ax/Ay are not automatically the reference model's LoadMemory.",
+33: ]
+34: 
+---
+261:             acceleration = {"warmup_excluded_s": warmup_s, "samples": int(ix.size),
+262:                             "time_basis": timing["diagnostic_time_basis"],
+263:                             "meaning": "planar finite-difference signal consistency; not model accuracy or LoadMemory validation"}
+264:             for axis, calculated in derived.items():
+265:                 measured = data[f"{axis}_carsim_m_s2"]
+---
+
+=== dynamics7dof\collect.py ===
+32:     "solver_state_force_time_alignment_unverified",
+33:     "wheel_torque_sign_and_net_torque_definition_unverified",
+34:     "carsim_acceleration_to_load_memory_mapping_unverified",
+35: ]
+36: 
+---
+
+=== dynamics7dof\comparison.py ===
+15: 
+16: from .audit import audit_capture
+17: from .model import Controls, LoadMemory, Reference7DOF, STATE_NAMES, VehicleParameters
+18: from .physics_check import load_capture, sha
+19: 
+---
+81:     one_step = np.full_like(truth, np.nan)
+82:     predicted[0] = truth[0]
+83:     memory = LoadMemory(0, 0)
+84:     shadow_memory = LoadMemory(0, 0)
+85:     stopped, shadow_stopped = None, None
+---
+82:     predicted[0] = truth[0]
+83:     memory = LoadMemory(0, 0)
+84:     shadow_memory = LoadMemory(0, 0)
+85:     stopped, shadow_stopped = None, None
+86:     for i, step in enumerate(dt):
+---
+91:         if stopped is None:
+92:             try:
+93:                 p = model.predict(predicted[i], commands[i], mu=mu, load_memory=memory,
+94:                                   horizon_s=float(step), substeps=substeps)
+95:                 if p.flags or p.state[0] < 1:
+---
+96:                     stopped = {'index': i+1, 'reason': 'model_outside_domain', 'flags': list(p.flags)}
+97:                 else:
+98:                     predicted[i+1], memory = p.state, p.load_memory
+99:             except (ValueError, FloatingPointError, OverflowError) as exc:
+100:                 stopped = {'index': i+1, 'reason': str(exc)}
+---
+101:         if shadow_stopped is None:
+102:             try:
+103:                 p = model.predict(truth[i], commands[i], mu=mu, load_memory=shadow_memory,
+104:                                   horizon_s=float(step), substeps=substeps)
+105:                 if p.flags or truth[i, 0] < 1:
+---
+106:                     shadow_stopped = {'index': i+1, 'reason': 'model_outside_domain', 'flags': list(p.flags)}
+107:                 else:
+108:                     one_step[i+1], shadow_memory = p.state, p.load_memory
+109:             except (ValueError, FloatingPointError, OverflowError) as exc:
+110:                 shadow_stopped = {'index': i+1, 'reason': str(exc)}
+---
+
+=== dynamics7dof\learning\data.py ===
+10: 
+11: from ..audit import audit_capture
+12: from ..model import Controls, LoadMemory, Reference7DOF, STATE_NAMES, VehicleParameters
+13: from ..physics_check import load_capture, sha
+14: 
+---
+57:         self.model = model or Reference7DOF()
+58:         self.buffer = deque(maxlen=2*radius+1)
+59:         self.memory = LoadMemory(0, 0)
+60:         self.previous = None
+61:         self.start = None
+---
+73:             if not 0 < dt <= .002:
+74:                 raise ValueError('Stream needs continuous solver samples, at most 2 ms apart')
+75:             p = self.model.predict(prev_x, prev_u, mu=prev_mu, load_memory=self.memory,
+76:                                    horizon_s=dt, substeps=max(1, int(np.ceil(dt/.0005-1e-8))))
+77:             self.memory = p.load_memory
+---
+75:             p = self.model.predict(prev_x, prev_u, mu=prev_mu, load_memory=self.memory,
+76:                                    horizon_s=dt, substeps=max(1, int(np.ceil(dt/.0005-1e-8))))
+77:             self.memory = p.load_memory
+78:             valid = valid and not p.flags
+79:         evaluation = self.model.evaluate(x, controls, mu=mu, load_memory=self.memory)
+---
+77:             self.memory = p.load_memory
+78:             valid = valid and not p.flags
+79:         evaluation = self.model.evaluate(x, controls, mu=mu, load_memory=self.memory)
+80:         z = feature_vector(x, controls, mu, self.memory)
+81:         valid = bool(valid and not evaluation.flags and x[0] >= 2)
+---
+
+=== dynamics7dof\learning\dynamics.py ===
+13: class AugmentedPrediction:
+14:     state: np.ndarray
+15:     load_memory: object
+16:     flags: tuple
+17:     uncertainty_mean: float
+---
+25:         self.physics = Reference7DOF()
+26: 
+27:     def evaluate(self, state, controls, *, mu, load_memory):
+28:         base = self.physics.evaluate(state, controls, mu=mu, load_memory=load_memory)
+29:         prediction = self.ensemble.predict(feature_vector(state, controls, mu, load_memory))
+---
+26: 
+27:     def evaluate(self, state, controls, *, mu, load_memory):
+28:         base = self.physics.evaluate(state, controls, mu=mu, load_memory=load_memory)
+29:         prediction = self.ensemble.predict(feature_vector(state, controls, mu, load_memory))
+30:         correction = prediction['correction'][0].copy()
+---
+27:     def evaluate(self, state, controls, *, mu, load_memory):
+28:         base = self.physics.evaluate(state, controls, mu=mu, load_memory=load_memory)
+29:         prediction = self.ensemble.predict(feature_vector(state, controls, mu, load_memory))
+30:         correction = prediction['correction'][0].copy()
+31:         if base.flags:
+---
+33:         return base, base.derivative+correction, prediction
+34: 
+35:     def predict(self, state, controls, *, mu, load_memory, horizon_s, substeps=2):
+36:         if not np.isfinite(horizon_s) or horizon_s <= 0 or not isinstance(substeps, int) or substeps < 1:
+37:             raise ValueError('Positive horizon and integer substeps required')
+---
+38:         x = np.asarray(state, dtype=float).reshape(7).copy()
+39:         dt = horizon_s/substeps
+40:         memory, flags, uncertainty, fallback, clipping = load_memory, set(), [], [], []
+41:         for _ in range(substeps):
+42:             base, derivative, result = self.evaluate(x, controls, mu=mu, load_memory=memory)
+---
+40:         memory, flags, uncertainty, fallback, clipping = load_memory, set(), [], [], []
+41:         for _ in range(substeps):
+42:             base, derivative, result = self.evaluate(x, controls, mu=mu, load_memory=memory)
+43:             flags.update(base.flags)
+44:             x += dt*derivative
+---
+52:             # Force-derived nominal memory: never substitute learned acceleration
+53:             # as a tire force without a separate physical force decomposition.
+54:             memory = base.next_load_memory
+55:             uncertainty.append(float(result['uncertainty'][0]))
+56:             fallback.append(bool(result['rejected'][0]) or bool(base.flags))
+---
+
+=== dynamics7dof\learning\workflow.py ===
+8: 
+9: from ..comparison import LABELS, display_states, error_metrics, replay_states, svg_panels
+10: from ..model import LoadMemory, STATE_NAMES
+11: from ..physics_check import load_capture, sha
+12: from .data import controls_at, prepare_capture
+---
+69:     augmented = np.full_like(truth, np.nan)
+70:     augmented[0] = truth[0]
+71:     memory, dynamics = LoadMemory(0, 0), Learned7DOF(model)
+72:     uncertainties, fallbacks = np.full(len(t), np.nan), np.full(len(t), np.nan)
+73:     stop = None
+---
+78:         try:
+79:             p = dynamics.predict(augmented[i], controls_at(data, i), mu=meta['scenario_mu_declared'],
+80:                                  load_memory=memory, horizon_s=float(dt),
+81:                                  substeps=max(1, int(np.ceil(dt/.0005-1e-8))))
+82:             if p.flags or p.state[0] < 1:
+---
+83:                 stop = {'index': i+1, 'reason': 'domain_or_protection', 'flags': list(p.flags)}
+84:                 break
+85:             augmented[i+1], memory = p.state, p.load_memory
+86:             uncertainties[i+1], fallbacks[i+1] = p.uncertainty_mean, p.fallback_fraction
+87:         except (ValueError, FloatingPointError, OverflowError) as exc:
+---
+
+=== dynamics7dof\model.py ===
+4: lateral damping, lagged acceleration/load update, and integration clamps.
+5: These are deliberate *reference* semantics, not physical validation. In
+6: particular this is f(x, u, mu, load_memory), NOT a closed f(x, u).
+7: 
+8: Frenet propagation is outside this physical seven-state module. No CarSim
+---
+100: 
+101: @dataclass(frozen=True)
+102: class LoadMemory:
+103:     """Previous force-derived ax/ay, matching MATLAB ax_cur/ay_cur.
+104: 
+---
+145:     sum_fy_body_n: float
+146:     yaw_moment_nm: float
+147:     next_load_memory: LoadMemory
+148:     flags: Tuple[str, ...]
+149: 
+---
+152: class Prediction:
+153:     state: np.ndarray
+154:     load_memory: LoadMemory
+155:     last_evaluation: ForceEvaluation
+156:     last_force_state: np.ndarray
+---
+206:         return fx, fy
+207: 
+208:     def evaluate(self, state, controls, *, mu, load_memory):
+209:         """Instantaneous derivative at state, conditioned on load memory."""
+210:         x = _vector(state, 7, "state")
+---
+209:         """Instantaneous derivative at state, conditioned on load memory."""
+210:         x = _vector(state, 7, "state")
+211:         if not isinstance(controls, Controls) or not isinstance(load_memory, LoadMemory):
+212:             raise TypeError("Controls and explicit LoadMemory are required")
+213:         friction = _mu_vector(mu)
+---
+210:         x = _vector(state, 7, "state")
+211:         if not isinstance(controls, Controls) or not isinstance(load_memory, LoadMemory):
+212:             raise TypeError("Controls and explicit LoadMemory are required")
+213:         friction = _mu_vector(mu)
+214:         v = self.vehicle
+---
+221:         cos_delta, sin_delta = np.cos(delta), np.sin(delta)
+222:         front_load = (v.mass_kg * v.gravity_m_s2 * v.lr_m
+223:                       - v.mass_kg * load_memory.ax_m_s2 * v.cg_height_m) / v.wheelbase_m
+224:         rear_load = (v.mass_kg * v.gravity_m_s2 * v.lf_m
+225:                      + v.mass_kg * load_memory.ax_m_s2 * v.cg_height_m) / v.wheelbase_m
+---
+223:                       - v.mass_kg * load_memory.ax_m_s2 * v.cg_height_m) / v.wheelbase_m
+224:         rear_load = (v.mass_kg * v.gravity_m_s2 * v.lf_m
+225:                      + v.mass_kg * load_memory.ax_m_s2 * v.cg_height_m) / v.wheelbase_m
+226:         front_transfer = (v.mass_kg * load_memory.ay_m_s2 * v.cg_height_m * v.lr_m
+227:                           / (v.wheelbase_m * v.track_front_m))
+---
+224:         rear_load = (v.mass_kg * v.gravity_m_s2 * v.lf_m
+225:                      + v.mass_kg * load_memory.ax_m_s2 * v.cg_height_m) / v.wheelbase_m
+226:         front_transfer = (v.mass_kg * load_memory.ay_m_s2 * v.cg_height_m * v.lr_m
+227:                           / (v.wheelbase_m * v.track_front_m))
+228:         rear_transfer = (v.mass_kg * load_memory.ay_m_s2 * v.cg_height_m * v.lf_m
+---
+226:         front_transfer = (v.mass_kg * load_memory.ay_m_s2 * v.cg_height_m * v.lr_m
+227:                           / (v.wheelbase_m * v.track_front_m))
+228:         rear_transfer = (v.mass_kg * load_memory.ay_m_s2 * v.cg_height_m * v.lf_m
+229:                          / (v.wheelbase_m * v.track_rear_m))
+230:         raw_fz = np.array([front_load/2-front_transfer, front_load/2+front_transfer,
+---
+262:         return ForceEvaluation(
+263:             derivative, fx, fy, fz, raw_fz, slip, alpha, sum_fx, sum_fy, moment,
+264:             LoadMemory(tire_ax, tire_ay), tuple(flags),
+265:         )
+266: 
+---
+265:         )
+266: 
+267:     def predict(self, state, controls, *, mu, load_memory, horizon_s, substeps=100):
+268:         """Euler reference step. Inputs and mu are held constant across the horizon.
+269: 
+---
+279:         friction = _mu_vector(mu)
+280:         dt = horizon_s / substeps
+281:         memory = load_memory
+282:         flags = set()
+283:         for _ in range(substeps):
+---
+283:         for _ in range(substeps):
+284:             last_force_state = x.copy()
+285:             evaluation = self.evaluate(x, controls, mu=friction, load_memory=memory)
+286:             flags.update(evaluation.flags)
+287:             x = x + dt * evaluation.derivative
+---
+294:             x[0] = max(x[0], 0.1)
+295:             x[3:] = np.maximum(x[3:], -1.0)
+296:             memory = evaluation.next_load_memory
+297:         return Prediction(x, memory, evaluation, last_force_state, float(horizon_s),
+298:                           float(dt), float((substeps - 1) * dt), tuple(sorted(flags)))
+---
+
+=== dynamics7dof\physics_check.py ===
+18: 
+19: from .audit import audit_capture
+20: from .model import Controls, LoadMemory, Reference7DOF, STATE_NAMES, VehicleParameters
+21: 
+22: 
+---
+222:     model = Reference7DOF(vehicle=vehicle)
+223:     derivative = np.gradient(x,t,axis=0)
+224:     mem = LoadMemory(0,0)  # explicit, ONCE per episode
+225:     results = {name: {'state':[], 'derivative':[], 'flags':0, 'fz_difference':[]}
+226:                for name in ('carried','sensor_lag','zero_each_step')}
+---
+235:         # The first observed interval may be half a step. No constant shift is applied.
+236:         substeps = max(1,int(np.ceil(dt/.0005-1e-8)))
+237:         carried = model.predict(x[i],controls[i],mu=mu,load_memory=mem,horizon_s=dt,substeps=substeps)
+238:         good = (i>=2 and i<len(t)-2 and t[i]-t[0]>=warmup and x[i,0]>=1
+239:                 and np.all(data['return_code'][i-1:i+3]==0) and not np.any(data['solver_done'][i-1:i+3]))
+---
+239:                 and np.all(data['return_code'][i-1:i+3]==0) and not np.any(data['solver_done'][i-1:i+3]))
+240:         if good and i%stride==0:
+241:             policies={'carried':mem, 'sensor_lag':LoadMemory(data['ax_carsim_m_s2'][i-1],data['ay_carsim_m_s2'][i-1]),
+242:                       'zero_each_step':LoadMemory(0,0)}
+243:             for name, seed in policies.items():
+---
+240:         if good and i%stride==0:
+241:             policies={'carried':mem, 'sensor_lag':LoadMemory(data['ax_carsim_m_s2'][i-1],data['ay_carsim_m_s2'][i-1]),
+242:                       'zero_each_step':LoadMemory(0,0)}
+243:             for name, seed in policies.items():
+244:                 prediction = carried if name=='carried' else model.predict(x[i],controls[i],mu=mu,load_memory=seed,
+---
+242:                       'zero_each_step':LoadMemory(0,0)}
+243:             for name, seed in policies.items():
+244:                 prediction = carried if name=='carried' else model.predict(x[i],controls[i],mu=mu,load_memory=seed,
+245:                                                                           horizon_s=dt,substeps=substeps)
+246:                 rhs = model.evaluate(x[i],controls[i],mu=mu,load_memory=seed)
+---
+244:                 prediction = carried if name=='carried' else model.predict(x[i],controls[i],mu=mu,load_memory=seed,
+245:                                                                           horizon_s=dt,substeps=substeps)
+246:                 rhs = model.evaluate(x[i],controls[i],mu=mu,load_memory=seed)
+247:                 if name=='carried':
+248:                     carried_fz=rhs.raw_fz_n
+---
+254:             memory_difference.append([mem.ax_m_s2-data['ax_carsim_m_s2'][i-1],
+255:                                       mem.ay_m_s2-data['ay_carsim_m_s2'][i-1]])
+256:         mem=carried.load_memory
+257:     if not persistence:
+258:         raise ValueError('No eligible shadow samples')
+---
+277:             for i in range(start,start+50):
+278:                 dt=float(t[i+1]-t[i])
+279:                 pred=model.predict(state,controls[i],mu=mu,load_memory=memory,horizon_s=dt,
+280:                                    substeps=max(1,int(np.ceil(dt/max_step-1e-8))))
+281:                 state,memory=pred.state,pred.load_memory; flags.update(pred.flags)
+---
+279:                 pred=model.predict(state,controls[i],mu=mu,load_memory=memory,horizon_s=dt,
+280:                                    substeps=max(1,int(np.ceil(dt/max_step-1e-8))))
+281:                 state,memory=pred.state,pred.load_memory; flags.update(pred.flags)
+282:             endpoints.append(state)
+283:         rollouts.append({'start':float(t[start]), 'error':endpoints[0]-x[start+50],
+---
+298:             'not_training_labels':True,
+299:             'notes':['Carried memory is initialized once to zero, then generated by the unmodified physical model.',
+300:                      'The sensor-lag case is a conditional proxy; it is not proof Ax/Ay equal tire-force-only LoadMemory.',
+301:                      'Sensor lag is one export interval; carried memory is from the previous model microstep. They are not identical clocks or definitions.',
+302:                      'Fz sensitivity compares model variants only. No measured Fz/Fy is available here for a physical load validation.',
+---
+
+=== dynamics7dof\tests\test_learning.py ===
+10: import torch
+11: 
+12: from dynamics7dof.model import Controls, LoadMemory, Reference7DOF
+13: from dynamics7dof.learning.data import CONTRACT, LabelStream, feature_vector, fingerprint, load_dataset
+14: from dynamics7dof.learning.dynamics import Learned7DOF
+---
+51:     def test_feature_order_and_units(self):
+52:         c = Controls([.1, .2], [1, 2, -3, -4])
+53:         z = feature_vector(self.state, c, .5, LoadMemory(6, 7))
+54:         self.assertEqual(z.shape, (16,))
+55:         np.testing.assert_equal(z[7:], [.1, .2, 1, 2, -3, -4, .5, 6, 7])
+---
+146:         m = Learned7DOF(self.model(zero=True))
+147:         c = Controls([.01, .01], [20]*4)
+148:         kwargs = dict(mu=.5, load_memory=LoadMemory(0, 0), horizon_s=.05, substeps=100)
+149:         a = Reference7DOF().predict(self.state, c, **kwargs)
+150:         b = m.predict(self.state, c, **kwargs)
+---
+150:         b = m.predict(self.state, c, **kwargs)
+151:         np.testing.assert_allclose(a.state, b.state, rtol=0, atol=1e-12)
+152:         self.assertEqual(a.load_memory, b.load_memory)
+153: 
+154:     def test_checkpoint_roundtrip_and_buffers(self):
+---
+
+=== dynamics7dof\tests\test_learning_symmetry.py ===
+20:                                           mirror_features, mirror_targets)
+21: from dynamics7dof.learning.workflow import phase_metrics, source_role
+22: from dynamics7dof.model import Controls, LoadMemory, Reference7DOF
+23: 
+24: 
+---
+51:         state = np.array([11., .2, .03, 31., 32., 30., 33.])
+52:         control = Controls([.02, .025], [10., 20., -30., -40.])
+53:         z = feature_vector(state, control, .5, LoadMemory(.2, -.4))
+54:         mz = mirror_features(z)
+55:         model = Reference7DOF()
+---
+54:         mz = mirror_features(z)
+55:         model = Reference7DOF()
+56:         a = model.evaluate(state, control, mu=.5, load_memory=LoadMemory(.2, -.4))
+57:         b = model.evaluate(mz[:7], Controls(mz[7:9], mz[9:13]), mu=mz[13],
+58:                            load_memory=LoadMemory(*mz[14:]))
+---
+56:         a = model.evaluate(state, control, mu=.5, load_memory=LoadMemory(.2, -.4))
+57:         b = model.evaluate(mz[:7], Controls(mz[7:9], mz[9:13]), mu=mz[13],
+58:                            load_memory=LoadMemory(*mz[14:]))
+59:         np.testing.assert_allclose(b.derivative, mirror_targets(a.derivative), atol=1e-10)
+60: 
+---
+117:         state = np.r_[10., 0., 0., np.full(4, 10/.353)]
+118:         p = Learned7DOF(m).predict(state, Controls([0., 0.], [0.]*4), mu=.5,
+119:                                    load_memory=LoadMemory(0., 0.), horizon_s=.05, substeps=100)
+120:         np.testing.assert_allclose(p.state[1:3], 0., atol=1e-13)
+121:         self.assertNotAlmostEqual(p.state[0], state[0], places=7)
+---
+
+=== dynamics7dof\tests\test_open_loop.py ===
+14: 
+15: from dynamics7dof.comparison import error_metrics, replay_states, svg_panels, write_comparison
+16: from dynamics7dof.model import Controls, LoadMemory, Reference7DOF, STATE_NAMES
+17: from dynamics7dof.open_loop import Excitation, capture_open_loop, guard_reason, main, parser
+18: from dynamics7dof.signals import EXPORT_NAMES, IMPORT_NAMES, inspect_configuration
+---
+202:         d = self.synthetic()
+203:         d['front_steer_fl_rad'].fill(.01); d['front_steer_fr_rad'].fill(.01)
+204:         x = np.array([d[k][0] for k in STATE_NAMES]); memory = LoadMemory(0, 0)
+205:         m = Reference7DOF(); c = Controls([.01, .01], [0]*4)
+206:         for i, dt in enumerate(np.diff(d['solver_time_s'])):
+---
+205:         m = Reference7DOF(); c = Controls([.01, .01], [0]*4)
+206:         for i, dt in enumerate(np.diff(d['solver_time_s'])):
+207:             q = m.predict(x, c, mu=.5, load_memory=memory, horizon_s=float(dt),
+208:                           substeps=max(1, int(np.ceil(dt/.0005-1e-8))))
+209:             x, memory = q.state, q.load_memory
+---
+207:             q = m.predict(x, c, mu=.5, load_memory=memory, horizon_s=float(dt),
+208:                           substeps=max(1, int(np.ceil(dt/.0005-1e-8))))
+209:             x, memory = q.state, q.load_memory
+210:             for k, v in zip(STATE_NAMES, x):
+211:                 d[k][i+1] = v
+---
+
+=== dynamics7dof\tests\test_physics_check.py ===
+11: import numpy as np
+12: 
+13: from dynamics7dof.model import Controls, LoadMemory, Reference7DOF, STATE_NAMES, VehicleParameters
+14: from dynamics7dof.physics_check import (
+15:     initial_total_vehicle_profile, read_echo_parameters, shadow_diagnostics,
+---
+34:         controls=Controls([.01,.01] if turning else [0,0], [20]*4 if turning else [0]*4)
+35:         model=Reference7DOF()
+36:         memory=LoadMemory(0,0)
+37:         states=[state.copy()]; memories=[memory]
+38:         for dt in np.diff(t):
+---
+37:         states=[state.copy()]; memories=[memory]
+38:         for dt in np.diff(t):
+39:             p=model.predict(state,controls,mu=.5,load_memory=memory,horizon_s=float(dt),
+40:                             substeps=max(1,int(np.ceil(dt/.0005-1e-8))))
+41:             state,memory=p.state,p.load_memory
+---
+39:             p=model.predict(state,controls,mu=.5,load_memory=memory,horizon_s=float(dt),
+40:                             substeps=max(1,int(np.ceil(dt/.0005-1e-8))))
+41:             state,memory=p.state,p.load_memory
+42:             states.append(state.copy()); memories.append(memory)
+43:         x=np.array(states)
+---
+
+=== dynamics7dof\tests\test_reference.py ===
+5: import numpy as np
+6: 
+7: from dynamics7dof import Controls, LoadMemory, Reference7DOF, TireFit, VehicleParameters
+8: 
+9: 
+---
+12:         self.model = Reference7DOF()
+13:         self.v = self.model.vehicle
+14:         self.memory = LoadMemory(0.0, 0.0)
+15:         self.controls = Controls([0.0, 0.0], [0.0] * 4)
+16:         self.x = np.r_[40.0 / 3.6, 0.0, 0.0,
+---
+21:             self.x if state is None else state,
+22:             self.controls if controls is None else controls,
+23:             mu=mu, load_memory=self.memory if memory is None else memory,
+24:         )
+25: 
+---
+36:         np.testing.assert_allclose(self.evaluate().derivative, 0.0, atol=1e-10)
+37:         result = self.model.predict(self.x, self.controls, mu=0.5,
+38:                                     load_memory=self.memory, horizon_s=0.05)
+39:         np.testing.assert_allclose(result.state, self.x, atol=1e-10)
+40:         self.assertEqual(result.flags, ())
+---
+49:     def test_load_transfer_direction_and_unclamped_sum(self):
+50:         static = self.evaluate()
+51:         e = self.evaluate(memory=LoadMemory(1.0, 2.0))
+52:         self.assertLess(e.raw_fz_n[:2].sum(), static.raw_fz_n[:2].sum())
+53:         self.assertGreater(e.raw_fz_n[2:].sum(), static.raw_fz_n[2:].sum())
+---
+85:         for sign in (1, -1):
+86:             c = Controls([sign * 0.02] * 2, [0.0] * 4)
+87:             results.append(self.model.predict(self.x, c, mu=0.5, load_memory=self.memory,
+88:                                                horizon_s=0.05).state)
+89:         left, right = results
+---
+112:         np.testing.assert_allclose(e.derivative[3:],
+113:             (c.wheel_net_torque_nm-e.fx_tire_n*self.v.wheel_radius_m)/self.v.wheel_inertia_kg_m2)
+114:         self.assertAlmostEqual(e.derivative[0], e.next_load_memory.ax_m_s2 + x[2]*x[1])
+115:         expected_vy_dot = (e.next_load_memory.ay_m_s2 - x[2]*x[0]
+116:                            - 100*np.exp(-x[1]**2)/self.v.mass_kg*x[1])
+---
+113:             (c.wheel_net_torque_nm-e.fx_tire_n*self.v.wheel_radius_m)/self.v.wheel_inertia_kg_m2)
+114:         self.assertAlmostEqual(e.derivative[0], e.next_load_memory.ax_m_s2 + x[2]*x[1])
+115:         expected_vy_dot = (e.next_load_memory.ay_m_s2 - x[2]*x[0]
+116:                            - 100*np.exp(-x[1]**2)/self.v.mass_kg*x[1])
+117:         self.assertAlmostEqual(e.derivative[1], expected_vy_dot)
+---
+120:         c = Controls([0.02] * 2, [0.0] * 4)
+121:         initial_eval = self.evaluate(controls=c)
+122:         result = self.model.predict(self.x, c, mu=0.5, load_memory=self.memory,
+123:                                     horizon_s=0.001, substeps=1)
+124:         np.testing.assert_allclose(result.state, self.x + 0.001*initial_eval.derivative)
+---
+125:         np.testing.assert_array_equal(result.last_force_state, self.x)
+126:         self.assertEqual(result.force_sample_time_s, 0.0)
+127:         longer = self.model.predict(self.x, c, mu=0.5, load_memory=self.memory,
+128:                                     horizon_s=0.05, substeps=100)
+129:         self.assertEqual(longer.substep_s, 0.0005)
+---
+132:     def test_split_rollout_matches_only_when_memory_carried(self):
+133:         c = Controls([0.02] * 2, [0.0] * 4)
+134:         whole = self.model.predict(self.x, c, mu=0.5, load_memory=self.memory,
+135:                                    horizon_s=0.05, substeps=100)
+136:         first = self.model.predict(self.x, c, mu=0.5, load_memory=self.memory,
+---
+134:         whole = self.model.predict(self.x, c, mu=0.5, load_memory=self.memory,
+135:                                    horizon_s=0.05, substeps=100)
+136:         first = self.model.predict(self.x, c, mu=0.5, load_memory=self.memory,
+137:                                    horizon_s=0.025, substeps=50)
+138:         second = self.model.predict(first.state, c, mu=0.5, load_memory=first.load_memory,
+---
+136:         first = self.model.predict(self.x, c, mu=0.5, load_memory=self.memory,
+137:                                    horizon_s=0.025, substeps=50)
+138:         second = self.model.predict(first.state, c, mu=0.5, load_memory=first.load_memory,
+139:                                     horizon_s=0.025, substeps=50)
+140:         np.testing.assert_allclose(whole.state, second.state, atol=1e-12)
+---
+143:         c = Controls([0.02] * 2, [0.0] * 4)
+144:         one = self.evaluate(controls=c)
+145:         two = self.evaluate(controls=c, memory=LoadMemory(2.0, 3.0))
+146:         self.assertGreater(np.max(np.abs(one.derivative-two.derivative)), 1e-5)
+147: 
+---
+147: 
+148:     def test_load_floor_and_state_clamps_are_exposed(self):
+149:         e = self.evaluate(memory=LoadMemory(0.0, 20.0))
+150:         self.assertIn("legacy_load_floor_active", e.flags)
+151:         self.assertIn("contact_loss_outside_model_domain", e.flags)
+---
+152:         self.assertGreater(e.fz_n.sum(), e.raw_fz_n.sum())
+153:         x = np.r_[np.zeros(3), [-3.0] * 4]
+154:         result = self.model.predict(x, self.controls, mu=0.0, load_memory=self.memory,
+155:                                     horizon_s=0.001, substeps=1)
+156:         self.assertIn("legacy_vx_clamp_active", result.flags)
+---
+162:         before = self.x.copy()
+163:         self.model.predict(self.x.reshape(7, 1), self.controls, mu=0.5,
+164:                            load_memory=self.memory, horizon_s=0.05)
+165:         np.testing.assert_array_equal(self.x, before)
+166:         self.assertFalse(self.controls.front_steer_rad.flags.writeable)
+---
+166:         self.assertFalse(self.controls.front_steer_rad.flags.writeable)
+167: 
+168:     def test_explicit_mu_and_load_memory_required(self):
+169:         with self.assertRaises(TypeError):
+170:             self.model.evaluate(self.x, self.controls, load_memory=self.memory)
+---
+168:     def test_explicit_mu_and_load_memory_required(self):
+169:         with self.assertRaises(TypeError):
+170:             self.model.evaluate(self.x, self.controls, load_memory=self.memory)
+171:         with self.assertRaises(TypeError):
+172:             self.model.evaluate(self.x, self.controls, mu=0.5)
+---
+188:         for steps in (0, -1, 1.5, True):
+189:             with self.subTest(steps=steps), self.assertRaises(ValueError):
+190:                 self.model.predict(self.x, self.controls, mu=0.5, load_memory=self.memory,
+191:                                    horizon_s=0.05, substeps=steps)
+192:         with self.assertRaises(ValueError):
+---
+191:                                    horizon_s=0.05, substeps=steps)
+192:         with self.assertRaises(ValueError):
+193:             self.model.predict(self.x, self.controls, mu=0.5, load_memory=self.memory,
+194:                                horizon_s=0.0)
+195: 
+---
+
+=== dynamics7dof\tests\test_rollout_learning.py ===
+9: import torch
+10: 
+11: from dynamics7dof.model import Controls, LoadMemory, Reference7DOF
+12: from dynamics7dof.learning.ensemble import ResidualEnsemble, fit_scaler, make_members
+13: from dynamics7dof.learning.online import OnlineShadow
+---
+45:             u = np.r_[rng.uniform(-.05, .05, 2), rng.uniform(-50, 50, 4)]
+46:             mem, mu = rng.uniform(-2, 2, 2), rng.uniform(.3, 1.)
+47:             a = Reference7DOF().evaluate(x, Controls(u[:2], u[2:]), mu=mu, load_memory=LoadMemory(*mem))
+48:             b, memory, invalid = rhs(*(torch.tensor(v, dtype=torch.float64) for v in (x, u, mu, mem)))
+49:             np.testing.assert_allclose(b.numpy(), a.derivative, rtol=1e-10, atol=1e-8)
+---
+48:             b, memory, invalid = rhs(*(torch.tensor(v, dtype=torch.float64) for v in (x, u, mu, mem)))
+49:             np.testing.assert_allclose(b.numpy(), a.derivative, rtol=1e-10, atol=1e-8)
+50:             np.testing.assert_allclose(memory.numpy(), [a.next_load_memory.ax_m_s2,a.next_load_memory.ay_m_s2], atol=1e-10)
+51:             self.assertEqual(bool(invalid), bool(a.flags))
+52: 
+---
+74:         pu = engine.tensor(np.tile(u,(2,1,12,1)))
+75:         predictions, bad = engine.predict(px,engine.tensor(np.zeros((2,1,2))),pu,engine.tensor(np.full((2,1),.5)))
+76:         memory = LoadMemory(0,0)
+77:         expected = []
+78:         for _ in range(12):
+---
+77:         expected = []
+78:         for _ in range(12):
+79:             step = Reference7DOF().predict(x,Controls(u[:2],u[2:]),mu=.5,load_memory=memory,horizon_s=.001,substeps=2)
+80:             x,memory=step.state,step.load_memory
+81:             expected.append(x.copy())
+---
+78:         for _ in range(12):
+79:             step = Reference7DOF().predict(x,Controls(u[:2],u[2:]),mu=.5,load_memory=memory,horizon_s=.001,substeps=2)
+80:             x,memory=step.state,step.load_memory
+81:             expected.append(x.copy())
+82:         np.testing.assert_allclose(predictions[0,0].detach().numpy(), expected, atol=1e-10)
+---
+
+=== wm_recovery\config.py ===
+55:         "residual_definition": "discrete_next_state_increment",
+56:         "history_definition": "past_state_and_actual_input_oldest_first_excluding_current",
+57:         "load_memory": "explicit_nominal_force_derived_ax_ay_carried_between_steps",
+58:         "road_friction_is_not_a_network_feature": True,
+59:     }
+---
+
+=== wm_recovery\dataset.py ===
+40:         memories.append([memory.ax_m_s2, memory.ay_m_s2])
+41:         p = model.predict(episode.state[i], controls_at(episode, i), mu=NOMINAL_MU,
+42:                           load_memory=memory, horizon_s=config.prediction_dt_s, substeps=config.substeps)
+43:         nominal.append(p.state)
+44:         valid.append(not p.flags)
+---
+43:         nominal.append(p.state)
+44:         valid.append(not p.flags)
+45:         memory = p.load_memory
+46:     valid = np.asarray(valid, dtype=bool)
+47:     # Once nominal load memory is invalid, subsequent anchors are also unverified.
+---
+
+=== wm_recovery\offline.py ===
+13: import numpy as np
+14: 
+15: from dynamics7dof.model import Controls, LoadMemory, Reference7DOF, STATE_NAMES
+16: 
+17: from .controls import APPLIED_INPUT_NAMES, COMMAND_NAMES, finite_array
+---
+29:     applied: np.ndarray
+30:     command: np.ndarray
+31:     initial_memory: LoadMemory
+32:     metadata: dict
+33:     source_sha256: str
+---
+75:             applied = finite_array(data["applied_input"], (n - 1, 6), "applied_input")
+76:             command = finite_array(data["command"], (n - 1, 5), "command")
+77:             memory = finite_array(data["initial_load_memory_m_s2"], (2,), "initial_load_memory_m_s2")
+78:         if np.any(np.abs(applied[:, :2]) >= np.pi / 2) or np.any(np.abs(command[:, 4]) >= np.pi / 2):
+79:             raise ValueError("Steering columns must contain radians inside (-pi/2, pi/2)")
+---
+91:             digest.update(str(array.shape).encode("ascii"))
+92:             digest.update(np.ascontiguousarray(array, dtype="<f8").tobytes())
+93:         return cls(time.copy(), state, applied, command, LoadMemory(*memory), meta, digest.hexdigest())
+94: 
+95: 
+---
+149:         dt = float(episode.time[index + 1] - episode.time[index])
+150:         return model.predict(state, controls_at(episode, index), mu=NOMINAL_MU,
+151:                              load_memory=memory, horizon_s=dt,
+152:                              substeps=max(1, math.ceil(dt / max_substep_s)))
+153: 
+---
+159:             if observer_alive:
+160:                 one[i], one_valid[i] = p.state, True
+161:                 memories.append(p.load_memory)
+162:         if free_alive:
+163:             p = step(free_state, free_memory, i)
+---
+165:             free_alive = not p.flags
+166:             if free_alive:
+167:                 free[i], free_valid[i], free_state, free_memory = p.state, True, p.state, p.load_memory
+168: 
+169:     endpoints, starts, predicted, targets, horizon_valid = [], [], [], [], []
+---
+183:                     good = False
+184:                     break
+185:                 x, memory = p.state, p.load_memory
+186:         starts.append(i)
+187:         endpoints.append(j)
+---
+
+=== wm_recovery\synthetic.py ===
+6: import numpy as np
+7: 
+8: from dynamics7dof.model import Controls, LoadMemory, Reference7DOF, STATE_NAMES
+9: 
+10: from .controls import APPLIED_INPUT_NAMES, COMMAND_NAMES
+---
+21:     time = np.arange(count + 1) * config.prediction_dt_s
+22:     states = [np.array([speed, 0, 0, *([speed / .353] * 4)])]
+23:     inputs, commands, memory = [], [], LoadMemory(0, 0)
+24:     physics = Reference7DOF()
+25:     for t in time[:-1]:
+---
+27:         torques = np.full(4, 8 * np.sin(2 * np.pi * .4 * t))
+28:         p = physics.predict(states[-1], Controls([angle, angle], torques), mu=actual_mu,
+29:                             load_memory=memory, horizon_s=config.prediction_dt_s, substeps=config.substeps)
+30:         if p.flags:
+31:             raise RuntimeError(f"Synthetic fixture left nominal model domain: {p.flags}")
+---
+34:         state[0] -= .02 * config.prediction_dt_s
+35:         states.append(state)
+36:         memory = p.load_memory
+37:         inputs.append([angle, angle, *torques])
+38:         commands.append([*torques, angle])
+---
+52:     (root / "metadata.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
+53:     np.savez_compressed(root / "trajectory.npz", time_s=time, state=np.array(states),
+54:                         applied_input=np.array(inputs), command=np.array(commands), initial_load_memory_m_s2=np.zeros(2))
+55:     return root
+56: 
+---
+
+=== wm_recovery\tests\test_foundation.py ===
+28:     np.savez(root / "trajectory.npz", time_s=time, state=state,
+29:              applied_input=np.zeros((len(time) - 1, 6)), command=np.zeros((len(time) - 1, 5)),
+30:              initial_load_memory_m_s2=np.zeros(2))
+31:     return root
+32: 
+---
+
+=== wm_recovery\tests\test_world_model.py ===
+7: import torch
+8: 
+9: from dynamics7dof.model import Controls, LoadMemory, Reference7DOF
+10: from wm_recovery.confidence import ConfidenceMonitor, GateSettings, calibrate
+11: from wm_recovery.config import WorldModelConfig
+---
+45:         x, u, h, m = self.sample(model)
+46:         expected = Reference7DOF().predict(x.numpy(), Controls(u[:2].numpy(), u[2:].numpy()), mu=.8,
+47:                     load_memory=LoadMemory(*m.numpy()), horizon_s=.01, substeps=20)
+48:         actual, memory, bad = model.member_step(0, x, u, h, m)
+49:         np.testing.assert_allclose(actual.detach(), expected.state, rtol=1e-10, atol=1e-10)
+---
+48:         actual, memory, bad = model.member_step(0, x, u, h, m)
+49:         np.testing.assert_allclose(actual.detach(), expected.state, rtol=1e-10, atol=1e-10)
+50:         np.testing.assert_allclose(memory.detach(), [expected.load_memory.ax_m_s2, expected.load_memory.ay_m_s2], atol=1e-10)
+51:         self.assertFalse(bad)
+52: 
+---
+
+=== wm_recovery\world_model.py ===
+93:         return {"members": values.cpu().numpy(), "mean": mean.cpu().numpy(),
+94:                 "variance": values.var(0, unbiased=True).cpu().numpy(), "uncertainty": float(uncertainty),
+95:                 "next_load_memory": torch.stack(memories).mean(0).cpu().numpy(),
+96:                 "valid": not bool(torch.stack(invalid).any())}
+97: 
+---
