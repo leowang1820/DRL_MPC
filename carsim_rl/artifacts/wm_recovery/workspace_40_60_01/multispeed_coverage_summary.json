@@ -1,0 +1,10 @@
+{
+  "format": "wm_recovery_limit_envelope_coverage_v1",
+  "passed": true,
+  "criteria_origin": "each_speed_project_defined_coverage_gate",
+  "speed_coverage_passed": {
+    "40kmh": true,
+    "60kmh": true
+  },
+  "note": "合并数据的 passed=True 仅表示各速度批次满足项目自定义的横向激励覆盖门槛，不是 ISO 认证或轮胎极限证明。"
+}

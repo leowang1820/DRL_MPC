@@ -1,0 +1,18 @@
+{
+  "format": "wm_recovery_experimental_episode_manifest_v1",
+  "trajectory_id": "carsim_experimental_v40_train_swd_right",
+  "condition_id": "v40_swd_right_05a",
+  "split": "train",
+  "actual_mu": 0.8,
+  "candidate_path": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\wm_recovery\\multispeed_40_60_01\\40kmh\\candidate_train_swd_right",
+  "candidate_sha256": "2af1bc490f47f945bfd0bc9013805df686228536beda0c61b986809d86c595a0",
+  "raw_source_sha256": "cd7a01f2cb211440b9e5c0fe0c756c29dca177a4fcd0320359c289fbea968808",
+  "assumption_acknowledged": true,
+  "source_kind": "carsim_experimental",
+  "ready_for_wm_training": false,
+  "note": "实验性数据，仅用户显式允许后用于训练；未确认四轮净转矩/制动接口；同角命令不等于 CarSim 实测左右前轮角严格相等",
+  "initial_speed_kmh": 40.0,
+  "expected_initial_speed_kmh": 40,
+  "capture_sim_sha256": "c30dc7d183841f622b005bd10c3d986234db0d48312f433aaf6c3700df0da888",
+  "capture_parameter_sha256": "494c67a057e11906bbe7112e64490142ca60f0891db34a08e7a6ad0e7336ab9c"
+}

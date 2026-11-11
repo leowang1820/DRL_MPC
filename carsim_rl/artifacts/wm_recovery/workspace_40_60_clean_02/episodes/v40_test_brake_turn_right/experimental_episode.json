@@ -1,0 +1,21 @@
+{
+  "format": "wm_recovery_experimental_episode_manifest_v1",
+  "trajectory_id": "carsim_experimental_v40_test_brake_turn_right",
+  "condition_id": "v40_test_brake_right_01",
+  "split": "test",
+  "actual_mu": 0.8,
+  "candidate_path": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\wm_recovery\\workspace_40_60_clean_02\\clean_candidates\\v40_test_brake_turn_right",
+  "candidate_sha256": "a09ddbf0d626d6d354c9e2608dac18a4766bc9b5d5a1bf2fd1685478eda9db91",
+  "raw_source_sha256": "5d56e6ea7f0f212490a3fa907d3b68fae49f489cbd779e898f9ce4e500b37b02",
+  "assumption_acknowledged": true,
+  "source_kind": "carsim_experimental",
+  "ready_for_wm_training": false,
+  "note": "实验性清洗前缀，仅限用户明确许可的 WM 实验；未核验实际净转矩/制动执行器",
+  "initial_speed_kmh": 40.0,
+  "expected_initial_speed_kmh": 40,
+  "capture_sim_sha256": "c30dc7d183841f622b005bd10c3d986234db0d48312f433aaf6c3700df0da888",
+  "capture_parameter_sha256": "494c67a057e11906bbe7112e64490142ca60f0891db34a08e7a6ad0e7336ab9c",
+  "quality_cleaned": true,
+  "quality_keep_intervals": 394,
+  "quality_original_candidate_sha256": "512b4771242e8798a6a573ef94cd0ed1fbfd2b4a423b19f7f840d1410ebbe5bf"
+}

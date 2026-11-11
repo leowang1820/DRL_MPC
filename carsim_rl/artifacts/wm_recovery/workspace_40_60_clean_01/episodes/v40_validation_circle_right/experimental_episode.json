@@ -1,0 +1,21 @@
+{
+  "format": "wm_recovery_experimental_episode_manifest_v1",
+  "trajectory_id": "carsim_experimental_v40_validation_circle_right",
+  "condition_id": "v40_val_circle_right_01",
+  "split": "validation",
+  "actual_mu": 0.8,
+  "candidate_path": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\wm_recovery\\multispeed_40_60_01\\40kmh\\candidate_validation_circle_right",
+  "candidate_sha256": "c4ee1118bc0d5a0978fe1cba9fba822ac539bc17f3aff5bb1b73368cad868d9f",
+  "raw_source_sha256": "e58be56f299ee64c6057a901854b1fb25406c55644acb7a1c31b4b42fd9a6a8b",
+  "assumption_acknowledged": true,
+  "source_kind": "carsim_experimental",
+  "ready_for_wm_training": false,
+  "note": "实验性清洗前缀，仅限用户明确许可的 WM 实验；未核验实际净转矩/制动执行器",
+  "initial_speed_kmh": 40.0,
+  "expected_initial_speed_kmh": 40,
+  "capture_sim_sha256": "c30dc7d183841f622b005bd10c3d986234db0d48312f433aaf6c3700df0da888",
+  "capture_parameter_sha256": "494c67a057e11906bbe7112e64490142ca60f0891db34a08e7a6ad0e7336ab9c",
+  "quality_cleaned": true,
+  "quality_keep_intervals": 600,
+  "quality_original_candidate_sha256": "c4ee1118bc0d5a0978fe1cba9fba822ac539bc17f3aff5bb1b73368cad868d9f"
+}

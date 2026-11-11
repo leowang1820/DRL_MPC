@@ -20,6 +20,7 @@
 from __future__ import annotations
 
 import argparse
+from dataclasses import asdict
 import json
 import math
 import os
@@ -27,7 +28,7 @@ from pathlib import Path
 import subprocess
 import sys
 
-from carsim_rl.scenario_config import (
+from .scenario_config import (
     DEFAULT_SIM_PATH,
     DT_S,
     G_MPS2,
@@ -47,7 +48,9 @@ EXPERIMENT_ENV = "WM_RECOVERY_EXPERIMENTAL_CARSIM"
 CALIBRATION_FORMAT = "wm_recovery_roadwheel_approx_a03_v1"
 COVERAGE_FORMAT = "wm_recovery_limit_envelope_coverage_v1"
 SPEED_MIN_KMH = 35.0
-SPEED_MAX_KMH = 110.0
+# 多初始车速批量实验：允许到 180 km/h，给初始化读数留 1 km/h 余量。
+# 只是软件允许范围，并不意味着高速极限试验已通过有效性验证。
+SPEED_MAX_KMH = 181.0
 
 
 def _atomic_json(path, value):

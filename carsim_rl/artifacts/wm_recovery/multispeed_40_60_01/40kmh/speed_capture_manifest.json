@@ -1,0 +1,14 @@
+{
+  "format": "wm_multispeed_speed_capture_v1",
+  "expected_speed_kmh": 40,
+  "measured_initial_speed_kmh": 40.0,
+  "sim_path": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsimruns\\multi_ve\\40kmh\\simfile.sim",
+  "sim_sha256": "c30dc7d183841f622b005bd10c3d986234db0d48312f433aaf6c3700df0da888",
+  "input_par_path": "E:\\modelcodeE\\carsim2022\\CarSim2022.1_Data\\Results\\Run_800f0a7e-3a39-4210-8109-e73b61c560f7\\Run_all.par",
+  "parameter_sha256": "494c67a057e11906bbe7112e64490142ca60f0891db34a08e7a6ad0e7336ab9c",
+  "filebase": "E:\\modelcodeE\\carsim2022\\CarSim2022.1_Data\\Results\\Run_800f0a7e-3a39-4210-8109-e73b61c560f7\\LastRun",
+  "scene_count": 18,
+  "coverage_passed": true,
+  "workspace": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\wm_recovery\\multispeed_40_60_01\\40kmh\\workspace",
+  "note": "实验性质的 CarSim 轨迹，未完成全部物理执行器核验"
+}

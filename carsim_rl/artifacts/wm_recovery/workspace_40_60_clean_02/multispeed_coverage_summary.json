@@ -1,0 +1,57 @@
+{
+  "format": "wm_recovery_limit_envelope_coverage_v1",
+  "passed": true,
+  "checks": {
+    "train_near_limit_count_ge_4": true,
+    "train_strong_limit_count_ge_2": true,
+    "train_positive_direction_near_limit": true,
+    "train_negative_direction_near_limit": true,
+    "validation_at_least_one_near_limit": true,
+    "test_at_least_one_near_limit": true
+  },
+  "criteria_origin": "postcapture_cleaned_project_defined_coverage_gate",
+  "speed_split_policy": "all_speeds_seen",
+  "speed_coverage_passed": {
+    "40kmh": true,
+    "60kmh": true
+  },
+  "source": "postcapture_quality_cleaned_candidate_prefixes",
+  "quality_policy": "详见 quality_report.json",
+  "speed_retained": {
+    "40kmh": {
+      "retained_episodes": 18,
+      "retained_splits": {
+        "train": 12,
+        "validation": 3,
+        "test": 3
+      },
+      "coverage_passed": true,
+      "coverage_checks": {
+        "train_near_limit_count_ge_4": true,
+        "train_strong_limit_count_ge_2": true,
+        "train_positive_direction_near_limit": true,
+        "train_negative_direction_near_limit": true,
+        "validation_at_least_one_near_limit": true,
+        "test_at_least_one_near_limit": true
+      }
+    },
+    "60kmh": {
+      "retained_episodes": 18,
+      "retained_splits": {
+        "train": 12,
+        "validation": 3,
+        "test": 3
+      },
+      "coverage_passed": true,
+      "coverage_checks": {
+        "train_near_limit_count_ge_4": true,
+        "train_strong_limit_count_ge_2": true,
+        "train_positive_direction_near_limit": true,
+        "train_negative_direction_near_limit": true,
+        "validation_at_least_one_near_limit": true,
+        "test_at_least_one_near_limit": true
+      }
+    }
+  },
+  "warning": "passed 表示清洗后符合项目自定义的横向加速度代理指标，不等于轮胎极限、有效控制可恢复性或物理接口验证。"
+}

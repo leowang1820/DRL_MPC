@@ -1,0 +1,28 @@
+{
+  "format": "wm_recovery_roadwheel_approx_a03_v1",
+  "sim_path": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsimruns\\multi_ve\\60kmh\\simfile.sim",
+  "positive": {
+    "direction": "positive",
+    "initial_speed_kmh": 59.99999999999999,
+    "speed_at_reference_kmh": 59.849480616267535,
+    "reference_roadwheel_angle_deg": 2.6317851684601106,
+    "time_at_reference_s": 2.5299999999998324,
+    "measured_ay_increment_g": 0.31797293036925345,
+    "max_calibration_steer_deg": 5.750602198635272,
+    "steady_check_samples": 10,
+    "standard_compliance": false
+  },
+  "negative": {
+    "direction": "negative",
+    "initial_speed_kmh": 59.99999999999999,
+    "speed_at_reference_kmh": 59.849480616267485,
+    "reference_roadwheel_angle_deg": 2.6317851684601106,
+    "time_at_reference_s": 2.5299999999998324,
+    "measured_ay_increment_g": 0.31797293036925217,
+    "max_calibration_steer_deg": 5.750602198635272,
+    "steady_check_samples": 10,
+    "standard_compliance": false
+  },
+  "meaning": "仅用于本 CarSim Run 的直接前轮转角幅值参考；有限斜率的近似 0.3g 标定，不等于法规转向盘 A",
+  "fmvss_126_compliance": false
+}

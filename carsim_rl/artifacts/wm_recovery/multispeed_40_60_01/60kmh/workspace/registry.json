@@ -1,0 +1,155 @@
+{
+  "format": "wm_recovery_experimental_registry_v1",
+  "status": "experimental_not_physically_validated",
+  "explicit_opt_in_env": "WM_RECOVERY_EXPERIMENTAL_CARSIM",
+  "no_cross_split_raw_duplicates": true,
+  "nominal_mu": 0.8,
+  "episode_count": 18,
+  "episodes": [
+    {
+      "name": "train_sis_left",
+      "split": "train",
+      "condition_id": "sis_left_01",
+      "episode_path": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\wm_recovery\\multispeed_40_60_01\\60kmh\\workspace\\episodes\\train_sis_left",
+      "raw_source_sha256": "1ef3938b8fa69451b7587d12226de77b933fc74b1271cee01445b30fa6425252",
+      "candidate_sha256": "da217f8cdf4e4505cb2e08b4fd752f7570061945b1d79b3fa86f39fbc1624bc4"
+    },
+    {
+      "name": "train_sis_right",
+      "split": "train",
+      "condition_id": "sis_right_01",
+      "episode_path": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\wm_recovery\\multispeed_40_60_01\\60kmh\\workspace\\episodes\\train_sis_right",
+      "raw_source_sha256": "7202fa7c6d7dc2d5c29bdba90249ebbd778532bed9022e73052f1044b5869ac0",
+      "candidate_sha256": "425f2674fa57b1d32493adc97dfac5f9fc5a778eef349717982321c4444f31a1"
+    },
+    {
+      "name": "train_circle_left",
+      "split": "train",
+      "condition_id": "circle_left_01",
+      "episode_path": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\wm_recovery\\multispeed_40_60_01\\60kmh\\workspace\\episodes\\train_circle_left",
+      "raw_source_sha256": "8087b6fbedd3ba7fc0ef2be65dbc41144b09ad31b604dd3564b2379a281d8023",
+      "candidate_sha256": "4fa182111c0aea32242b35e33f50c0aeb0e3f5c92ed8ca734e677eb0aeb276cb"
+    },
+    {
+      "name": "train_circle_right",
+      "split": "train",
+      "condition_id": "circle_right_01",
+      "episode_path": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\wm_recovery\\multispeed_40_60_01\\60kmh\\workspace\\episodes\\train_circle_right",
+      "raw_source_sha256": "be41628a93d4407298aa1af27f202dc596285320d07fbbf1cf4f0f11c9103624",
+      "candidate_sha256": "a7dd7a9bc3b6cbd5cdc32f60b4c022e5beafe5caca7413647c28f56b56758a0a"
+    },
+    {
+      "name": "train_step_left",
+      "split": "train",
+      "condition_id": "step_left_01",
+      "episode_path": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\wm_recovery\\multispeed_40_60_01\\60kmh\\workspace\\episodes\\train_step_left",
+      "raw_source_sha256": "efd974f6b74617ab750094c34547cc5318c5646feba63f70da06b46881b58ecd",
+      "candidate_sha256": "ec825cda5e6e5abba543c6a37f1a3826bb93898c6a256ce56fce9e0a5bf4341a"
+    },
+    {
+      "name": "train_step_right",
+      "split": "train",
+      "condition_id": "step_right_01",
+      "episode_path": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\wm_recovery\\multispeed_40_60_01\\60kmh\\workspace\\episodes\\train_step_right",
+      "raw_source_sha256": "1f142502a96370919cdf5fe029ce5d3af83671d5938db8624a886018405233d8",
+      "candidate_sha256": "4e323d627c38919258a23f31cec78261e6a40dcac7eb3edf57c0c9dcab50bcd4"
+    },
+    {
+      "name": "train_chirp",
+      "split": "train",
+      "condition_id": "chirp_01",
+      "episode_path": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\wm_recovery\\multispeed_40_60_01\\60kmh\\workspace\\episodes\\train_chirp",
+      "raw_source_sha256": "4f7b5555d8ded6c433e89ddf88bb0c933ef2fd3b6f462906f5c79ad607f34937",
+      "candidate_sha256": "64f7bcd7973c2488eef82a9d7ccdb3ae26375f43edffd7356ef30e430f4d18e0"
+    },
+    {
+      "name": "train_swd_left",
+      "split": "train",
+      "condition_id": "swd_left_04a",
+      "episode_path": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\wm_recovery\\multispeed_40_60_01\\60kmh\\workspace\\episodes\\train_swd_left",
+      "raw_source_sha256": "6ab253ee534d3dfeddf36476c557ae16d3ac42c7fea1aad8977c21d689159f1c",
+      "candidate_sha256": "0a2ce941cad4e29be14dab4f6dd9a1f4fdda0e23a3514d890776e3a7db068d75"
+    },
+    {
+      "name": "train_swd_right",
+      "split": "train",
+      "condition_id": "swd_right_05a",
+      "episode_path": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\wm_recovery\\multispeed_40_60_01\\60kmh\\workspace\\episodes\\train_swd_right",
+      "raw_source_sha256": "d2b6de377b6949e952e7f3903befee2569c7597ab43991cd7d893bf1ec66daad",
+      "candidate_sha256": "d64fbfeb37c490655dc3cc9041523005aa29ddf8b784b9d20847789cbfdf53b1"
+    },
+    {
+      "name": "train_dlc_proxy",
+      "split": "train",
+      "condition_id": "dlc_proxy_left_01",
+      "episode_path": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\wm_recovery\\multispeed_40_60_01\\60kmh\\workspace\\episodes\\train_dlc_proxy",
+      "raw_source_sha256": "29897abf1a1da56650ecd59996219e4482ab62f9f5c9dce2e172c42c7e1fd60a",
+      "candidate_sha256": "477c29229afe85226fe9a90ce14217e9b199ac28521ad5373ae6cb9ec68a3441"
+    },
+    {
+      "name": "train_brake_turn_left",
+      "split": "train",
+      "condition_id": "brake_turn_left_01",
+      "episode_path": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\wm_recovery\\multispeed_40_60_01\\60kmh\\workspace\\episodes\\train_brake_turn_left",
+      "raw_source_sha256": "c7b2085bc72c3e270f75f4e0c8447b024f8757308d362014d6093fff09ba2ffb",
+      "candidate_sha256": "a73feb379fb401bd7d4dc98313bb49c6578efbd9a794136505b6a8a6c46a66b9"
+    },
+    {
+      "name": "train_torque_sweep",
+      "split": "train",
+      "condition_id": "torque_sweep_01",
+      "episode_path": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\wm_recovery\\multispeed_40_60_01\\60kmh\\workspace\\episodes\\train_torque_sweep",
+      "raw_source_sha256": "edc5f5095c20c57351e0d936e6377c3592b807a52940a78f6078b2f0baaa7c3b",
+      "candidate_sha256": "8b1f1367089919ac84a1962e1bfeb7f0e7c747ac97f00db0803e1f91c88bdf18"
+    },
+    {
+      "name": "validation_circle_right",
+      "split": "validation",
+      "condition_id": "val_circle_right_01",
+      "episode_path": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\wm_recovery\\multispeed_40_60_01\\60kmh\\workspace\\episodes\\validation_circle_right",
+      "raw_source_sha256": "9f6a0ebbae8818440f3ebe478b6081d643264f2fc777719884920956d7505585",
+      "candidate_sha256": "56e33b0b26e2bf616822e367bbc1c7ec00406fe7363f5c1d52d2f9d59ccbeb36"
+    },
+    {
+      "name": "validation_swd_left",
+      "split": "validation",
+      "condition_id": "val_swd_left_046a",
+      "episode_path": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\wm_recovery\\multispeed_40_60_01\\60kmh\\workspace\\episodes\\validation_swd_left",
+      "raw_source_sha256": "19e0095b9c9c6af6214c30ebc6bba10c94d424e2b9338f43230b83f4628ed359",
+      "candidate_sha256": "aa6686370c1a9f337de4b2d4676c87ddba2b33462b3b95c297bc9360ff007427"
+    },
+    {
+      "name": "validation_brake_turn",
+      "split": "validation",
+      "condition_id": "val_brake_right_01",
+      "episode_path": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\wm_recovery\\multispeed_40_60_01\\60kmh\\workspace\\episodes\\validation_brake_turn",
+      "raw_source_sha256": "73e006f0242f85139d938522bfd733c365b3b03494e8fb482c5dcdf6e61e338f",
+      "candidate_sha256": "78d7849c7c26e767aaa64bcc2c298d298f4343e4413ab6bb76ad7c50a8667af8"
+    },
+    {
+      "name": "test_swd_right",
+      "split": "test",
+      "condition_id": "test_swd_right_065a",
+      "episode_path": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\wm_recovery\\multispeed_40_60_01\\60kmh\\workspace\\episodes\\test_swd_right",
+      "raw_source_sha256": "7c347b604d9039dbd1898b0629e08da14391993362368bae2b266d4696ad8311",
+      "candidate_sha256": "4322f64622c8568834759490d907e290e4aa6c3f5e9d0e41f8b255763249a671"
+    },
+    {
+      "name": "test_dlc_proxy_right",
+      "split": "test",
+      "condition_id": "test_dlc_proxy_right_01",
+      "episode_path": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\wm_recovery\\multispeed_40_60_01\\60kmh\\workspace\\episodes\\test_dlc_proxy_right",
+      "raw_source_sha256": "01c3b5f55aa961984030f157aabc470f6b6e68fffc5f472f5bd7343bbf4e0582",
+      "candidate_sha256": "a3aa74d38d38cfcc0312433579df19626b2924b8d121100539938159dfb07cee"
+    },
+    {
+      "name": "test_brake_turn_right",
+      "split": "test",
+      "condition_id": "test_brake_right_01",
+      "episode_path": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\wm_recovery\\multispeed_40_60_01\\60kmh\\workspace\\episodes\\test_brake_turn_right",
+      "raw_source_sha256": "661a669494b4b42fdfea14d85ea0fc2227cf2e0376d184ccfbc2bbcfde059a3f",
+      "candidate_sha256": "c83aa02fa7b02691754ce5b60da71ebd0e4bdc95ab7ae20cd9ab2bd6ecf14b13"
+    }
+  ],
+  "ready_for_wm_training": false
+}

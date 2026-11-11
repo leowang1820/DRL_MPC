@@ -1,0 +1,14 @@
+{
+  "format": "wm_recovery_experimental_episode_manifest_v1",
+  "trajectory_id": "carsim_experimental_train_dlc_proxy",
+  "condition_id": "dlc_proxy_left_01",
+  "split": "train",
+  "actual_mu": 0.8,
+  "candidate_path": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\wm_recovery\\multispeed_40_60_01\\40kmh\\candidate_train_dlc_proxy",
+  "candidate_sha256": "59d8db69916f4bb34d4b56f5e604e63c614fbd31fac4476b4e6221306fa7cce9",
+  "raw_source_sha256": "afa1f79802971b239814bd4da8d6cd853aa18af6e1aa1789723e7d9107cf281b",
+  "assumption_acknowledged": true,
+  "source_kind": "carsim_experimental",
+  "ready_for_wm_training": false,
+  "note": "实验性数据，仅用户显式允许后用于训练；未确认四轮净转矩/制动接口；同角命令不等于 CarSim 实测左右前轮角严格相等"
+}

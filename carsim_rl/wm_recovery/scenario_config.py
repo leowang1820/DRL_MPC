@@ -4,7 +4,8 @@
 本文件只定义：
     1. 各实验轨迹的名称与用途；
     2. 方向、强度、时间和控制波形；
-    3. 根据已测得的 0.3g 前轮参考转角 A03 计算控制指令。
+    3. 通过 medium / strong / limit 三级横向激励管理场景强度；
+    4. 根据已标定的 0.3g 前轮指令参考角 A03 计算控制指令。
 
 不会创建 CarSim Run，不会改变车辆参数、道路附着或初始车速。
 
@@ -28,7 +29,27 @@ DT_S = 0.01
 NOMINAL_MU = 0.8
 G_MPS2 = 9.80665
 WHEELBASE_M = 3.16
-MAX_ROADWHEEL_DEG = 12.0       # 自定义仿真扫描上限，绝非标准限值
+MAX_ROADWHEEL_DEG = 25.0       # 直接前轮角指令上限，单位 deg；不是方向盘转角
+
+# ================================================================
+# 统一管理横向激励强度
+#
+# lat_mu_fraction 只是生成转向指令的「名义横向加速度目标倍率」：
+#   target_ay_g = lat_mu_fraction * NOMINAL_MU
+#
+# 例如 NOMINAL_MU=0.8 时：
+#   medium -> 0.75 * 0.8 = 0.60 g
+#   strong -> 0.90 * 0.8 = 0.72 g
+#   limit  -> 1.05 * 0.8 = 0.84 g
+#
+# 这些数值不改变 CarSim 真实路面附着系数，也不保证实测 ay 达标。
+# 修改不同等级的强度只需要修改这里，而不必逐一修改 SCENARIOS。
+# ================================================================
+LAT_MU_LEVELS = {
+    "medium": 0.75,   # 中强度侧向激励：名义 0.60g
+    "strong": 0.85,   # 强侧向激励：名义 0.72g
+    "limit": 1.00,    # 探索性近极限激励：名义 0.84g，可能超出附着能力
+}
 
 DEFAULT_SIM_PATH = (
     r"E:\modelcodeE\carsim2022"
@@ -44,7 +65,7 @@ class Scenario:
     mode: str                       # sis / circle / step / chirp / swd / dlc_proxy / brake_turn / torque
     duration_s: float = 6.0
     sign: int = 1                   # +1 为正转向、-1 为负转向
-    lat_mu_fraction: float = 0.0    # 相对名义 mu*g 的目标横向激励，非保证实测值
+    lat_mu_fraction: float = 0.0    # 三级激励对应的名义倍率，非 CarSim 真实附着系数
     swd_a03_factor: float = 0.0     # Sine-with-dwell 幅值 / 实测 A03
     torque_peak_nm: float = 0.0     # N*m，四轮外加转矩的幅值
     diff_peak_nm: float = 0.0       # N*m，左右差动外加转矩
@@ -52,50 +73,52 @@ class Scenario:
 
 
 # 12 条训练 + 3 条验证 + 3 条测试。
+# 非 SWD、非纯转矩场景：从 LAT_MU_LEVELS 选择 medium/strong/limit；
+# SWD 场景使用 swd_a03_factor，纯转矩场景使用 torque_peak_nm。
 # 先在 *同一 CarSim Run、同一车辆、mu=0.8* 上扩大操纵包络。
 # 后续如需 40/60/80 km/h，应分别建立/生成对应 simfile，
 # 逐批采集，而不是仅改 scenario.name。
 SCENARIOS = (
     Scenario("train_sis_left", "train", "sis_left_01", "sis",
-             sign=1, lat_mu_fraction=0.90, note="ISO 4138/SIS 思路：逐步增大正向前轮转角"),
+             sign=1, lat_mu_fraction=LAT_MU_LEVELS["limit"], note="ISO 4138/SIS 思路：逐步增大正向前轮转角"),
     Scenario("train_sis_right", "train", "sis_right_01", "sis",
-             sign=-1, lat_mu_fraction=0.90, note="逐步增大反向前轮转角"),
+             sign=-1, lat_mu_fraction=LAT_MU_LEVELS["limit"], note="逐步增大反向前轮转角"),
     Scenario("train_circle_left", "train", "circle_left_01", "circle",
-             sign=1, lat_mu_fraction=0.78, note="ISO 4138 启发：近极限持续转向"),
+             sign=1, lat_mu_fraction=LAT_MU_LEVELS["medium"], note="ISO 4138 启发：近极限持续转向"),
     Scenario("train_circle_right", "train", "circle_right_01", "circle",
-             sign=-1, lat_mu_fraction=0.78),
+             sign=-1, lat_mu_fraction=LAT_MU_LEVELS["medium"]),
     Scenario("train_step_left", "train", "step_left_01", "step",
-             sign=1, lat_mu_fraction=0.92, note="ISO 7401 启发：快速转向瞬态"),
+             sign=1, lat_mu_fraction=LAT_MU_LEVELS["strong"], note="ISO 7401 启发：快速转向瞬态"),
     Scenario("train_step_right", "train", "step_right_01", "step",
-             sign=-1, lat_mu_fraction=0.92),
+             sign=-1, lat_mu_fraction=LAT_MU_LEVELS["strong"]),
     Scenario("train_chirp", "train", "chirp_01", "chirp",
-             lat_mu_fraction=0.82, note="ISO 7401 启发：频率扫掠"),
-    Scenario("train_swd_left", "train", "swd_left_03a", "swd",
+             lat_mu_fraction=LAT_MU_LEVELS["strong"], note="ISO 7401 启发：频率扫掠"),
+    Scenario("train_swd_left", "train", "swd_left_04a", "swd",
              sign=1, swd_a03_factor=3.0, note="FMVSS 126 思路：0.7 Hz+500ms dwell"),
     Scenario("train_swd_right", "train", "swd_right_05a", "swd",
-             sign=-1, swd_a03_factor=5.0),
+             sign=-1, swd_a03_factor=4.0),
     Scenario("train_dlc_proxy", "train", "dlc_proxy_left_01", "dlc_proxy",
-             sign=1, lat_mu_fraction=0.93, note="开环双脉冲，非 ISO 3888-2 合规路径试验"),
+             sign=1, lat_mu_fraction=LAT_MU_LEVELS["strong"], note="开环双脉冲，非 ISO 3888-2 合规路径试验"),
     Scenario("train_brake_turn_left", "train", "brake_turn_left_01", "brake_turn",
-             sign=1, lat_mu_fraction=0.72, torque_peak_nm=650,
-             diff_peak_nm=120, note="ISO 7975 启发：转向与负轮端转矩联合"),
+             sign=1, lat_mu_fraction=LAT_MU_LEVELS["medium"], torque_peak_nm=200,
+             diff_peak_nm=100, note="ISO 7975 启发：转向与负轮端转矩联合"),
     Scenario("train_torque_sweep", "train", "torque_sweep_01", "torque",
              torque_peak_nm=1300, note="纵向滑移激励；非标准制动踏板试验"),
 
     Scenario("validation_circle_right", "validation", "val_circle_right_01", "circle",
-             sign=-1, lat_mu_fraction=0.86),
-    Scenario("validation_swd_left", "validation", "val_swd_left_04a", "swd",
-             sign=1, swd_a03_factor=4.0),
+             sign=-1, lat_mu_fraction=LAT_MU_LEVELS["strong"]),
+    Scenario("validation_swd_left", "validation", "val_swd_left_046a", "swd",
+             sign=1, swd_a03_factor=3.6),
     Scenario("validation_brake_turn", "validation", "val_brake_right_01", "brake_turn",
-             sign=-1, lat_mu_fraction=0.80, torque_peak_nm=550, diff_peak_nm=90),
+             sign=-1, lat_mu_fraction=LAT_MU_LEVELS["strong"], torque_peak_nm=200, diff_peak_nm=90),
 
     Scenario("test_swd_right", "test", "test_swd_right_065a", "swd",
-             sign=-1, swd_a03_factor=6.5),
+             sign=-1, swd_a03_factor=4.5),
     Scenario("test_dlc_proxy_right", "test", "test_dlc_proxy_right_01", "dlc_proxy",
-             sign=-1, lat_mu_fraction=0.97),
+             sign=-1, lat_mu_fraction=LAT_MU_LEVELS["limit"]),
     Scenario("test_brake_turn_right", "test", "test_brake_right_01", "brake_turn",
-             sign=-1, lat_mu_fraction=0.87, torque_peak_nm=720,
-             diff_peak_nm=140),
+             sign=-1, lat_mu_fraction=LAT_MU_LEVELS["limit"], torque_peak_nm=200,
+             diff_peak_nm=100),
 )
 
 
@@ -172,19 +195,25 @@ def pulse(t, start, end, ramp_s=0.15):
 
 
 def steering_amplitude_deg(scene, a03_deg):
-    """根据实测 0.3g 参考前轮角给出本场景的幅值。
+    """根据 CarSim 标定的 0.3g 前轮*指令角*给出本场景幅值。
 
-    A03 是 CarSim 中的前轮转角，不能当成 FMVSS 方向盘转角。
+    A03 是在仿真中达到约 0.3g 时发送的前轮指令角，
+    既不是方向盘角，也未必等于实测左右前轮的实际角。
     """
     a03 = float(a03_deg)
     if not math.isfinite(a03) or a03 <= 0:
         raise ValueError("0.3g 参考角 A03 必须是正数")
     if scene.mode == "swd":
+        # SWD 的强度单独由 swd_a03_factor 管理，和三级 lat_mu_fraction 无关。
+        # 平滑限幅不会在有限幅值下突然将多条不同指令截为同一个 25°。
+        # 其实际输出幅值通常低于名义 factor*A03。
         target = scene.swd_a03_factor * a03
-    else:
-        # 将期望 mu 占比转换成 A03 倍数，只是初值估算。
-        target_g = scene.lat_mu_fraction * NOMINAL_MU
-        target = a03 * (target_g / 0.3)
+        return MAX_ROADWHEEL_DEG * math.tanh(target / MAX_ROADWHEEL_DEG)
+
+    # 其他转向场景：把名义目标 ay/g 转换为实测 A03 的倍率。
+    # 注意这个线性缩放只是激励设计方法，不是车辆非线性响应预测。
+    target_g = scene.lat_mu_fraction * NOMINAL_MU
+    target = a03 * (target_g / 0.3)
     return min(MAX_ROADWHEEL_DEG, target)
 
 
@@ -286,6 +315,71 @@ def command_at(scene: Scenario, t: float, a03_deg: float):
     if not all(math.isfinite(x) for x in command):
         raise ValueError("出现无效控制指令")
     return command
+
+
+def audit_scene_control_sequences(calibration, scenes=SCENARIOS):
+    """采集前逐条检查 10 ms 五维控制数组，拒绝重复输入。
+
+    注意：这是控制序列预检查，不能代替后续对真实 CarSim 原始
+    轨迹、候选文件 SHA256 的防重复审计。
+    """
+    import hashlib
+    import struct
+
+    scene_list = tuple(scenes)
+    fingerprints = {}
+    details = []
+    for scene in scene_list:
+        direction = "positive" if scene.sign > 0 else "negative"
+        a03 = float(calibration[direction]["reference_roadwheel_angle_deg"])
+        steps = round(scene.duration_s / DT_S)
+        h = hashlib.sha256()
+        for i in range(steps):
+            command = command_at(scene, i * DT_S, a03)
+            # 固定字节序和浮点格式；不因名字、split 不同而改变指纹。
+            h.update(struct.pack("<5d", *command))
+        signature = h.hexdigest()
+        if signature in fingerprints:
+            previous = fingerprints[signature]
+            raise ValueError(
+                f"检测到重复的五维控制序列：{previous} 与 {scene.name}；"
+                "请先调整转角限幅/激励参数，禁止让重复轨迹进入不同数据分区"
+            )
+        fingerprints[signature] = scene.name
+        details.append({
+            "scene": scene.name,
+            "split": scene.split,
+            "mode": scene.mode,
+            "sign": scene.sign,
+            "a03_deg": a03,
+            "actual_requested_peak_steer_deg": steering_amplitude_deg(scene, a03),
+            "control_sha256": signature,
+        })
+
+    # 对同方向 Sine-with-dwell 跨分区的幅值做额外检查。
+    # 避免虽然不完全一样，但幅值过于接近而失去测试意义。
+    for i, a in enumerate(details):
+        if a["mode"] != "swd":
+            continue
+        for b in details[i + 1:]:
+            if b["mode"] == "swd" and a["sign"] == b["sign"]:
+                min_separation = max(0.05, 0.10 * max(a["a03_deg"], b["a03_deg"]))
+                diff = abs(a["actual_requested_peak_steer_deg"] -
+                           b["actual_requested_peak_steer_deg"])
+                if diff < min_separation:
+                    raise ValueError(
+                        f"{a['scene']} 和 {b['scene']} 的转角仅相差 {diff:.3f}deg，"
+                        f"小于预设最低间隔 {min_separation:.3f}deg；"
+                        "请调整 SWD 倍率以保证测试工况明显区分"
+                    )
+
+    return {
+        "format": "wm_scenario_command_uniqueness_preflight_v1",
+        "scenes_checked": len(details),
+        "all_unique": True,
+        "note": "仅确认给定 A03 下控制序列不重复；仍需真实轨迹指纹审计",
+        "commands": details,
+    }
 
 
 def describe_scenario(scene):

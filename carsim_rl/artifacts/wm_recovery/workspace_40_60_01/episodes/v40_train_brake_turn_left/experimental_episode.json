@@ -1,0 +1,18 @@
+{
+  "format": "wm_recovery_experimental_episode_manifest_v1",
+  "trajectory_id": "carsim_experimental_v40_train_brake_turn_left",
+  "condition_id": "v40_brake_turn_left_01",
+  "split": "train",
+  "actual_mu": 0.8,
+  "candidate_path": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\wm_recovery\\multispeed_40_60_01\\40kmh\\candidate_train_brake_turn_left",
+  "candidate_sha256": "4edbace06cfb657650ad8a971097ec7453cd4a19ccb2823fdccfdfbfe24f7fc8",
+  "raw_source_sha256": "bca0824e5f38e18790d0fabfc221802c9c3a0a02fca851dafcf4e36d8e09350b",
+  "assumption_acknowledged": true,
+  "source_kind": "carsim_experimental",
+  "ready_for_wm_training": false,
+  "note": "实验性数据，仅用户显式允许后用于训练；未确认四轮净转矩/制动接口；同角命令不等于 CarSim 实测左右前轮角严格相等",
+  "initial_speed_kmh": 40.0,
+  "expected_initial_speed_kmh": 40,
+  "capture_sim_sha256": "c30dc7d183841f622b005bd10c3d986234db0d48312f433aaf6c3700df0da888",
+  "capture_parameter_sha256": "494c67a057e11906bbe7112e64490142ca60f0891db34a08e7a6ad0e7336ab9c"
+}

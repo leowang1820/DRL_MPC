@@ -1,0 +1,14 @@
+{
+  "format": "wm_recovery_experimental_episode_manifest_v1",
+  "trajectory_id": "carsim_experimental_test_brake_turn_right",
+  "condition_id": "test_brake_right_01",
+  "split": "test",
+  "actual_mu": 0.8,
+  "candidate_path": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\wm_recovery\\multispeed_40_60_01\\40kmh\\candidate_test_brake_turn_right",
+  "candidate_sha256": "512b4771242e8798a6a573ef94cd0ed1fbfd2b4a423b19f7f840d1410ebbe5bf",
+  "raw_source_sha256": "5d56e6ea7f0f212490a3fa907d3b68fae49f489cbd779e898f9ce4e500b37b02",
+  "assumption_acknowledged": true,
+  "source_kind": "carsim_experimental",
+  "ready_for_wm_training": false,
+  "note": "实验性数据，仅用户显式允许后用于训练；未确认四轮净转矩/制动接口；同角命令不等于 CarSim 实测左右前轮角严格相等"
+}
