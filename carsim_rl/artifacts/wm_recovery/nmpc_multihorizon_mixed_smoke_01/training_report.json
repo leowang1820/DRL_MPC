@@ -1,0 +1,384 @@
+{
+  "format": "wm_recovery_nmpc_multihorizon_finetune_v2",
+  "created_utc": "2026-11-11T09:08:17.124538+00:00",
+  "dataset": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\wm_recovery\\nmpc_residual_dataset_40_60_01",
+  "pretrained_checkpoint": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\wm_recovery\\nmpc_residual_mlp_100ep_01\\best.pt",
+  "output": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\wm_recovery\\nmpc_multihorizon_mixed_smoke_01",
+  "model_architecture": "8-16-16-3-Tanh",
+  "horizon_intervals": 200,
+  "horizons_intervals": [
+    50,
+    100,
+    200
+  ],
+  "horizons_s": [
+    0.5,
+    1.0,
+    2.0
+  ],
+  "horizon_weights": {
+    "50": 0.4,
+    "100": 0.35,
+    "200": 0.25
+  },
+  "horizon_strategy": "mixed",
+  "integration": "continuous",
+  "rk4_substeps": 1,
+  "training_hyperparameters": {
+    "epochs_requested": 2,
+    "epochs_completed": 2,
+    "batch_size": 4,
+    "steps_per_epoch": 5,
+    "learning_rate": 5e-05,
+    "rollout_weight": 1.0,
+    "terminal_weight": 0.3,
+    "single_weight": 0.25,
+    "regularization_weight": 0.0001,
+    "weight_decay": 1e-06,
+    "patience": 6,
+    "scene_balance": "family",
+    "validation_scene_weight": 0.5,
+    "train_stride_intervals": 10,
+    "validation_stride_intervals": 50,
+    "seed": 2026,
+    "device": "cpu"
+  },
+  "train_window_candidates_by_horizon": {
+    "50": 1318,
+    "100": 1198,
+    "200": 958
+  },
+  "validation_fixed_window_count_by_horizon": {
+    "50": 66,
+    "100": 60,
+    "200": 48
+  },
+  "training_sampling_by_horizon": {
+    "50": {
+      "mode": "family",
+      "group_count": 16,
+      "candidate_counts": {
+        "v40:brake_turn": 56,
+        "v40:chirp": 56,
+        "v40:circle": 112,
+        "v40:dlc_proxy": 56,
+        "v40:sis": 112,
+        "v40:step": 112,
+        "v40:swd": 112,
+        "v40:torque_sweep": 56,
+        "v60:brake_turn": 30,
+        "v60:chirp": 56,
+        "v60:circle": 112,
+        "v60:dlc_proxy": 56,
+        "v60:sis": 112,
+        "v60:step": 112,
+        "v60:swd": 112,
+        "v60:torque_sweep": 56
+      },
+      "observed_sampled_counts": {
+        "v40:brake_turn": 2,
+        "v40:chirp": 1,
+        "v40:circle": 2,
+        "v40:dlc_proxy": 1,
+        "v40:sis": 1,
+        "v40:step": 1,
+        "v40:swd": 1,
+        "v40:torque_sweep": 1,
+        "v60:brake_turn": 1,
+        "v60:chirp": 2,
+        "v60:circle": 1,
+        "v60:dlc_proxy": 1,
+        "v60:sis": 2,
+        "v60:step": 1,
+        "v60:swd": 1,
+        "v60:torque_sweep": 1
+      }
+    },
+    "100": {
+      "mode": "family",
+      "group_count": 16,
+      "candidate_counts": {
+        "v40:brake_turn": 51,
+        "v40:chirp": 51,
+        "v40:circle": 102,
+        "v40:dlc_proxy": 51,
+        "v40:sis": 102,
+        "v40:step": 102,
+        "v40:swd": 102,
+        "v40:torque_sweep": 51,
+        "v60:brake_turn": 25,
+        "v60:chirp": 51,
+        "v60:circle": 102,
+        "v60:dlc_proxy": 51,
+        "v60:sis": 102,
+        "v60:step": 102,
+        "v60:swd": 102,
+        "v60:torque_sweep": 51
+      },
+      "observed_sampled_counts": {
+        "v40:brake_turn": 1,
+        "v40:chirp": 1,
+        "v40:circle": 1,
+        "v40:dlc_proxy": 1,
+        "v40:sis": 1,
+        "v40:step": 0,
+        "v40:swd": 1,
+        "v40:torque_sweep": 1,
+        "v60:brake_turn": 0,
+        "v60:chirp": 0,
+        "v60:circle": 1,
+        "v60:dlc_proxy": 0,
+        "v60:sis": 1,
+        "v60:step": 1,
+        "v60:swd": 1,
+        "v60:torque_sweep": 1
+      }
+    },
+    "200": {
+      "mode": "family",
+      "group_count": 16,
+      "candidate_counts": {
+        "v40:brake_turn": 41,
+        "v40:chirp": 41,
+        "v40:circle": 82,
+        "v40:dlc_proxy": 41,
+        "v40:sis": 82,
+        "v40:step": 82,
+        "v40:swd": 82,
+        "v40:torque_sweep": 41,
+        "v60:brake_turn": 15,
+        "v60:chirp": 41,
+        "v60:circle": 82,
+        "v60:dlc_proxy": 41,
+        "v60:sis": 82,
+        "v60:step": 82,
+        "v60:swd": 82,
+        "v60:torque_sweep": 41
+      },
+      "observed_sampled_counts": {
+        "v40:brake_turn": 0,
+        "v40:chirp": 0,
+        "v40:circle": 1,
+        "v40:dlc_proxy": 0,
+        "v40:sis": 1,
+        "v40:step": 1,
+        "v40:swd": 1,
+        "v40:torque_sweep": 1,
+        "v60:brake_turn": 0,
+        "v60:chirp": 0,
+        "v60:circle": 1,
+        "v60:dlc_proxy": 0,
+        "v60:sis": 0,
+        "v60:step": 1,
+        "v60:swd": 0,
+        "v60:torque_sweep": 1
+      }
+    }
+  },
+  "training_single_sampling": {
+    "mode": "family",
+    "group_count": 16,
+    "candidate_counts": {
+      "v40:brake_turn": 600,
+      "v40:chirp": 600,
+      "v40:circle": 1200,
+      "v40:dlc_proxy": 600,
+      "v40:sis": 1200,
+      "v40:step": 1200,
+      "v40:swd": 1200,
+      "v40:torque_sweep": 600,
+      "v60:brake_turn": 340,
+      "v60:chirp": 600,
+      "v60:circle": 1200,
+      "v60:dlc_proxy": 600,
+      "v60:sis": 1200,
+      "v60:step": 1200,
+      "v60:swd": 1200,
+      "v60:torque_sweep": 600
+    },
+    "observed_sampled_counts": {
+      "v40:brake_turn": 20,
+      "v40:chirp": 20,
+      "v40:circle": 20,
+      "v40:dlc_proxy": 20,
+      "v40:sis": 20,
+      "v40:step": 20,
+      "v40:swd": 20,
+      "v40:torque_sweep": 20,
+      "v60:brake_turn": 20,
+      "v60:chirp": 20,
+      "v60:circle": 20,
+      "v60:dlc_proxy": 20,
+      "v60:sis": 20,
+      "v60:step": 20,
+      "v60:swd": 20,
+      "v60:torque_sweep": 20
+    }
+  },
+  "initial_validation": {
+    "validation_joint_normalized_mse": 0.11738232646716318,
+    "validation_single_normalized_mse": 0.3170760743901242,
+    "per_horizon": {
+      "50": {
+        "horizon_s": 0.5,
+        "windows": 66,
+        "scene_count": 6,
+        "path_mse": 0.017832351256805462,
+        "terminal_mse": 0.05324782322234901,
+        "scene_macro_path_mse": 0.02663151514191296,
+        "scene_macro_terminal_mse": 0.08810328895765086,
+        "selected_joint_mse": 0.043434600026359196,
+        "worst_scene": "v60_validation_brake_turn",
+        "per_scene": {
+          "v40_validation_brake_turn": {
+            "windows": 12,
+            "path_mse": 0.012836175561553378,
+            "terminal_mse": 0.020970861609949366
+          },
+          "v40_validation_circle_right": {
+            "windows": 12,
+            "path_mse": 0.0011485698437022128,
+            "terminal_mse": 0.00168158965167914
+          },
+          "v40_validation_swd_left": {
+            "windows": 12,
+            "path_mse": 0.006430047015544497,
+            "terminal_mse": 0.008781337156645957
+          },
+          "v60_validation_brake_turn": {
+            "windows": 6,
+            "path_mse": 0.12342231787809539,
+            "terminal_mse": 0.47151341204597136
+          },
+          "v60_validation_circle_right": {
+            "windows": 12,
+            "path_mse": 0.0006018357978373777,
+            "terminal_mse": 0.0013685380026252681
+          },
+          "v60_validation_swd_left": {
+            "windows": 12,
+            "path_mse": 0.015350144754744888,
+            "terminal_mse": 0.02430399527903414
+          }
+        }
+      },
+      "100": {
+        "horizon_s": 1.0,
+        "windows": 60,
+        "scene_count": 6,
+        "path_mse": 0.049464478951908294,
+        "terminal_mse": 0.2101149994228696,
+        "scene_macro_path_mse": 0.08401511810792393,
+        "scene_macro_terminal_mse": 0.4023233700082951,
+        "selected_joint_mse": 0.1586055539445908,
+        "worst_scene": "v60_validation_brake_turn",
+        "per_scene": {
+          "v40_validation_brake_turn": {
+            "windows": 11,
+            "path_mse": 0.019801772431069033,
+            "terminal_mse": 0.024069060494449002
+          },
+          "v40_validation_circle_right": {
+            "windows": 11,
+            "path_mse": 0.0015118369567525623,
+            "terminal_mse": 0.0017672816836106218
+          },
+          "v40_validation_swd_left": {
+            "windows": 11,
+            "path_mse": 0.007723070124169723,
+            "terminal_mse": 0.009326877181633698
+          },
+          "v60_validation_brake_turn": {
+            "windows": 5,
+            "path_mse": 0.42952150966808034,
+            "terminal_mse": 2.32440707586255
+          },
+          "v60_validation_circle_right": {
+            "windows": 11,
+            "path_mse": 0.0017017033732790413,
+            "terminal_mse": 0.004632992678603995
+          },
+          "v60_validation_swd_left": {
+            "windows": 11,
+            "path_mse": 0.04383081609419292,
+            "terminal_mse": 0.04973693214892307
+          }
+        }
+      },
+      "200": {
+        "horizon_s": 2.0,
+        "windows": 48,
+        "scene_count": 6,
+        "path_mse": 0.043103123357951544,
+        "terminal_mse": 0.23196843452284252,
+        "scene_macro_path_mse": 0.07058520915943658,
+        "scene_macro_terminal_mse": 0.5756449257795363,
+        "selected_joint_mse": 0.1779861703040509,
+        "worst_scene": "v60_validation_brake_turn",
+        "per_scene": {
+          "v40_validation_brake_turn": {
+            "windows": 9,
+            "path_mse": 0.027956258447558342,
+            "terminal_mse": 0.030327688291120092
+          },
+          "v40_validation_circle_right": {
+            "windows": 9,
+            "path_mse": 0.0019089440455173703,
+            "terminal_mse": 0.0019108566584502909
+          },
+          "v40_validation_swd_left": {
+            "windows": 9,
+            "path_mse": 0.009416701890494785,
+            "terminal_mse": 0.007968763920701793
+          },
+          "v60_validation_brake_turn": {
+            "windows": 3,
+            "path_mse": 0.2904418955713169,
+            "terminal_mse": 3.3250568558330866
+          },
+          "v60_validation_circle_right": {
+            "windows": 9,
+            "path_mse": 0.006243179366712569,
+            "terminal_mse": 0.01522453366437318
+          },
+          "v60_validation_swd_left": {
+            "windows": 9,
+            "path_mse": 0.08754427563501953,
+            "terminal_mse": 0.073380856309486
+          }
+        }
+      }
+    },
+    "horizon_weights": {
+      "50": 0.4,
+      "100": 0.35,
+      "200": 0.25
+    },
+    "terminal_weight": 0.3,
+    "validation_scene_weight": 0.5
+  },
+  "best_epoch": 0,
+  "best_validation_joint_normalized_mse": 0.11738232646716318,
+  "best_validation_rollout_normalized_mse": 0.11738232646716318,
+  "best_checkpoint_sha256": "e05962f210a629318fff55d0afd140a002a24651e2dbb64949713269c42ce28f",
+  "source_checkpoint_sha256": "f7a2c42942c83887aff8072d2b1d9e1e364318a621a1f9fe9f62ee7a85c3c8d6",
+  "dataset_manifest_sha256": "5599e8961c3ca0753886b06c4e9a2c1cf2b78fda3a8be2f5e5924a64e0ae64df",
+  "train_npz_sha256": "c028caa5f53be51154245eee9a808a308334249b47afce63ead572ee7befe3cc",
+  "validation_npz_sha256": "74128a7bd0517d13021b9a8bfe8304774be5d1ed41f66bd91cb5900b322acbf5",
+  "q_scale_train_only_si": [
+    0.39143678545951843,
+    0.3403972387313843,
+    3.290844440460205
+  ],
+  "test_not_used": true,
+  "closed_loop_nmpc_validated": false,
+  "physics_verified": false,
+  "notes": [
+    "多时域联合目标按 horizon_weights 加权，各 H 路径 MSE 均已归一化。",
+    "终点误差损失独立加权，不除以 horizon 步数。",
+    "仅使用 Train 场景均衡采样；Validation 固定窗口选模，Test 不读取。",
+    "微调未改善时 best.pt 保留源模型第 0 轮权重。",
+    "未来 CarSim 等效执行器参数已知，车辆状态完全自由滚动。",
+    "该微调指标不等于完整 5s 验证，仍需运行固定 3s/5s 消融。"
+  ]
+}

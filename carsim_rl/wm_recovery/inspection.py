@@ -91,8 +91,32 @@ def inspect_simfile(path):
             if key == "INPUT":
                 inputs.append(value)
 
+
+
             elif key in ("PORTS_IMP", "PORTS_EXP"):
-                ports[key] = _parse_ports(value)
+
+                # 去除首尾空格及可能存在的分号
+
+                port_value = value.strip().rstrip(";").strip()
+
+                # CarSim 内置驾驶员模式可能不需要外部 Import
+
+                # 例如：PORTS_IMP 0
+
+                # 此时直接记录端口数量为 0
+
+                if port_value == "0":
+
+                    ports[key] = 0
+
+
+                else:
+
+                    # 非零端口声明继续使用原来的解析函数
+
+                    # 保留原有六通道控制实验的兼容性
+
+                    ports[key] = _parse_ports(value)
 
     # 检查 SIM 文件是否只有一个参数文件入口
     if len(inputs) != 1:

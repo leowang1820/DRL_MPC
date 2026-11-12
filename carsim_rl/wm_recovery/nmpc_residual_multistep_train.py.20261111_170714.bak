@@ -1,0 +1,481 @@
+# -*- coding: utf-8 -*-
+"""基于原 best.pt 的可微 NMPC 多步自由滚动微调。
+
+使用条件：未来 CarSim 等效执行器参数已知，模型状态独立滚动。
+只使用 Train 的输入统计量和训练样本，Validation 用于固定窗口选模，
+Test 完全不读取。损失不是对未来真值逐步回灌，而是完整计算轨迹后比较。
+
+推荐按 H=20 -> 50 -> 100 -> 200 等阶段微调，最终单独做 500 步评价。
+8->16->16->3 网络与原来的 best.pt 完全兼容；不改变模型结构和输入顺序。
+"""
+from __future__ import annotations
+
+import argparse
+from datetime import datetime, timezone
+import json
+import math
+from pathlib import Path
+import random
+
+import numpy as np
+import torch
+
+from .nmpc_reference import NMPCReferenceParams
+from .nmpc_reference_torch import hybrid_rk4_step_torch
+from .nmpc_residual_model import (
+    INPUT_NAMES, TARGET_NAMES, MODEL_FORMAT, load_model_checkpoint,
+)
+from .nmpc_residual_train import (
+    _check_manifest, load_split_npz, sha256,
+)
+from .nmpc_rollout_evaluate import _segment_slices
+
+
+REPORT_FORMAT = "wm_recovery_nmpc_multistep_finetune_v1"
+
+
+def contiguous_window_starts(data, horizon, *, stride=50):
+    """从每一条合法连续段中选择 H 区间窗口，禁止跨采样缺口或跨轨迹。"""
+    if (isinstance(horizon, bool) or not isinstance(horizon, int)
+            or not 1 <= horizon <= 500):
+        raise ValueError("训练窗口长度 horizon 必须在 1~500")
+    if isinstance(stride, bool) or not isinstance(stride,int) or stride<1:
+        raise ValueError("stride 必须是正整数")
+    starts = []
+    for start,end in _segment_slices(data):
+        if end-start < horizon:
+            continue
+        starts.extend(range(start, end-horizon+1, stride))
+    return np.asarray(starts,dtype=np.int64)
+
+
+def window_batch_torch(data, starts, horizon, *, device="cpu", dtype=torch.float64,
+                       use_train_weights=True):
+    """收集同一批真实连续窗口；真实状态只作为初值和监督目标。"""
+    idx=np.asarray(starts,dtype=np.int64)
+    if idx.ndim != 1 or len(idx)==0:
+        raise ValueError("窗口起点必须是非空一维数组")
+    loc=idx[:,None]+np.arange(horizon,dtype=np.int64)[None,:]
+    if np.min(loc)<0 or np.max(loc)>=len(data["z_si"]):
+        raise ValueError("窗口越过数据集边界")
+    # 仅用于复核：一个窗口内必须保持相同轨迹和连续原始时间区间。
+    seg=data["segment_id"][loc]
+    step=data["segment_step"][loc]
+    episode=data["episode_index"][loc]
+    intervals=data["interval_index"][loc]
+    if (not np.all(seg==seg[:,:1])
+            or not np.all(episode==episode[:,:1])
+            or not np.array_equal(step,step[:,:1]+np.arange(horizon)[None,:])
+            or not np.array_equal(intervals,intervals[:,:1]+np.arange(horizon)[None,:])):
+        raise ValueError("窗口跨越了 segment/episode 或非连续的原始索引")
+    def tensor(x):
+        return torch.as_tensor(
+            np.asarray(x), dtype=dtype, device=device,
+        )
+    return {
+        "q0":tensor(data["q_k_si"][idx]),
+        "external":tensor(data["z_si"][loc,3:]),
+        "dt":tensor(data["dt_s"][loc]),
+        "true_next":tensor(data["q_true_next_si"][loc]),
+        # 验证集绝不使用任何训练时的 neutral 权重。
+        "weights":tensor(
+            data["sample_weight"][loc]
+            if use_train_weights
+            else np.ones(loc.shape,dtype=np.float64)
+        ),
+        "starts":idx.copy(),
+    }
+
+
+def differentiable_rollout_loss(
+    model, batch, q_scale, *,
+    params, integration="continuous", rk4_substeps=1,
+):
+    """沿 H 个完整真实时间区间自由滚动，返回归一化整段状态 MSE。
+
+    与单步标签不同，此 Loss 对每一个预测状态和神经网络参数求梯度。
+    未来 q_true 不参与任何求导，只在每步输出后计算监督损失。
+    """
+    q=batch["q0"]
+    ext=batch["external"]
+    truth=batch["true_next"]
+    dt=batch["dt"]
+    weights=batch["weights"]
+    h=ext.shape[1]
+    if h < 1 or q.shape[0] != ext.shape[0]:
+        raise ValueError("多步窗口维度不正确")
+    if q_scale.shape != (3,) or not bool((q_scale>0).all()):
+        raise ValueError("三状态归一化尺度必须为正数")
+    loss_num=q.new_zeros(())
+    loss_den=q.new_zeros(())
+    last_error_norm=None
+    for k in range(h):
+        q=hybrid_rk4_step_torch(
+            q,ext[:,k,:],dt[:,k],
+            residual_model=model,params=params,
+            integration=integration,substeps=rk4_substeps,
+        )
+        diff=(q-truth[:,k,:])/q_scale[None,:]
+        per_window=diff.square().mean(dim=1)
+        w=weights[:,k]
+        loss_num=loss_num + (per_window*w).sum()
+        loss_den=loss_den + w.sum()
+        last_error_norm=per_window
+    return loss_num / loss_den, last_error_norm.mean()
+
+
+def one_step_residual_loss(model,z,y,weights=None):
+    """与旧 trainer 相同的 Train-only 标签归一化 MSE。"""
+    pred=model(z)
+    per=((pred-y)/model.y_scale).square().mean(dim=1)
+    if weights is None:
+        return per.mean()
+    return (per*weights).sum()/weights.sum()
+
+
+@torch.no_grad()
+def validation_metrics(
+    model, validation_data, fixed_starts, horizon, *,
+    params, q_scale, device, batch_size, integration, rk4_substeps,
+):
+    """每轮使用完全相同的 Validation 起点，选模指标为滚动状态 MSE。"""
+    model.eval()
+    all_roll=[]
+    all_endpoint=[]
+    n=len(fixed_starts)
+    for k in range(0,n,batch_size):
+        selection=fixed_starts[k:k+batch_size]
+        batch=window_batch_torch(
+            validation_data,selection,horizon,device=device,
+            use_train_weights=False,
+        )
+        roll,end=differentiable_rollout_loss(
+            model,batch,q_scale,params=params,integration=integration,
+            rk4_substeps=rk4_substeps,
+        )
+        all_roll.append((roll.item(),len(selection)))
+        all_endpoint.append((end.item(),len(selection)))
+    # 这里每个窗口时间长度一致，因此按窗口数加权，即为平均单步状态 MSE。
+    roll_mse=sum(a*b for a,b in all_roll)/sum(b for _,b in all_roll)
+    endpoint_mse=sum(a*b for a,b in all_endpoint)/sum(b for _,b in all_endpoint)
+    z=torch.as_tensor(
+        validation_data["z_si"],dtype=torch.float64,device=device
+    )
+    y=torch.as_tensor(
+        validation_data["residual_y_si"],dtype=torch.float64,device=device
+    )
+    single=one_step_residual_loss(model,z,y).item()
+    return {
+        "validation_rollout_normalized_mse":float(roll_mse),
+        "validation_endpoint_normalized_mse":float(endpoint_mse),
+        "validation_single_normalized_mse":float(single),
+        "window_count":n,
+    }
+
+
+def fine_tune_multistep(
+    dataset_dir, pretrained_checkpoint, output_dir, *,
+    horizon=50, epochs=5, batch_size=8, steps_per_epoch=10,
+    validation_stride=50, train_stride=10,
+    learning_rate=1e-4, single_weight=0.25,
+    rollout_weight=1.0, regularization_weight=1e-4,
+    weight_decay=1e-6, patience=6,
+    seed=2026, device="cpu", integration="continuous", rk4_substeps=1,
+):
+    """载入既有最佳模型并执行多步微调，独立保存新的 best.pt。
+
+    仍使用旧权重的训练集归一化参数，额外的 q_scale 只取 Train 状态尺度。
+    train/validation 之间没有窗口跨越；Test 没有被读入、选模或拟合统计量。
+    """
+    if integration not in ("continuous","discrete"):
+        raise ValueError("integration 必须为 continuous 或 discrete")
+    for key,val in (
+        ("epochs",epochs),("batch_size",batch_size),
+        ("steps_per_epoch",steps_per_epoch),("patience",patience),
+        ("validation_stride",validation_stride),("train_stride",train_stride),
+        ("rk4_substeps",rk4_substeps),
+    ):
+        if isinstance(val,bool) or not isinstance(val,int) or val<1:
+            raise ValueError(f"{key} 必须是正整数")
+    if not isinstance(horizon,int) or isinstance(horizon,bool) or not 1<=horizon<=500:
+        raise ValueError("horizon 必须是 1~500 的整数")
+    for key,val in (
+        ("learning_rate",learning_rate),("single_weight",single_weight),
+        ("rollout_weight",rollout_weight),
+        ("regularization_weight",regularization_weight),
+        ("weight_decay",weight_decay),
+    ):
+        if not math.isfinite(val) or (val<0 if key!="learning_rate" else val<=0):
+            raise ValueError(f"{key} 的数值不合法")
+    if rollout_weight<=0:
+        raise ValueError("必须保留正的 rollout_weight 才是多步训练")
+    output_dir=Path(output_dir).expanduser().resolve()
+    if output_dir.exists():
+        raise FileExistsError(f"输出目录已存在，禁止覆盖：{output_dir}")
+    dataset_dir=Path(dataset_dir).expanduser().resolve(strict=True)
+    pretrained_checkpoint=Path(pretrained_checkpoint).expanduser().resolve(strict=True)
+    manifest=_check_manifest(dataset_dir)
+    if manifest["dataset_settings"]["rk4_substeps"]!=rk4_substeps:
+        raise ValueError("RK4 子步数必须与残差数据集的名义标签构造配置一致")
+    model,payload=load_model_checkpoint(pretrained_checkpoint,device="cpu")
+    manifest_hash=sha256(dataset_dir/"dataset_manifest.json")
+    if payload.get("dataset_manifest_sha256")!=manifest_hash:
+        raise ValueError("源 checkpoint 与 dataset_manifest 不一致")
+    if payload.get("train_npz_sha256")!=sha256(dataset_dir/"train.npz"):
+        raise ValueError("源 checkpoint 与 train.npz 内容不一致")
+    if payload.get("validation_npz_sha256")!=sha256(dataset_dir/"validation.npz"):
+        raise ValueError("源 checkpoint 与 validation.npz 内容不一致")
+    train=load_split_npz(dataset_dir,"train")
+    valid=load_split_npz(dataset_dir,"validation")
+    if len(train["z_si"])!=manifest["split_counts"]["train"]["intervals"]:
+        raise ValueError("Train 行数与 manifest 不符")
+    if len(valid["z_si"])!=manifest["split_counts"]["validation"]["intervals"]:
+        raise ValueError("Validation 行数与 manifest 不符")
+
+    tr_starts=contiguous_window_starts(train,horizon,stride=train_stride)
+    va_starts=contiguous_window_starts(valid,horizon,stride=validation_stride)
+    if len(tr_starts)==0 or len(va_starts)==0:
+        raise ValueError(f"Train/Validation 缺少长度 {horizon} 的连续区间")
+
+    rng=np.random.default_rng(seed)
+    random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+    dev=torch.device(device)
+    if dev.type=="cpu":
+        torch.set_num_threads(1)
+    model=model.to(dev).double()
+    model.train()
+    params=NMPCReferenceParams(**manifest["reference_parameters"])
+    params.validate()
+    # 保留原 Train-only 归一化系数，禁止用 Validation/Test 重新拟合。
+    q_scale=model.x_scale[:3].detach().clone()
+    if not bool(torch.isfinite(q_scale).all()) or not bool((q_scale>0).all()):
+        raise ValueError("预训练模型的 Train-only q_scale 无效")
+
+    optimizer=torch.optim.Adam(
+        model.net.parameters(),lr=learning_rate,weight_decay=weight_decay
+    )
+    train_z=torch.as_tensor(train["z_si"],dtype=torch.float64,device=dev)
+    train_y=torch.as_tensor(train["residual_y_si"],dtype=torch.float64,device=dev)
+    train_weights=torch.as_tensor(train["sample_weight"],dtype=torch.float64,device=dev)
+    initial_metrics=validation_metrics(
+        model,valid,va_starts,horizon,
+        params=params,q_scale=q_scale,device=dev,batch_size=batch_size,
+        integration=integration,rk4_substeps=rk4_substeps,
+    )
+    print("微调前 Validation 多步归一化 MSE:",
+          f"{initial_metrics['validation_rollout_normalized_mse']:.7f}",flush=True)
+    history=[]
+    best_score=float(initial_metrics["validation_rollout_normalized_mse"])
+    best_epoch=0
+    no_improve=0
+    output_dir.mkdir(parents=True,exist_ok=False)
+    run_metadata={
+        "format":MODEL_FORMAT,
+        "input_names":list(INPUT_NAMES),
+        "target_names":list(TARGET_NAMES),
+        "hidden_sizes":[16,16],
+        "dataset_manifest_sha256":manifest_hash,
+        "train_npz_sha256":sha256(dataset_dir/"train.npz"),
+        "validation_npz_sha256":sha256(dataset_dir/"validation.npz"),
+        "training_mode":"multistep_rollout_finetune",
+        "source_checkpoint_sha256":sha256(pretrained_checkpoint),
+        "condition":"future_CarSim_equivalent_actuation_is_exogenous",
+        "horizon_intervals":int(horizon),
+        "integration":integration,
+        "seed":int(seed),
+    }
+
+    def save_best(epoch,score):
+        state={
+            key:value.detach().cpu().clone().to(torch.float32)
+            for key,value in model.state_dict().items()
+        }
+        torch.save(
+            {**run_metadata,
+             "best_epoch":int(epoch),
+             "best_validation_normalized_mse":float(score),
+             "model_state_dict":state},
+            output_dir/"best.pt",
+        )
+
+    # 保留源模型作为第 0 轮候选，防止微调退化却覆盖基线。
+    save_best(0,best_score)
+
+    for epoch in range(1,epochs+1):
+        model.train()
+        sums={"train_rollout_loss":0.0,"train_single_loss":0.0,
+              "train_regularization":0.0,"train_total":0.0}
+        for _ in range(steps_per_epoch):
+            starts=rng.choice(
+                tr_starts,size=min(batch_size,len(tr_starts)),replace=False
+            )
+            batch=window_batch_torch(
+                train,starts,horizon,device=dev,use_train_weights=True,
+            )
+            optimizer.zero_grad(set_to_none=True)
+            rollout_loss,_=differentiable_rollout_loss(
+                model,batch,q_scale,params=params,integration=integration,
+                rk4_substeps=rk4_substeps,
+            )
+            # 从整个 Train 随机抽取单步样本，不局限于窗口起点。
+            single_indices=rng.choice(
+                len(train_z),size=min(len(train_z),batch_size*8),
+                replace=False,
+            )
+            idx=torch.as_tensor(single_indices,dtype=torch.long,device=dev)
+            single_loss=one_step_residual_loss(
+                model,train_z.index_select(0,idx),
+                train_y.index_select(0,idx),
+                train_weights.index_select(0,idx),
+            )
+            if regularization_weight>0:
+                pred=model(train_z.index_select(0,idx))
+                reg=(pred/model.y_scale).square().mean()
+            else:
+                reg=single_loss.new_zeros(())
+            total=(rollout_weight*rollout_loss+
+                   single_weight*single_loss+
+                   regularization_weight*reg)
+            if not bool(torch.isfinite(total)):
+                raise FloatingPointError(
+                    "多步训练 Loss 非有限：检查工况分布、lr 和梯度"
+                )
+            total.backward()
+            torch.nn.utils.clip_grad_norm_(model.net.parameters(),max_norm=1.0)
+            optimizer.step()
+            for key,value in (
+                ("train_rollout_loss",rollout_loss),
+                ("train_single_loss",single_loss),
+                ("train_regularization",reg),("train_total",total),
+            ):
+                sums[key]+=float(value.detach().item())
+
+        metrics=validation_metrics(
+            model,valid,va_starts,horizon,
+            params=params,q_scale=q_scale,device=dev,batch_size=batch_size,
+            integration=integration,rk4_substeps=rk4_substeps,
+        )
+        score=metrics["validation_rollout_normalized_mse"]
+        entry={"epoch":epoch,**{
+            key:value/steps_per_epoch for key,value in sums.items()
+        },**metrics}
+        history.append(entry)
+        print(
+            f"epoch {epoch:03d} | train_roll={entry['train_rollout_loss']:.7f}"
+            f" | val_roll={score:.7f}"
+            f" | val_endpoint={entry['validation_endpoint_normalized_mse']:.7f}"
+            f" | val_single={entry['validation_single_normalized_mse']:.7f}",
+            flush=True,
+        )
+        if score<best_score-1e-8:
+            best_score=score
+            best_epoch=epoch
+            no_improve=0
+            save_best(epoch,best_score)
+        else:
+            no_improve+=1
+            if no_improve>=patience:
+                print("按 Validation 多步滚动损失早停。",flush=True)
+                break
+
+    (output_dir/"history.json").write_text(
+        json.dumps(history,ensure_ascii=False,indent=2),encoding="utf-8"
+    )
+    (output_dir/"normalization.json").write_text(
+        json.dumps(model.normalization_json(),ensure_ascii=False,indent=2),
+        encoding="utf-8",
+    )
+    report={
+        "format":REPORT_FORMAT,
+        "created_utc":datetime.now(timezone.utc).isoformat(),
+        "dataset":str(dataset_dir),
+        "pretrained_checkpoint":str(pretrained_checkpoint),
+        "output":str(output_dir),
+        "horizon_intervals":int(horizon),
+        "horizon_s":float(horizon*.01),
+        "model_architecture":"8-16-16-3-Tanh",
+        "integration":integration,
+        "rk4_substeps":rk4_substeps,
+        "training_hyperparameters":{
+            "epochs_requested":epochs,"epochs_completed":len(history),
+            "steps_per_epoch":steps_per_epoch,
+            "batch_size":batch_size,"learning_rate":learning_rate,
+            "single_weight":single_weight,
+            "rollout_weight":rollout_weight,
+            "regularization_weight":regularization_weight,
+            "weight_decay":weight_decay,"patience":patience,
+            "train_stride_intervals":train_stride,
+            "validation_stride_intervals":validation_stride,
+            "seed":seed,"device":device,
+        },
+        "train_window_candidates":int(len(tr_starts)),
+        "validation_fixed_window_count":int(len(va_starts)),
+        "initial_validation":initial_metrics,
+        "best_epoch":int(best_epoch),
+        "best_validation_rollout_normalized_mse":float(best_score),
+        "best_checkpoint_sha256":sha256(output_dir/"best.pt"),
+        "source_checkpoint_sha256":sha256(pretrained_checkpoint),
+        "dataset_manifest_sha256":manifest_hash,
+        "train_npz_sha256":run_metadata["train_npz_sha256"],
+        "validation_npz_sha256":run_metadata["validation_npz_sha256"],
+        "q_scale_train_only_si":q_scale.detach().cpu().numpy().tolist(),
+        "test_not_used":True,
+        "closed_loop_nmpc_validated":False,
+        "physics_verified":False,
+        "notes":[
+            "如果微调从未改善 Validation，多步 best.pt 保存源模型第 0 轮权重。",
+            "只使用了训练集已有归一化，所有 Validation 连续起点在各轮固定。",
+            "已知未来等效执行器序列 ZOH；模型车辆状态始终自由滚动。",
+            "训练选择的是短窗口滚动 MSE，仍应单独做固定 3s/5s Validation。",
+            "如将 continuous 换为 discrete，部署动力学也需要对应匹配。",
+        ],
+    }
+    (output_dir/"training_report.json").write_text(
+        json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8"
+    )
+    print("多步微调最佳 epoch:",best_epoch,
+          "| 最佳模型:",output_dir/"best.pt",flush=True)
+    return report
+
+
+def main(argv=None):
+    parser=argparse.ArgumentParser(description="可微 NMPC 多步自由滚动残差微调")
+    parser.add_argument("--dataset",type=Path,required=True)
+    parser.add_argument("--pretrained",type=Path,required=True)
+    parser.add_argument("--output",type=Path,required=True)
+    parser.add_argument("--horizon",type=int,default=50,
+                        help="连续训练区间数，50=0.5s")
+    parser.add_argument("--epochs",type=int,default=5)
+    parser.add_argument("--batch-size",type=int,default=8)
+    parser.add_argument("--steps-per-epoch",type=int,default=10)
+    parser.add_argument("--lr",type=float,default=1e-4)
+    parser.add_argument("--single-weight",type=float,default=0.25)
+    parser.add_argument("--rollout-weight",type=float,default=1.0)
+    parser.add_argument("--reg-weight",type=float,default=1e-4)
+    parser.add_argument("--patience",type=int,default=6)
+    parser.add_argument("--train-stride",type=int,default=10)
+    parser.add_argument("--validation-stride",type=int,default=50)
+    parser.add_argument("--integration",choices=("continuous","discrete"),
+                        default="continuous")
+    parser.add_argument("--rk4-substeps",type=int,default=1)
+    parser.add_argument("--device",default="cpu")
+    parser.add_argument("--seed",type=int,default=2026)
+    args=parser.parse_args(argv)
+    fine_tune_multistep(
+        args.dataset,args.pretrained,args.output,
+        horizon=args.horizon,epochs=args.epochs,
+        batch_size=args.batch_size,steps_per_epoch=args.steps_per_epoch,
+        validation_stride=args.validation_stride,train_stride=args.train_stride,
+        learning_rate=args.lr,single_weight=args.single_weight,
+        rollout_weight=args.rollout_weight,regularization_weight=args.reg_weight,
+        patience=args.patience,seed=args.seed,
+        device=args.device,integration=args.integration,
+        rk4_substeps=args.rk4_substeps,
+    )
+
+
+if __name__=="__main__":
+    main()

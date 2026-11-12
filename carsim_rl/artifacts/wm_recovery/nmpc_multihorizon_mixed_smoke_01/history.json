@@ -1,0 +1,308 @@
+[
+  {
+    "epoch": 1,
+    "train_rollout_loss": 0.0027167247997008973,
+    "train_terminal_loss": 0.004683121410612643,
+    "train_single_loss": 0.2270805652081354,
+    "train_regularization": 0.9030429565080045,
+    "train_total": 0.06098210682056935,
+    "validation_joint_normalized_mse": 0.11849705877184115,
+    "validation_single_normalized_mse": 0.31738023359326445,
+    "per_horizon": {
+      "50": {
+        "horizon_s": 0.5,
+        "windows": 66,
+        "scene_count": 6,
+        "path_mse": 0.017967715637994756,
+        "terminal_mse": 0.053679510364570415,
+        "scene_macro_path_mse": 0.02683538755214733,
+        "scene_macro_terminal_mse": 0.0888113242760913,
+        "selected_joint_mse": 0.043775176791170295,
+        "worst_scene": "v60_validation_brake_turn",
+        "per_scene": {
+          "v40_validation_brake_turn": {
+            "windows": 12,
+            "path_mse": 0.01290653940908131,
+            "terminal_mse": 0.021068362218363185
+          },
+          "v40_validation_circle_right": {
+            "windows": 12,
+            "path_mse": 0.0010957007868637218,
+            "terminal_mse": 0.0016016862818870991
+          },
+          "v40_validation_swd_left": {
+            "windows": 12,
+            "path_mse": 0.00650626759255522,
+            "terminal_mse": 0.008885648030728725
+          },
+          "v60_validation_brake_turn": {
+            "windows": 6,
+            "path_mse": 0.12437977860782563,
+            "terminal_mse": 0.4752612773028209
+          },
+          "v60_validation_circle_right": {
+            "windows": 12,
+            "path_mse": 0.0005456328110867337,
+            "terminal_mse": 0.0012109784593863063
+          },
+          "v60_validation_swd_left": {
+            "windows": 12,
+            "path_mse": 0.015578406105471355,
+            "terminal_mse": 0.024839993363361512
+          }
+        }
+      },
+      "100": {
+        "horizon_s": 1.0,
+        "windows": 60,
+        "scene_count": 6,
+        "path_mse": 0.049854356595997434,
+        "terminal_mse": 0.21143518509790507,
+        "scene_macro_path_mse": 0.08465101525846996,
+        "scene_macro_terminal_mse": 0.4048447558495946,
+        "selected_joint_mse": 0.15969467706935864,
+        "worst_scene": "v60_validation_brake_turn",
+        "per_scene": {
+          "v40_validation_brake_turn": {
+            "windows": 11,
+            "path_mse": 0.019901686179303543,
+            "terminal_mse": 0.024170454529696617
+          },
+          "v40_validation_circle_right": {
+            "windows": 11,
+            "path_mse": 0.0014408758824159317,
+            "terminal_mse": 0.0016859271746414372
+          },
+          "v40_validation_swd_left": {
+            "windows": 11,
+            "path_mse": 0.007807561629828768,
+            "terminal_mse": 0.009434631043342875
+          },
+          "v60_validation_brake_turn": {
+            "windows": 5,
+            "path_mse": 0.4326176018831953,
+            "terminal_mse": 2.3389404633664896
+          },
+          "v60_validation_circle_right": {
+            "windows": 11,
+            "path_mse": 0.0014740106426216488,
+            "terminal_mse": 0.003967311900138936
+          },
+          "v60_validation_swd_left": {
+            "windows": 11,
+            "path_mse": 0.0446643553334546,
+            "terminal_mse": 0.050869747083258
+          }
+        }
+      },
+      "200": {
+        "horizon_s": 2.0,
+        "windows": 48,
+        "scene_count": 6,
+        "path_mse": 0.0436238355118051,
+        "terminal_mse": 0.2348773184323952,
+        "scene_macro_path_mse": 0.07159743005847281,
+        "scene_macro_terminal_mse": 0.5835544918292787,
+        "selected_joint_mse": 0.18037540432439003,
+        "worst_scene": "v60_validation_brake_turn",
+        "per_scene": {
+          "v40_validation_brake_turn": {
+            "windows": 9,
+            "path_mse": 0.02808343298713115,
+            "terminal_mse": 0.030454046363797775
+          },
+          "v40_validation_circle_right": {
+            "windows": 9,
+            "path_mse": 0.0018204872546893143,
+            "terminal_mse": 0.0018359496661221415
+          },
+          "v40_validation_swd_left": {
+            "windows": 9,
+            "path_mse": 0.009512816947955475,
+            "terminal_mse": 0.008060416596069837
+          },
+          "v60_validation_brake_turn": {
+            "windows": 3,
+            "path_mse": 0.2953861864318144,
+            "terminal_mse": 3.372971879004347
+          },
+          "v60_validation_circle_right": {
+            "windows": 9,
+            "path_mse": 0.005306396017172466,
+            "terminal_mse": 0.01292723350956687
+          },
+          "v60_validation_swd_left": {
+            "windows": 9,
+            "path_mse": 0.089475260712074,
+            "terminal_mse": 0.07507742583576874
+          }
+        }
+      }
+    },
+    "horizon_weights": {
+      "50": 0.4,
+      "100": 0.35,
+      "200": 0.25
+    },
+    "terminal_weight": 0.3,
+    "validation_scene_weight": 0.5,
+    "sampled_horizon_updates": {
+      "50": 3,
+      "100": 2,
+      "200": 0
+    }
+  },
+  {
+    "epoch": 2,
+    "train_rollout_loss": 0.0037680510921235116,
+    "train_terminal_loss": 0.005284710235591389,
+    "train_single_loss": 0.15136786662065346,
+    "train_regularization": 0.9573136800538153,
+    "train_total": 0.04329116218596968,
+    "validation_joint_normalized_mse": 0.11964724940527727,
+    "validation_single_normalized_mse": 0.317771590381904,
+    "per_horizon": {
+      "50": {
+        "horizon_s": 0.5,
+        "windows": 66,
+        "scene_count": 6,
+        "path_mse": 0.018105795884044727,
+        "terminal_mse": 0.0541330134114612,
+        "scene_macro_path_mse": 0.027047032566629634,
+        "scene_macro_terminal_mse": 0.08956358163970206,
+        "selected_joint_mse": 0.04413090348301167,
+        "worst_scene": "v60_validation_brake_turn",
+        "per_scene": {
+          "v40_validation_brake_turn": {
+            "windows": 12,
+            "path_mse": 0.012960736746092766,
+            "terminal_mse": 0.02114305467795174
+          },
+          "v40_validation_circle_right": {
+            "windows": 12,
+            "path_mse": 0.0010629028682918903,
+            "terminal_mse": 0.0015519046444704733
+          },
+          "v40_validation_swd_left": {
+            "windows": 12,
+            "path_mse": 0.006560785158732625,
+            "terminal_mse": 0.008950832416349088
+          },
+          "v60_validation_brake_turn": {
+            "windows": 6,
+            "path_mse": 0.12540063607506363,
+            "terminal_mse": 0.4792998321503515
+          },
+          "v60_validation_circle_right": {
+            "windows": 12,
+            "path_mse": 0.0005014011749864504,
+            "terminal_mse": 0.0010839136365385328
+          },
+          "v60_validation_swd_left": {
+            "windows": 12,
+            "path_mse": 0.015795733376610433,
+            "terminal_mse": 0.025351952312551055
+          }
+        }
+      },
+      "100": {
+        "horizon_s": 1.0,
+        "windows": 60,
+        "scene_count": 6,
+        "path_mse": 0.050259653808468356,
+        "terminal_mse": 0.2128094876855297,
+        "scene_macro_path_mse": 0.08531337473215604,
+        "scene_macro_terminal_mse": 0.4074694474832124,
+        "selected_joint_mse": 0.1608283545456235,
+        "worst_scene": "v60_validation_brake_turn",
+        "per_scene": {
+          "v40_validation_brake_turn": {
+            "windows": 11,
+            "path_mse": 0.01997531277518615,
+            "terminal_mse": 0.024245850483518426
+          },
+          "v40_validation_circle_right": {
+            "windows": 11,
+            "path_mse": 0.0013969836881586545,
+            "terminal_mse": 0.001635529327262294
+          },
+          "v40_validation_swd_left": {
+            "windows": 11,
+            "path_mse": 0.007865333944326112,
+            "terminal_mse": 0.009501301712091908
+          },
+          "v60_validation_brake_turn": {
+            "windows": 5,
+            "path_mse": 0.4358505839690328,
+            "terminal_mse": 2.35406904546004
+          },
+          "v60_validation_circle_right": {
+            "windows": 11,
+            "path_mse": 0.0012816112594744807,
+            "terminal_mse": 0.0033848256749259413
+          },
+          "v60_validation_swd_left": {
+            "windows": 11,
+            "path_mse": 0.045510422756758026,
+            "terminal_mse": 0.05198013224143614
+          }
+        }
+      },
+      "200": {
+        "horizon_s": 2.0,
+        "windows": 48,
+        "scene_count": 6,
+        "path_mse": 0.04416967459254523,
+        "terminal_mse": 0.2378428722331278,
+        "scene_macro_path_mse": 0.072644873834959,
+        "scene_macro_terminal_mse": 0.5915743375713078,
+        "selected_joint_mse": 0.18281985568441747,
+        "worst_scene": "v60_validation_brake_turn",
+        "per_scene": {
+          "v40_validation_brake_turn": {
+            "windows": 9,
+            "path_mse": 0.02817602608242658,
+            "terminal_mse": 0.030546833998874017
+          },
+          "v40_validation_circle_right": {
+            "windows": 9,
+            "path_mse": 0.0017662810724807462,
+            "terminal_mse": 0.0017897918120294
+          },
+          "v40_validation_swd_left": {
+            "windows": 9,
+            "path_mse": 0.009575288230712641,
+            "terminal_mse": 0.008105881227124044
+          },
+          "v60_validation_brake_turn": {
+            "windows": 3,
+            "path_mse": 0.30044646777426914,
+            "terminal_mse": 3.4214260602767474
+          },
+          "v60_validation_circle_right": {
+            "windows": 9,
+            "path_mse": 0.004473453541565679,
+            "terminal_mse": 0.01085516557487267
+          },
+          "v60_validation_swd_left": {
+            "windows": 9,
+            "path_mse": 0.09143172630829915,
+            "terminal_mse": 0.07672229253819902
+          }
+        }
+      }
+    },
+    "horizon_weights": {
+      "50": 0.4,
+      "100": 0.35,
+      "200": 0.25
+    },
+    "terminal_weight": 0.3,
+    "validation_scene_weight": 0.5,
+    "sampled_horizon_updates": {
+      "50": 2,
+      "100": 1,
+      "200": 2
+    }
+  }
+]

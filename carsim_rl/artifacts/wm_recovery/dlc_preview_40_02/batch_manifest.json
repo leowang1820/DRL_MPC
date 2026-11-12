@@ -1,0 +1,9 @@
+[
+  {
+    "directory": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\wm_recovery\\dlc_preview_40_02\\run_001_CarSim2022_1_Data",
+    "sim_path": "E:\\modelcodeE\\carsim2022\\CarSim2022.1_Data\\simfile.sim",
+    "samples": 1001,
+    "exports": 61,
+    "duration_s": 9.999999999999897
+  }
+]

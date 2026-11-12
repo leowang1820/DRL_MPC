@@ -1,0 +1,1226 @@
+[
+  {
+    "epoch": 1,
+    "train_rollout_loss": 0.010950620468641406,
+    "train_terminal_loss": 0.04720761976397403,
+    "train_single_loss": 0.2136131195344531,
+    "train_regularization": 0.9686908320947528,
+    "train_total": 0.07861305536465636,
+    "validation_joint_normalized_mse": 0.11786594196410612,
+    "validation_single_normalized_mse": 0.3172755099967048,
+    "per_horizon": {
+      "50": {
+        "horizon_s": 0.5,
+        "windows": 66,
+        "scene_count": 6,
+        "path_mse": 0.017890085477149587,
+        "terminal_mse": 0.05343074336237404,
+        "scene_macro_path_mse": 0.026717844825703736,
+        "scene_macro_terminal_mse": 0.08840112572829584,
+        "selected_joint_mse": 0.04357874551502715,
+        "worst_scene": "v60_validation_brake_turn",
+        "per_scene": {
+          "v40_validation_brake_turn": {
+            "windows": 12,
+            "path_mse": 0.01287061687795063,
+            "terminal_mse": 0.02101893615790379
+          },
+          "v40_validation_circle_right": {
+            "windows": 12,
+            "path_mse": 0.0011245566700482806,
+            "terminal_mse": 0.001645310729859616
+          },
+          "v40_validation_swd_left": {
+            "windows": 12,
+            "path_mse": 0.006466353498069088,
+            "terminal_mse": 0.008829264378268363
+          },
+          "v60_validation_brake_turn": {
+            "windows": 6,
+            "path_mse": 0.12382319765979938,
+            "terminal_mse": 0.47307533175343575
+          },
+          "v60_validation_circle_right": {
+            "windows": 12,
+            "path_mse": 0.0005740638409057663,
+            "terminal_mse": 0.001291550166049922
+          },
+          "v60_validation_swd_left": {
+            "windows": 12,
+            "path_mse": 0.015448280407449272,
+            "terminal_mse": 0.024546361184257643
+          }
+        }
+      },
+      "100": {
+        "horizon_s": 1.0,
+        "windows": 60,
+        "scene_count": 6,
+        "path_mse": 0.04963347183122056,
+        "terminal_mse": 0.21069227013742983,
+        "scene_macro_path_mse": 0.08429220566579408,
+        "scene_macro_terminal_mse": 0.40342649464489194,
+        "selected_joint_mse": 0.1590806534658556,
+        "worst_scene": "v60_validation_brake_turn",
+        "per_scene": {
+          "v40_validation_brake_turn": {
+            "windows": 11,
+            "path_mse": 0.019849932503583304,
+            "terminal_mse": 0.024118185646174926
+          },
+          "v40_validation_circle_right": {
+            "windows": 11,
+            "path_mse": 0.0014797355118191695,
+            "terminal_mse": 0.0017307083809954612
+          },
+          "v40_validation_swd_left": {
+            "windows": 11,
+            "path_mse": 0.007762766865761334,
+            "terminal_mse": 0.009376411755327203
+          },
+          "v60_validation_brake_turn": {
+            "windows": 5,
+            "path_mse": 0.4308795440115293,
+            "terminal_mse": 2.3307687397195127
+          },
+          "v60_validation_circle_right": {
+            "windows": 11,
+            "path_mse": 0.0015925639804400425,
+            "terminal_mse": 0.0043191333023768
+          },
+          "v60_validation_swd_left": {
+            "windows": 11,
+            "path_mse": 0.04418869112163136,
+            "terminal_mse": 0.05024578906496438
+          }
+        }
+      },
+      "200": {
+        "horizon_s": 2.0,
+        "windows": 48,
+        "scene_count": 6,
+        "path_mse": 0.04332781622125461,
+        "terminal_mse": 0.23323546922444083,
+        "scene_macro_path_mse": 0.07102407099561202,
+        "scene_macro_terminal_mse": 0.5790906412538918,
+        "selected_joint_mse": 0.1790248601801832,
+        "worst_scene": "v60_validation_brake_turn",
+        "per_scene": {
+          "v40_validation_brake_turn": {
+            "windows": 9,
+            "path_mse": 0.028016878697652483,
+            "terminal_mse": 0.03038831352534971
+          },
+          "v40_validation_circle_right": {
+            "windows": 9,
+            "path_mse": 0.0018692510469405402,
+            "terminal_mse": 0.0018776628540784455
+          },
+          "v40_validation_swd_left": {
+            "windows": 9,
+            "path_mse": 0.00946129844126877,
+            "terminal_mse": 0.00800692813567237
+          },
+          "v60_validation_brake_turn": {
+            "windows": 3,
+            "path_mse": 0.2925941091904713,
+            "terminal_mse": 3.3459320174894995
+          },
+          "v60_validation_circle_right": {
+            "windows": 9,
+            "path_mse": 0.005808586134449033,
+            "terminal_mse": 0.014178078864947118
+          },
+          "v60_validation_swd_left": {
+            "windows": 9,
+            "path_mse": 0.08839430246288998,
+            "terminal_mse": 0.07416084665380368
+          }
+        }
+      }
+    },
+    "horizon_weights": {
+      "50": 0.4,
+      "100": 0.35,
+      "200": 0.25
+    },
+    "terminal_weight": 0.3,
+    "validation_scene_weight": 0.5,
+    "sampled_horizon_updates": {
+      "50": 8,
+      "100": 8,
+      "200": 8
+    }
+  },
+  {
+    "epoch": 2,
+    "train_rollout_loss": 0.025568711906353507,
+    "train_terminal_loss": 0.16288235066129877,
+    "train_single_loss": 0.1244321184828557,
+    "train_regularization": 0.8279413423960278,
+    "train_total": 0.10562424085969667,
+    "validation_joint_normalized_mse": 0.11732428418225513,
+    "validation_single_normalized_mse": 0.31721009029913894,
+    "per_horizon": {
+      "50": {
+        "horizon_s": 0.5,
+        "windows": 66,
+        "scene_count": 6,
+        "path_mse": 0.01782258206062238,
+        "terminal_mse": 0.05320712671089074,
+        "scene_macro_path_mse": 0.026611521083199197,
+        "scene_macro_terminal_mse": 0.08801675888732002,
+        "selected_joint_mse": 0.0434006344116424,
+        "worst_scene": "v60_validation_brake_turn",
+        "per_scene": {
+          "v40_validation_brake_turn": {
+            "windows": 12,
+            "path_mse": 0.012850514485294182,
+            "terminal_mse": 0.02099117682391945
+          },
+          "v40_validation_circle_right": {
+            "windows": 12,
+            "path_mse": 0.0011344967984900933,
+            "terminal_mse": 0.0016608255079487075
+          },
+          "v40_validation_swd_left": {
+            "windows": 12,
+            "path_mse": 0.006452012489428016,
+            "terminal_mse": 0.00881557451897924
+          },
+          "v60_validation_brake_turn": {
+            "windows": 6,
+            "path_mse": 0.12328985033154416,
+            "terminal_mse": 0.4709227128280424
+          },
+          "v60_validation_circle_right": {
+            "windows": 12,
+            "path_mse": 0.0005909232311007085,
+            "terminal_mse": 0.0013406038062596035
+          },
+          "v60_validation_swd_left": {
+            "windows": 12,
+            "path_mse": 0.015351329163338007,
+            "terminal_mse": 0.02436965983877086
+          }
+        }
+      },
+      "100": {
+        "horizon_s": 1.0,
+        "windows": 60,
+        "scene_count": 6,
+        "path_mse": 0.049446247854951025,
+        "terminal_mse": 0.21002045593394417,
+        "scene_macro_path_mse": 0.08397722061119141,
+        "scene_macro_terminal_mse": 0.40211466833197274,
+        "selected_joint_mse": 0.15853200287295877,
+        "worst_scene": "v60_validation_brake_turn",
+        "per_scene": {
+          "v40_validation_brake_turn": {
+            "windows": 11,
+            "path_mse": 0.019822570184163592,
+            "terminal_mse": 0.024088888808843138
+          },
+          "v40_validation_circle_right": {
+            "windows": 11,
+            "path_mse": 0.0014935030325789918,
+            "terminal_mse": 0.0017472267182239221
+          },
+          "v40_validation_swd_left": {
+            "windows": 11,
+            "path_mse": 0.0077491520555999,
+            "terminal_mse": 0.009363374318653238
+          },
+          "v60_validation_brake_turn": {
+            "windows": 5,
+            "path_mse": 0.4292869481735952,
+            "terminal_mse": 2.3230567923122574
+          },
+          "v60_validation_circle_right": {
+            "windows": 11,
+            "path_mse": 0.0016721236624134992,
+            "terminal_mse": 0.004567538397475964
+          },
+          "v60_validation_swd_left": {
+            "windows": 11,
+            "path_mse": 0.04383902655879727,
+            "terminal_mse": 0.04986418943638229
+          }
+        }
+      },
+      "200": {
+        "horizon_s": 2.0,
+        "windows": 48,
+        "scene_count": 6,
+        "path_mse": 0.04309728054109511,
+        "terminal_mse": 0.2318722390009393,
+        "scene_macro_path_mse": 0.07056340357965206,
+        "scene_macro_terminal_mse": 0.5753342649182397,
+        "selected_joint_mse": 0.17791131764825044,
+        "worst_scene": "v60_validation_brake_turn",
+        "per_scene": {
+          "v40_validation_brake_turn": {
+            "windows": 9,
+            "path_mse": 0.027980546241458862,
+            "terminal_mse": 0.0303503421633831
+          },
+          "v40_validation_circle_right": {
+            "windows": 9,
+            "path_mse": 0.0018867940980324895,
+            "terminal_mse": 0.001893915000408568
+          },
+          "v40_validation_swd_left": {
+            "windows": 9,
+            "path_mse": 0.009448775499077376,
+            "terminal_mse": 0.008002310779103898
+          },
+          "v60_validation_brake_turn": {
+            "windows": 3,
+            "path_mse": 0.2902923878881077,
+            "terminal_mse": 3.3230304722566424
+          },
+          "v60_validation_circle_right": {
+            "windows": 9,
+            "path_mse": 0.006183192004346628,
+            "terminal_mse": 0.015162252535287976
+          },
+          "v60_validation_swd_left": {
+            "windows": 9,
+            "path_mse": 0.08758872574688933,
+            "terminal_mse": 0.0735662967746119
+          }
+        }
+      }
+    },
+    "horizon_weights": {
+      "50": 0.4,
+      "100": 0.35,
+      "200": 0.25
+    },
+    "terminal_weight": 0.3,
+    "validation_scene_weight": 0.5,
+    "sampled_horizon_updates": {
+      "50": 8,
+      "100": 8,
+      "200": 8
+    }
+  },
+  {
+    "epoch": 3,
+    "train_rollout_loss": 0.029593944847509195,
+    "train_terminal_loss": 0.15620094600366796,
+    "train_single_loss": 0.14010606329544117,
+    "train_regularization": 0.8431472218461771,
+    "train_total": 0.11156505919465448,
+    "validation_joint_normalized_mse": 0.11676938797881176,
+    "validation_single_normalized_mse": 0.31704879188809953,
+    "per_horizon": {
+      "50": {
+        "horizon_s": 0.5,
+        "windows": 66,
+        "scene_count": 6,
+        "path_mse": 0.01775302130134014,
+        "terminal_mse": 0.05298521019843811,
+        "scene_macro_path_mse": 0.026503629265391595,
+        "scene_macro_terminal_mse": 0.08763702031889746,
+        "selected_joint_mse": 0.04322165986096621,
+        "worst_scene": "v60_validation_brake_turn",
+        "per_scene": {
+          "v40_validation_brake_turn": {
+            "windows": 12,
+            "path_mse": 0.012822032293669482,
+            "terminal_mse": 0.02095136903186451
+          },
+          "v40_validation_circle_right": {
+            "windows": 12,
+            "path_mse": 0.0011475006443573618,
+            "terminal_mse": 0.0016805875069737086
+          },
+          "v40_validation_swd_left": {
+            "windows": 12,
+            "path_mse": 0.0064317787904476535,
+            "terminal_mse": 0.008795119212157346
+          },
+          "v60_validation_brake_turn": {
+            "windows": 6,
+            "path_mse": 0.12276031686995753,
+            "terminal_mse": 0.46880693164395026
+          },
+          "v60_validation_circle_right": {
+            "windows": 12,
+            "path_mse": 0.0006112290988451627,
+            "terminal_mse": 0.0013966336236097493
+          },
+          "v60_validation_swd_left": {
+            "windows": 12,
+            "path_mse": 0.015248917895072345,
+            "terminal_mse": 0.024191480894829167
+          }
+        }
+      },
+      "100": {
+        "horizon_s": 1.0,
+        "windows": 60,
+        "scene_count": 6,
+        "path_mse": 0.04925089518749162,
+        "terminal_mse": 0.20929356374872515,
+        "scene_macro_path_mse": 0.08364225573856615,
+        "scene_macro_terminal_mse": 0.40069020880131045,
+        "selected_joint_mse": 0.15794414134553425,
+        "worst_scene": "v60_validation_brake_turn",
+        "per_scene": {
+          "v40_validation_brake_turn": {
+            "windows": 11,
+            "path_mse": 0.019784811620986362,
+            "terminal_mse": 0.02404854256896243
+          },
+          "v40_validation_circle_right": {
+            "windows": 11,
+            "path_mse": 0.00151101312908781,
+            "terminal_mse": 0.0017675689476762462
+          },
+          "v40_validation_swd_left": {
+            "windows": 11,
+            "path_mse": 0.007729571835546837,
+            "terminal_mse": 0.009343545910951113
+          },
+          "v60_validation_brake_turn": {
+            "windows": 5,
+            "path_mse": 0.42755586124931133,
+            "terminal_mse": 2.3146566593271642
+          },
+          "v60_validation_circle_right": {
+            "windows": 11,
+            "path_mse": 0.0017575257298724847,
+            "terminal_mse": 0.004821662736548241
+          },
+          "v60_validation_swd_left": {
+            "windows": 11,
+            "path_mse": 0.04351475086659202,
+            "terminal_mse": 0.04950327331656075
+          }
+        }
+      },
+      "200": {
+        "horizon_s": 2.0,
+        "windows": 48,
+        "scene_count": 6,
+        "path_mse": 0.04287123926710756,
+        "terminal_mse": 0.23049891173206125,
+        "scene_macro_path_mse": 0.07010981586231027,
+        "scene_macro_terminal_mse": 0.5715715595295668,
+        "selected_joint_mse": 0.17680109825395313,
+        "worst_scene": "v60_validation_brake_turn",
+        "per_scene": {
+          "v40_validation_brake_turn": {
+            "windows": 9,
+            "path_mse": 0.02793173011107228,
+            "terminal_mse": 0.0302988032272581
+          },
+          "v40_validation_circle_right": {
+            "windows": 9,
+            "path_mse": 0.0019085741212309928,
+            "terminal_mse": 0.0019135193783479168
+          },
+          "v40_validation_swd_left": {
+            "windows": 9,
+            "path_mse": 0.00942998988535414,
+            "terminal_mse": 0.00799498024131078
+          },
+          "v60_validation_brake_turn": {
+            "windows": 3,
+            "path_mse": 0.288018428623932,
+            "terminal_mse": 3.3001527419096113
+          },
+          "v60_validation_circle_right": {
+            "windows": 9,
+            "path_mse": 0.006552389537781982,
+            "terminal_mse": 0.016097718710115394
+          },
+          "v60_validation_swd_left": {
+            "windows": 9,
+            "path_mse": 0.08681778289449023,
+            "terminal_mse": 0.07297159371075727
+          }
+        }
+      }
+    },
+    "horizon_weights": {
+      "50": 0.4,
+      "100": 0.35,
+      "200": 0.25
+    },
+    "terminal_weight": 0.3,
+    "validation_scene_weight": 0.5,
+    "sampled_horizon_updates": {
+      "50": 8,
+      "100": 8,
+      "200": 8
+    }
+  },
+  {
+    "epoch": 4,
+    "train_rollout_loss": 0.04596116611245187,
+    "train_terminal_loss": 0.2036260841006002,
+    "train_single_loss": 0.15371065138131468,
+    "train_regularization": 0.848615802060586,
+    "train_total": 0.14556151576816662,
+    "validation_joint_normalized_mse": 0.11657643880462006,
+    "validation_single_normalized_mse": 0.31693549542947885,
+    "per_horizon": {
+      "50": {
+        "horizon_s": 0.5,
+        "windows": 66,
+        "scene_count": 6,
+        "path_mse": 0.017725537127038858,
+        "terminal_mse": 0.052907022996946745,
+        "scene_macro_path_mse": 0.02646243011604255,
+        "scene_macro_terminal_mse": 0.08750220281202963,
+        "selected_joint_mse": 0.04315536749288716,
+        "worst_scene": "v60_validation_brake_turn",
+        "per_scene": {
+          "v40_validation_brake_turn": {
+            "windows": 12,
+            "path_mse": 0.012805991509782405,
+            "terminal_mse": 0.020928664370228067
+          },
+          "v40_validation_circle_right": {
+            "windows": 12,
+            "path_mse": 0.0011541137817330455,
+            "terminal_mse": 0.0016907582819963983
+          },
+          "v40_validation_swd_left": {
+            "windows": 12,
+            "path_mse": 0.006419875732843532,
+            "terminal_mse": 0.008785108963757638
+          },
+          "v60_validation_brake_turn": {
+            "windows": 6,
+            "path_mse": 0.12256825299508317,
+            "terminal_mse": 0.4680491807779412
+          },
+          "v60_validation_circle_right": {
+            "windows": 12,
+            "path_mse": 0.0006172617189235074,
+            "terminal_mse": 0.0014110145710247478
+          },
+          "v60_validation_swd_left": {
+            "windows": 12,
+            "path_mse": 0.015209084957889646,
+            "terminal_mse": 0.024148489907229648
+          }
+        }
+      },
+      "100": {
+        "horizon_s": 1.0,
+        "windows": 60,
+        "scene_count": 6,
+        "path_mse": 0.04917990973009405,
+        "terminal_mse": 0.20900143175697075,
+        "scene_macro_path_mse": 0.08351474200974575,
+        "scene_macro_terminal_mse": 0.4001124419363955,
+        "selected_joint_mse": 0.15771440692392483,
+        "worst_scene": "v60_validation_brake_turn",
+        "per_scene": {
+          "v40_validation_brake_turn": {
+            "windows": 11,
+            "path_mse": 0.019763520256729648,
+            "terminal_mse": 0.024025611572902065
+          },
+          "v40_validation_circle_right": {
+            "windows": 11,
+            "path_mse": 0.0015199277917365465,
+            "terminal_mse": 0.001777961367797303
+          },
+          "v40_validation_swd_left": {
+            "windows": 11,
+            "path_mse": 0.007718557877176103,
+            "terminal_mse": 0.009334193391460415
+          },
+          "v60_validation_brake_turn": {
+            "windows": 5,
+            "path_mse": 0.4268630648062627,
+            "terminal_mse": 2.3112225437306435
+          },
+          "v60_validation_circle_right": {
+            "windows": 11,
+            "path_mse": 0.0017775326922840223,
+            "terminal_mse": 0.004874010703361689
+          },
+          "v60_validation_swd_left": {
+            "windows": 11,
+            "path_mse": 0.043445848634285494,
+            "terminal_mse": 0.04944033085220816
+          }
+        }
+      },
+      "200": {
+        "horizon_s": 2.0,
+        "windows": 48,
+        "scene_count": 6,
+        "path_mse": 0.04280010426648028,
+        "terminal_mse": 0.23005832048736044,
+        "scene_macro_path_mse": 0.06997398497547873,
+        "scene_macro_terminal_mse": 0.570408032281883,
+        "selected_joint_mse": 0.176456997536366,
+        "worst_scene": "v60_validation_brake_turn",
+        "per_scene": {
+          "v40_validation_brake_turn": {
+            "windows": 9,
+            "path_mse": 0.02790424269314964,
+            "terminal_mse": 0.030269529946013285
+          },
+          "v40_validation_circle_right": {
+            "windows": 9,
+            "path_mse": 0.0019195622187886956,
+            "terminal_mse": 0.0019233323115416456
+          },
+          "v40_validation_swd_left": {
+            "windows": 9,
+            "path_mse": 0.009420061001535869,
+            "terminal_mse": 0.007994573832573645
+          },
+          "v60_validation_brake_turn": {
+            "windows": 3,
+            "path_mse": 0.28736503064746627,
+            "terminal_mse": 3.2932057266380634
+          },
+          "v60_validation_circle_right": {
+            "windows": 9,
+            "path_mse": 0.006620274066357768,
+            "terminal_mse": 0.01624823621553066
+          },
+          "v60_validation_swd_left": {
+            "windows": 9,
+            "path_mse": 0.08661473922557408,
+            "terminal_mse": 0.07280679474757537
+          }
+        }
+      }
+    },
+    "horizon_weights": {
+      "50": 0.4,
+      "100": 0.35,
+      "200": 0.25
+    },
+    "terminal_weight": 0.3,
+    "validation_scene_weight": 0.5,
+    "sampled_horizon_updates": {
+      "50": 8,
+      "100": 8,
+      "200": 8
+    }
+  },
+  {
+    "epoch": 5,
+    "train_rollout_loss": 0.02314424254419314,
+    "train_terminal_loss": 0.16875417368930787,
+    "train_single_loss": 0.37939650513076684,
+    "train_regularization": 0.8100156635462055,
+    "train_total": 0.16870062250003184,
+    "validation_joint_normalized_mse": 0.11623386921691416,
+    "validation_single_normalized_mse": 0.31677852835583314,
+    "per_horizon": {
+      "50": {
+        "horizon_s": 0.5,
+        "windows": 66,
+        "scene_count": 6,
+        "path_mse": 0.017687255068742514,
+        "terminal_mse": 0.05278274386831885,
+        "scene_macro_path_mse": 0.02640306411388366,
+        "scene_macro_terminal_mse": 0.08728918286045861,
+        "selected_joint_mse": 0.04305594860062971,
+        "worst_scene": "v60_validation_brake_turn",
+        "per_scene": {
+          "v40_validation_brake_turn": {
+            "windows": 12,
+            "path_mse": 0.012790312302142637,
+            "terminal_mse": 0.020906633236466993
+          },
+          "v40_validation_circle_right": {
+            "windows": 12,
+            "path_mse": 0.0011602123655318991,
+            "terminal_mse": 0.001700564685059089
+          },
+          "v40_validation_swd_left": {
+            "windows": 12,
+            "path_mse": 0.006410821567918844,
+            "terminal_mse": 0.00877834458706108
+          },
+          "v60_validation_brake_turn": {
+            "windows": 6,
+            "path_mse": 0.12227696361043634,
+            "terminal_mse": 0.4668600117739961
+          },
+          "v60_validation_circle_right": {
+            "windows": 12,
+            "path_mse": 0.0006284115035538648,
+            "terminal_mse": 0.0014431615469646922
+          },
+          "v60_validation_swd_left": {
+            "windows": 12,
+            "path_mse": 0.015151663333718403,
+            "terminal_mse": 0.02404638133320373
+          }
+        }
+      },
+      "100": {
+        "horizon_s": 1.0,
+        "windows": 60,
+        "scene_count": 6,
+        "path_mse": 0.04906258902492945,
+        "terminal_mse": 0.20855545293404573,
+        "scene_macro_path_mse": 0.08331271224108398,
+        "scene_macro_terminal_mse": 0.39923838142070983,
+        "selected_joint_mse": 0.15735672578622006,
+        "worst_scene": "v60_validation_brake_turn",
+        "per_scene": {
+          "v40_validation_brake_turn": {
+            "windows": 11,
+            "path_mse": 0.019742392220257584,
+            "terminal_mse": 0.0240030270756636
+          },
+          "v40_validation_circle_right": {
+            "windows": 11,
+            "path_mse": 0.001528409029433118,
+            "terminal_mse": 0.0017880336922157466
+          },
+          "v40_validation_swd_left": {
+            "windows": 11,
+            "path_mse": 0.0077109525205484915,
+            "terminal_mse": 0.009328386789357115
+          },
+          "v60_validation_brake_turn": {
+            "windows": 5,
+            "path_mse": 0.4258139444026292,
+            "terminal_mse": 2.3060676662873503
+          },
+          "v60_validation_circle_right": {
+            "windows": 11,
+            "path_mse": 0.001828193373213647,
+            "terminal_mse": 0.0050292454373654615
+          },
+          "v60_validation_swd_left": {
+            "windows": 11,
+            "path_mse": 0.04325238190042179,
+            "terminal_mse": 0.049213929242306546
+          }
+        }
+      },
+      "200": {
+        "horizon_s": 2.0,
+        "windows": 48,
+        "scene_count": 6,
+        "path_mse": 0.04265563525071985,
+        "terminal_mse": 0.22917634751939994,
+        "scene_macro_path_mse": 0.06968483057877979,
+        "scene_macro_terminal_mse": 0.5679990530885414,
+        "selected_joint_mse": 0.175746543005941,
+        "worst_scene": "v60_validation_brake_turn",
+        "per_scene": {
+          "v40_validation_brake_turn": {
+            "windows": 9,
+            "path_mse": 0.027877028826629784,
+            "terminal_mse": 0.030241468829137926
+          },
+          "v40_validation_circle_right": {
+            "windows": 9,
+            "path_mse": 0.0019300366426585494,
+            "terminal_mse": 0.001932489553797885
+          },
+          "v40_validation_swd_left": {
+            "windows": 9,
+            "path_mse": 0.009414133474264955,
+            "terminal_mse": 0.0079955701494967
+          },
+          "v60_validation_brake_turn": {
+            "windows": 3,
+            "path_mse": 0.28591839320325935,
+            "terminal_mse": 3.2785806976416727
+          },
+          "v60_validation_circle_right": {
+            "windows": 9,
+            "path_mse": 0.006850563331230869,
+            "terminal_mse": 0.016844527807317686
+          },
+          "v60_validation_swd_left": {
+            "windows": 9,
+            "path_mse": 0.08611882799463527,
+            "terminal_mse": 0.07239956454982514
+          }
+        }
+      }
+    },
+    "horizon_weights": {
+      "50": 0.4,
+      "100": 0.35,
+      "200": 0.25
+    },
+    "terminal_weight": 0.3,
+    "validation_scene_weight": 0.5,
+    "sampled_horizon_updates": {
+      "50": 8,
+      "100": 8,
+      "200": 8
+    }
+  },
+  {
+    "epoch": 6,
+    "train_rollout_loss": 0.007543716375133036,
+    "train_terminal_loss": 0.03831105338627419,
+    "train_single_loss": 0.12443493126845939,
+    "train_regularization": 0.9645218928646061,
+    "train_total": 0.0502422173974166,
+    "validation_joint_normalized_mse": 0.11617938340776668,
+    "validation_single_normalized_mse": 0.31673036170727065,
+    "per_horizon": {
+      "50": {
+        "horizon_s": 0.5,
+        "windows": 66,
+        "scene_count": 6,
+        "path_mse": 0.017681533250603124,
+        "terminal_mse": 0.05276600036104779,
+        "scene_macro_path_mse": 0.026394103312568473,
+        "scene_macro_terminal_mse": 0.08725744755546126,
+        "selected_joint_mse": 0.04304133546906215,
+        "worst_scene": "v60_validation_brake_turn",
+        "per_scene": {
+          "v40_validation_brake_turn": {
+            "windows": 12,
+            "path_mse": 0.012787155064026444,
+            "terminal_mse": 0.02090226084067373
+          },
+          "v40_validation_circle_right": {
+            "windows": 12,
+            "path_mse": 0.0011586196242333706,
+            "terminal_mse": 0.0016985693182311
+          },
+          "v40_validation_swd_left": {
+            "windows": 12,
+            "path_mse": 0.006414033965427717,
+            "terminal_mse": 0.008784768588950909
+          },
+          "v60_validation_brake_turn": {
+            "windows": 6,
+            "path_mse": 0.12223237399418728,
+            "terminal_mse": 0.4666633666940094
+          },
+          "v60_validation_circle_right": {
+            "windows": 12,
+            "path_mse": 0.0006266084301793459,
+            "terminal_mse": 0.0014380750014773673
+          },
+          "v60_validation_swd_left": {
+            "windows": 12,
+            "path_mse": 0.015145828797356686,
+            "terminal_mse": 0.02405764488942505
+          }
+        }
+      },
+      "100": {
+        "horizon_s": 1.0,
+        "windows": 60,
+        "scene_count": 6,
+        "path_mse": 0.049044338218400235,
+        "terminal_mse": 0.2084631241945287,
+        "scene_macro_path_mse": 0.0832767061408498,
+        "scene_macro_terminal_mse": 0.3990515154574903,
+        "selected_joint_mse": 0.15728771812742787,
+        "worst_scene": "v60_validation_brake_turn",
+        "per_scene": {
+          "v40_validation_brake_turn": {
+            "windows": 11,
+            "path_mse": 0.019738535284198964,
+            "terminal_mse": 0.02399866347467903
+          },
+          "v40_validation_circle_right": {
+            "windows": 11,
+            "path_mse": 0.001526473417835375,
+            "terminal_mse": 0.0017859956585097084
+          },
+          "v40_validation_swd_left": {
+            "windows": 11,
+            "path_mse": 0.007715997730099808,
+            "terminal_mse": 0.009335993590889794
+          },
+          "v60_validation_brake_turn": {
+            "windows": 5,
+            "path_mse": 0.4256003853653455,
+            "terminal_mse": 2.3049354280871057
+          },
+          "v60_validation_circle_right": {
+            "windows": 11,
+            "path_mse": 0.001822965991671979,
+            "terminal_mse": 0.005016977292069792
+          },
+          "v60_validation_swd_left": {
+            "windows": 11,
+            "path_mse": 0.04325587905594721,
+            "terminal_mse": 0.0492360346416876
+          }
+        }
+      },
+      "200": {
+        "horizon_s": 2.0,
+        "windows": 48,
+        "scene_count": 6,
+        "path_mse": 0.04263648113196821,
+        "terminal_mse": 0.2290453884179765,
+        "scene_macro_path_mse": 0.06964854314277805,
+        "scene_macro_terminal_mse": 0.5676618073473244,
+        "selected_joint_mse": 0.17564859150216827,
+        "worst_scene": "v60_validation_brake_turn",
+        "per_scene": {
+          "v40_validation_brake_turn": {
+            "windows": 9,
+            "path_mse": 0.02787211491219334,
+            "terminal_mse": 0.030236620364112874
+          },
+          "v40_validation_circle_right": {
+            "windows": 9,
+            "path_mse": 0.001927582257122842,
+            "terminal_mse": 0.0019304083367917375
+          },
+          "v40_validation_swd_left": {
+            "windows": 9,
+            "path_mse": 0.009421455349429515,
+            "terminal_mse": 0.008004276965019015
+          },
+          "v60_validation_brake_turn": {
+            "windows": 3,
+            "path_mse": 0.2857450392292567,
+            "terminal_mse": 3.276593158782108
+          },
+          "v60_validation_circle_right": {
+            "windows": 9,
+            "path_mse": 0.006837387015393583,
+            "terminal_mse": 0.01682251181104353
+          },
+          "v60_validation_swd_left": {
+            "windows": 9,
+            "path_mse": 0.08608768009327228,
+            "terminal_mse": 0.07238386782487143
+          }
+        }
+      }
+    },
+    "horizon_weights": {
+      "50": 0.4,
+      "100": 0.35,
+      "200": 0.25
+    },
+    "terminal_weight": 0.3,
+    "validation_scene_weight": 0.5,
+    "sampled_horizon_updates": {
+      "50": 8,
+      "100": 8,
+      "200": 8
+    }
+  },
+  {
+    "epoch": 7,
+    "train_rollout_loss": 0.020476366799578517,
+    "train_terminal_loss": 0.1349152981275078,
+    "train_single_loss": 0.1296182916082129,
+    "train_regularization": 0.9734652085655541,
+    "train_total": 0.09345287566074062,
+    "validation_joint_normalized_mse": 0.11590436058260813,
+    "validation_single_normalized_mse": 0.31661312747189535,
+    "per_horizon": {
+      "50": {
+        "horizon_s": 0.5,
+        "windows": 66,
+        "scene_count": 6,
+        "path_mse": 0.01764824729639446,
+        "terminal_mse": 0.05266074821288133,
+        "scene_macro_path_mse": 0.02634263787368045,
+        "scene_macro_terminal_mse": 0.08707634395304543,
+        "selected_joint_mse": 0.04295600640992647,
+        "worst_scene": "v60_validation_brake_turn",
+        "per_scene": {
+          "v40_validation_brake_turn": {
+            "windows": 12,
+            "path_mse": 0.012773858374041097,
+            "terminal_mse": 0.02088397397536194
+          },
+          "v40_validation_circle_right": {
+            "windows": 12,
+            "path_mse": 0.0011638386066941456,
+            "terminal_mse": 0.0017068202608530308
+          },
+          "v40_validation_swd_left": {
+            "windows": 12,
+            "path_mse": 0.006404120189527348,
+            "terminal_mse": 0.008776964910076053
+          },
+          "v60_validation_brake_turn": {
+            "windows": 6,
+            "path_mse": 0.12198093422382637,
+            "terminal_mse": 0.4656478970948506
+          },
+          "v60_validation_circle_right": {
+            "windows": 12,
+            "path_mse": 0.0006353589852410778,
+            "terminal_mse": 0.0014627335803858443
+          },
+          "v60_validation_swd_left": {
+            "windows": 12,
+            "path_mse": 0.01509771686275266,
+            "terminal_mse": 0.023979673896745154
+          }
+        }
+      },
+      "100": {
+        "horizon_s": 1.0,
+        "windows": 60,
+        "scene_count": 6,
+        "path_mse": 0.04894806754516967,
+        "terminal_mse": 0.20809726270632153,
+        "scene_macro_path_mse": 0.08310983541887847,
+        "scene_macro_terminal_mse": 0.3983313252921461,
+        "selected_joint_mse": 0.1569932396817942,
+        "worst_scene": "v60_validation_brake_turn",
+        "per_scene": {
+          "v40_validation_brake_turn": {
+            "windows": 11,
+            "path_mse": 0.019721207894953487,
+            "terminal_mse": 0.023980413289804315
+          },
+          "v40_validation_circle_right": {
+            "windows": 11,
+            "path_mse": 0.001533598182142472,
+            "terminal_mse": 0.0017944198057731563
+          },
+          "v40_validation_swd_left": {
+            "windows": 11,
+            "path_mse": 0.007707013585057976,
+            "terminal_mse": 0.009328787618547425
+          },
+          "v60_validation_brake_turn": {
+            "windows": 5,
+            "path_mse": 0.4247275141559664,
+            "terminal_mse": 2.300671951150392
+          },
+          "v60_validation_circle_right": {
+            "windows": 11,
+            "path_mse": 0.00186192573514946,
+            "terminal_mse": 0.005135207420099976
+          },
+          "v60_validation_swd_left": {
+            "windows": 11,
+            "path_mse": 0.043107752960001015,
+            "terminal_mse": 0.049077172468259864
+          }
+        }
+      },
+      "200": {
+        "horizon_s": 2.0,
+        "windows": 48,
+        "scene_count": 6,
+        "path_mse": 0.042525287431417064,
+        "terminal_mse": 0.2283615912093633,
+        "scene_macro_path_mse": 0.06942456873672785,
+        "scene_macro_terminal_mse": 0.5657875316970754,
+        "selected_joint_mse": 0.17509729652003825,
+        "worst_scene": "v60_validation_brake_turn",
+        "per_scene": {
+          "v40_validation_brake_turn": {
+            "windows": 9,
+            "path_mse": 0.027850070102689917,
+            "terminal_mse": 0.030213475452520084
+          },
+          "v40_validation_circle_right": {
+            "windows": 9,
+            "path_mse": 0.0019364136175791411,
+            "terminal_mse": 0.0019382877203605274
+          },
+          "v40_validation_swd_left": {
+            "windows": 9,
+            "path_mse": 0.00941360723018879,
+            "terminal_mse": 0.008004482589895119
+          },
+          "v60_validation_brake_turn": {
+            "windows": 3,
+            "path_mse": 0.28461881917921417,
+            "terminal_mse": 3.265195055598772
+          },
+          "v60_validation_circle_right": {
+            "windows": 9,
+            "path_mse": 0.007011727705001517,
+            "terminal_mse": 0.017269816693045767
+          },
+          "v60_validation_swd_left": {
+            "windows": 9,
+            "path_mse": 0.08571677458569359,
+            "terminal_mse": 0.07210407212785877
+          }
+        }
+      }
+    },
+    "horizon_weights": {
+      "50": 0.4,
+      "100": 0.35,
+      "200": 0.25
+    },
+    "terminal_weight": 0.3,
+    "validation_scene_weight": 0.5,
+    "sampled_horizon_updates": {
+      "50": 8,
+      "100": 8,
+      "200": 8
+    }
+  },
+  {
+    "epoch": 8,
+    "train_rollout_loss": 0.030743626047206138,
+    "train_terminal_loss": 0.17275654790834036,
+    "train_single_loss": 0.12502723996235965,
+    "train_regularization": 0.879463111437643,
+    "train_total": 0.11391534672144193,
+    "validation_joint_normalized_mse": 0.11563535672377152,
+    "validation_single_normalized_mse": 0.3165009263030597,
+    "per_horizon": {
+      "50": {
+        "horizon_s": 0.5,
+        "windows": 66,
+        "scene_count": 6,
+        "path_mse": 0.017615916856928288,
+        "terminal_mse": 0.052558420837235144,
+        "scene_macro_path_mse": 0.02629241437330335,
+        "scene_macro_terminal_mse": 0.08689925831108414,
+        "selected_joint_mse": 0.04287281748736371,
+        "worst_scene": "v60_validation_brake_turn",
+        "per_scene": {
+          "v40_validation_brake_turn": {
+            "windows": 12,
+            "path_mse": 0.012760058506686609,
+            "terminal_mse": 0.020864637844833375
+          },
+          "v40_validation_circle_right": {
+            "windows": 12,
+            "path_mse": 0.0011688807380077053,
+            "terminal_mse": 0.0017148500433977268
+          },
+          "v40_validation_swd_left": {
+            "windows": 12,
+            "path_mse": 0.006395540299892282,
+            "terminal_mse": 0.008771272582496391
+          },
+          "v60_validation_brake_turn": {
+            "windows": 6,
+            "path_mse": 0.12173388705342902,
+            "terminal_mse": 0.4646484705234231
+          },
+          "v60_validation_circle_right": {
+            "windows": 12,
+            "path_mse": 0.0006436449485903939,
+            "terminal_mse": 0.0014855691334416702
+          },
+          "v60_validation_swd_left": {
+            "windows": 12,
+            "path_mse": 0.015052474693214085,
+            "terminal_mse": 0.023910749738912548
+          }
+        }
+      },
+      "100": {
+        "horizon_s": 1.0,
+        "windows": 60,
+        "scene_count": 6,
+        "path_mse": 0.048854662508066186,
+        "terminal_mse": 0.20772905187936352,
+        "scene_macro_path_mse": 0.08294527218026514,
+        "scene_macro_terminal_mse": 0.3976042938367454,
+        "selected_joint_mse": 0.156699969201582,
+        "worst_scene": "v60_validation_brake_turn",
+        "per_scene": {
+          "v40_validation_brake_turn": {
+            "windows": 11,
+            "path_mse": 0.01970294332122617,
+            "terminal_mse": 0.023960641184476016
+          },
+          "v40_validation_circle_right": {
+            "windows": 11,
+            "path_mse": 0.0015405789176153482,
+            "terminal_mse": 0.001802771959337577
+          },
+          "v40_validation_swd_left": {
+            "windows": 11,
+            "path_mse": 0.00769986277970337,
+            "terminal_mse": 0.009324008600606828
+          },
+          "v60_validation_brake_turn": {
+            "windows": 5,
+            "path_mse": 0.4238513689022546,
+            "terminal_mse": 2.296356713410563
+          },
+          "v60_validation_circle_right": {
+            "windows": 11,
+            "path_mse": 0.001897620648058241,
+            "terminal_mse": 0.005242413080141436
+          },
+          "v60_validation_swd_left": {
+            "windows": 11,
+            "path_mse": 0.04297925851273309,
+            "terminal_mse": 0.04893921478534693
+          }
+        }
+      },
+      "200": {
+        "horizon_s": 2.0,
+        "windows": 48,
+        "scene_count": 6,
+        "path_mse": 0.04242078547348105,
+        "terminal_mse": 0.22769516673938073,
+        "scene_macro_path_mse": 0.0692112977305868,
+        "scene_macro_terminal_mse": 0.5639643028009887,
+        "selected_joint_mse": 0.17456496203308935,
+        "worst_scene": "v60_validation_brake_turn",
+        "per_scene": {
+          "v40_validation_brake_turn": {
+            "windows": 9,
+            "path_mse": 0.02782622257616997,
+            "terminal_mse": 0.030187949300843255
+          },
+          "v40_validation_circle_right": {
+            "windows": 9,
+            "path_mse": 0.001945114455055094,
+            "terminal_mse": 0.0019462871797587761
+          },
+          "v40_validation_swd_left": {
+            "windows": 9,
+            "path_mse": 0.009408234778442165,
+            "terminal_mse": 0.008007471200588607
+          },
+          "v60_validation_brake_turn": {
+            "windows": 3,
+            "path_mse": 0.28353539578743286,
+            "terminal_mse": 3.254117391293853
+          },
+          "v60_validation_circle_right": {
+            "windows": 9,
+            "path_mse": 0.007169482197038079,
+            "terminal_mse": 0.017673557922355577
+          },
+          "v60_validation_swd_left": {
+            "windows": 9,
+            "path_mse": 0.08538333658938269,
+            "terminal_mse": 0.07185315990853355
+          }
+        }
+      }
+    },
+    "horizon_weights": {
+      "50": 0.4,
+      "100": 0.35,
+      "200": 0.25
+    },
+    "terminal_weight": 0.3,
+    "validation_scene_weight": 0.5,
+    "sampled_horizon_updates": {
+      "50": 8,
+      "100": 8,
+      "200": 8
+    }
+  }
+]

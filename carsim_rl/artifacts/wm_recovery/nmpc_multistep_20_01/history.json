@@ -1,0 +1,57 @@
+[
+  {
+    "epoch": 1,
+    "train_rollout_loss": 0.002236977035560369,
+    "train_single_loss": 0.12147513452775596,
+    "train_regularization": 1.031146952433227,
+    "train_total": 0.03270887536274268,
+    "validation_rollout_normalized_mse": 0.00284618260860475,
+    "validation_endpoint_normalized_mse": 0.007539296362884043,
+    "validation_single_normalized_mse": 0.3178417129628338,
+    "window_count": 66
+  },
+  {
+    "epoch": 2,
+    "train_rollout_loss": 0.0018886872959192186,
+    "train_single_loss": 0.11568263674561138,
+    "train_regularization": 1.0528126651963274,
+    "train_total": 0.0309146277488417,
+    "validation_rollout_normalized_mse": 0.00286364972778844,
+    "validation_endpoint_normalized_mse": 0.007595319392837877,
+    "validation_single_normalized_mse": 0.31831724403096273,
+    "window_count": 66
+  },
+  {
+    "epoch": 3,
+    "train_rollout_loss": 0.0008700670841312837,
+    "train_single_loss": 0.3944092581140376,
+    "train_regularization": 0.9841023424748527,
+    "train_total": 0.09957079184688819,
+    "validation_rollout_normalized_mse": 0.0028806324086582194,
+    "validation_endpoint_normalized_mse": 0.007653838597300817,
+    "validation_single_normalized_mse": 0.31896612580549866,
+    "window_count": 66
+  },
+  {
+    "epoch": 4,
+    "train_rollout_loss": 0.0019637486743875115,
+    "train_single_loss": 0.1469439792197947,
+    "train_regularization": 0.9953858124519062,
+    "train_total": 0.038799282060581385,
+    "validation_rollout_normalized_mse": 0.0028983778459777186,
+    "validation_endpoint_normalized_mse": 0.007709914999577151,
+    "validation_single_normalized_mse": 0.31952186153546286,
+    "window_count": 66
+  },
+  {
+    "epoch": 5,
+    "train_rollout_loss": 0.00110367661625525,
+    "train_single_loss": 0.13979321153652496,
+    "train_regularization": 1.0261609074410796,
+    "train_total": 0.0361545955911306,
+    "validation_rollout_normalized_mse": 0.002895259105718677,
+    "validation_endpoint_normalized_mse": 0.007701488312244816,
+    "validation_single_normalized_mse": 0.3197287296487489,
+    "window_count": 66
+  }
+]

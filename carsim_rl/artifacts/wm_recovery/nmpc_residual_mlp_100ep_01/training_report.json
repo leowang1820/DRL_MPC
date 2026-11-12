@@ -1,0 +1,36 @@
+{
+  "format": "wm_recovery_nmpc_residual_training_report_v1",
+  "created_utc": "2026-11-11T03:10:57.202888+00:00",
+  "dataset": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\wm_recovery\\nmpc_residual_dataset_40_60_01",
+  "output": "E:\\modelcodeE\\DRL_MPC\\DRL_MPC\\carsim_rl\\artifacts\\wm_recovery\\nmpc_residual_mlp_100ep_01",
+  "train_samples": 14140,
+  "validation_samples": 3314,
+  "best_epoch": 27,
+  "trained_epochs": 42,
+  "best_validation_normalized_mse": 0.31707608699798584,
+  "hyperparameters": {
+    "max_epochs": 100,
+    "batch_size": 256,
+    "learning_rate": 0.001,
+    "weight_decay": 1e-06,
+    "patience": 15,
+    "min_delta": 1e-06,
+    "seed": 2026,
+    "device": "cpu"
+  },
+  "checkpoint_sha256": "f7a2c42942c83887aff8072d2b1d9e1e364318a621a1f9fe9f62ee7a85c3c8d6",
+  "dataset_manifest_sha256": "5599e8961c3ca0753886b06c4e9a2c1cf2b78fda3a8be2f5e5924a64e0ae64df",
+  "train_npz_sha256": "c028caa5f53be51154245eee9a808a308334249b47afce63ead572ee7befe3cc",
+  "validation_npz_sha256": "74128a7bd0517d13021b9a8bfe8304774be5d1ed41f66bd91cb5900b322acbf5",
+  "input_constant_channels": [
+    "mu_hat"
+  ],
+  "physics_verified": false,
+  "evaluation_ready": true,
+  "closed_loop_nmpc_validated": false,
+  "notes": [
+    "只使用 Train 数据拟合归一化，Validation 用于早停；不读取 Test。",
+    "单步残差监督不保证 5 秒滚动预测改善，需要独立滚动评价。",
+    "已知未来执行器响应是离线条件预测，不声称在线未知执行器的预测。"
+  ]
+}

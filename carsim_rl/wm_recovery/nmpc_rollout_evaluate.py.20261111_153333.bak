@@ -1,0 +1,395 @@
+# -*- coding: utf-8 -*-
+"""NMPC 纯物理模型 vs 三通道残差模型：最多 5 秒自由滚动评价。
+
+核心约束（与你确认的离线 NMPC 条件预测一致）：
+  1. 两模型同起点 q0，同一批已知未来等效执行器序列。
+  2. 将 CarSim 61 通道换算出的 delta_f/Mz_tv/Fx_all/lamda/mu 视为
+     每个 10ms 时刻已知的条件输入，段内 ZOH；不模拟轮端转矩执行器。
+  3. 每个滚动步完全使用自己的 vy/r/vx，绝不回灌未来 CarSim 速度。
+  4. CarSim 未来状态只用来计算误差，不能输入动力学函数。
+  5. 窗口绝不跨 episode 或 cancellation 造成的 segment_id 断点。
+  6. 对同样的起点分别报告名义/补偿的终点误差以及区间内全程误差。
+  7. 窗口可以按固定时间间隔重叠，因此指标不是统计独立样本的置信区间。
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import math
+from pathlib import Path
+
+import numpy as np
+import torch
+
+from .nmpc_reference import NMPCReferenceParams
+from .nmpc_residual_model import load_model_checkpoint
+from .nmpc_residual_train import (
+    _check_manifest, load_split_npz, sha256,
+)
+from .nmpc_rollout import rk4_free_step
+
+
+REPORT_FORMAT = "wm_recovery_nmpc_conditional_rollout_v1"
+HORIZONS = (10, 50, 100, 200, 300, 400, 500)
+STATE_NAMES = ("vy_mps", "yaw_rate_radps", "vx_mps")
+
+
+def _segment_slices(data):
+    """严格检查分段连续性，禁止跨轨迹、跨丢弃点拼接已知未来控制。"""
+    segments = np.asarray(data["segment_id"], dtype=np.int64)
+    episode = np.asarray(data["episode_index"], dtype=np.int64)
+    steps = np.asarray(data["segment_step"], dtype=np.int64)
+    interval_id = np.asarray(data["interval_index"], dtype=np.int64)
+    timestamps = data["time_k_s"]
+    dt = data["dt_s"]
+    if len(segments) == 0:
+        raise ValueError("滚动评价数据为空")
+    boundaries = np.r_[0, np.flatnonzero(segments[1:] != segments[:-1])+1, len(segments)]
+    ids = [int(segments[start]) for start in boundaries[:-1]]
+    if len(set(ids)) != len(ids):
+        raise ValueError("同一个 segment_id 出现在两个不相邻的数据块")
+    result = []
+    for start, end in zip(boundaries[:-1], boundaries[1:]):
+        start, end = int(start), int(end)
+        sl = slice(start, end)
+        if not np.all(episode[sl] == episode[start]):
+            raise ValueError("segment_id 跨越了不同 Episode")
+        if not np.array_equal(steps[sl], np.arange(end-start)):
+            raise ValueError("segment_step 不是从 0 开始的连续区间")
+        if not np.array_equal(interval_id[sl], interval_id[start]+np.arange(end-start)):
+            raise ValueError("原始区间索引被错误拼接")
+        if end-start > 1:
+            if not np.allclose(
+                timestamps[start+1:end],
+                timestamps[start:end-1] + dt[start:end-1],
+                rtol=0, atol=1e-8,
+            ):
+                raise ValueError("区间时间戳存在跳变")
+            if not np.allclose(
+                data["q_true_next_si"][start:end-1],
+                data["q_k_si"][start+1:end], rtol=0, atol=1e-7,
+            ):
+                raise ValueError("CarSim 下一状态与下一行状态不连续")
+        result.append((start, end))
+    return result
+
+
+def _make_anchors(data, stride_intervals):
+    """每段每隔 stride 个实际区间选起点；即使末端只够短时域也保留。"""
+    if isinstance(stride_intervals, bool) or not isinstance(stride_intervals, int):
+        raise ValueError("stride_intervals 必须为正整数")
+    if stride_intervals < 1:
+        raise ValueError("stride_intervals 必须大于 0")
+    starts, avail, ep, seg, regime = [], [], [], [], []
+    for start, end in _segment_slices(data):
+        for loc in range(start, end, stride_intervals):
+            starts.append(loc)
+            avail.append(end-loc)
+            ep.append(int(data["episode_index"][loc]))
+            seg.append(int(data["segment_id"][loc]))
+            regime.append(int(data["lamda_regime_code"][loc]))
+    return {
+        "start": np.asarray(starts, dtype=np.int64),
+        "available": np.asarray(avail, dtype=np.int64),
+        "episode": np.asarray(ep, dtype=np.int64),
+        "segment": np.asarray(seg, dtype=np.int64),
+        "start_regime": np.asarray(regime, dtype=np.int64),
+    }
+
+
+def _model_metrics(errors, path_squares, horizon):
+    """针对一组相同窗口，给出逐分量终点误差与全路径 RMSE。"""
+    if errors.shape[0] == 0:
+        return None
+    return {
+        "endpoint_rmse_q_si": np.sqrt(np.mean(errors**2, axis=0)).tolist(),
+        "endpoint_mae_q_si": np.mean(np.abs(errors), axis=0).tolist(),
+        # 对每个窗口先求 horizon 步时间平均，再在窗口之间等权平均。
+        "path_rmse_q_si": np.sqrt(
+            np.mean(path_squares / horizon, axis=0)
+        ).tolist(),
+    }
+
+
+def _paired_metrics(err_nom, err_res, sq_nom, sq_res, horizon):
+    if not len(err_nom):
+        return None
+    baseline = _model_metrics(err_nom, sq_nom, horizon)
+    residual = _model_metrics(err_res, sq_res, horizon)
+    pct = []
+    for b, r in zip(
+        baseline["endpoint_rmse_q_si"],
+        residual["endpoint_rmse_q_si"],
+    ):
+        pct.append(None if b <= 1e-12 else float(100.0 * (b-r)/b))
+    pct_path = []
+    for b, r in zip(
+        baseline["path_rmse_q_si"], residual["path_rmse_q_si"]
+    ):
+        pct_path.append(None if b <= 1e-12 else float(100.0 * (b-r)/b))
+    return {
+        "windows": int(len(err_nom)),
+        "nominal": baseline,
+        "residual": residual,
+        "endpoint_rmse_improvement_pct": pct,
+        "path_rmse_improvement_pct": pct_path,
+        "residual_better_endpoint_windows_by_channel": np.mean(
+            np.abs(err_res) < np.abs(err_nom), axis=0
+        ).tolist(),
+    }
+
+
+def evaluate_split(dataset_dir, checkpoint, *, split="validation",
+                   anchor_stride=50, max_horizon=500, rk4_substeps=1,
+                   output_dir=None):
+    """按已知未来等效外部量，批量滚动评估 0.1s 至最多 5s 的精度。
+
+    返回报告及最多一个 5s 代表窗口的数据，实际窗口数以报告为准。
+    """
+    if split not in ("train", "validation", "test"):
+        raise ValueError("不支持的 split")
+    if isinstance(max_horizon, bool) or not isinstance(max_horizon, int):
+        raise ValueError("max_horizon 必须是正整数")
+    if max_horizon < 1 or max_horizon > 500:
+        raise ValueError("max_horizon 必须在 1~500，最长支持 5 秒")
+    if isinstance(rk4_substeps, bool) or not isinstance(rk4_substeps, int):
+        raise ValueError("rk4_substeps 必须是正整数")
+    if rk4_substeps < 1:
+        raise ValueError("rk4_substeps 必须为正整数")
+
+    # 在开始昂贵的 5 秒批量 RK4 之前，先禁止覆盖已有报告目录。
+    if output_dir is not None:
+        proposed_output = Path(output_dir).expanduser().resolve()
+        if proposed_output.exists():
+            raise FileExistsError(f"评价目录已存在，不允许覆盖：{proposed_output}")
+
+    dataset_dir = Path(dataset_dir).expanduser().resolve(strict=True)
+    checkpoint = Path(checkpoint).expanduser().resolve(strict=True)
+    manifest = _check_manifest(dataset_dir)
+    model, payload = load_model_checkpoint(checkpoint, device="cpu")
+    # 小型 MLP 在 RK4 的每个阶段频繁前向，单线程避免额外线程调度开销。
+    torch.set_num_threads(1)
+    actual_hash = sha256(dataset_dir / "dataset_manifest.json")
+    if payload.get("dataset_manifest_sha256") != actual_hash:
+        raise ValueError("模型与当前 dataset_manifest.json SHA256 不一致")
+
+    data = load_split_npz(dataset_dir, split)
+    if len(data["z_si"]) != manifest["split_counts"][split]["intervals"]:
+        raise ValueError("评价数据样本数量与 manifest 不一致")
+    reference = NMPCReferenceParams(**manifest["reference_parameters"])
+    reference.validate()
+
+    anchors = _make_anchors(data, anchor_stride)
+    start = anchors["start"]
+    available = anchors["available"]
+    b = len(start)
+    # 每个起点的当前真实状态只在 t0 读一次，以后只使用自身积分结果。
+    q_nominal = data["q_k_si"][start].copy()
+    q_residual = q_nominal.copy()
+    accum_sq_nominal = np.zeros((b, 3), dtype=np.float64)
+    accum_sq_residual = np.zeros((b, 3), dtype=np.float64)
+    maximum = min(max_horizon, int(np.max(available)))
+    chosen_horizons = [h for h in HORIZONS if h <= max_horizon]
+
+    # 每一预测时域的误差快照，供逐速度和逐场景汇总。
+    snapshots = {}
+    example = None
+    example_anchor = (int(np.flatnonzero(available >= 500)[0])
+                      if max_horizon >= 500 and np.any(available >= 500)
+                      else None)
+    if example_anchor is not None:
+        example = {
+            "scene": manifest["episodes"][int(anchors["episode"][example_anchor])]["name"],
+            "t_from_start_s": [0.0],
+            "q_true_si": [data["q_k_si"][start[example_anchor]].copy()],
+            "q_nominal_si": [q_nominal[example_anchor].copy()],
+            "q_residual_si": [q_residual[example_anchor].copy()],
+            "known_external_si": [],
+        }
+
+    for k in range(maximum):
+        active = np.flatnonzero(available > k)
+        loc = start[active] + k
+        external = data["z_si"][loc, 3:]  # 注意：完全没有读后续 CarSim q。
+        dt = data["dt_s"][loc]
+        q_nominal[active] = rk4_free_step(
+            q_nominal[active], external, dt, residual_model=None,
+            reference=reference, substeps=rk4_substeps,
+        )
+        q_residual[active] = rk4_free_step(
+            q_residual[active], external, dt, residual_model=model,
+            reference=reference, substeps=rk4_substeps,
+        )
+        truth = data["q_true_next_si"][loc]  # 真值仅在积分后参与误差计算
+        error_nominal = q_nominal[active] - truth
+        error_residual = q_residual[active] - truth
+        accum_sq_nominal[active] += error_nominal**2
+        accum_sq_residual[active] += error_residual**2
+        if not np.isfinite(q_nominal[active]).all() or not np.isfinite(
+            q_residual[active]
+        ).all():
+            raise FloatingPointError(f"长时滚动在第 {k+1} 个 10ms 区间出现数值发散")
+
+        if example is not None and k < 500:
+            i = example_anchor
+            if available[i] > k:
+                pos = start[i] + k
+                example["t_from_start_s"].append(float(
+                    example["t_from_start_s"][-1] + data["dt_s"][pos]
+                ))
+                example["q_true_si"].append(data["q_true_next_si"][pos].copy())
+                example["q_nominal_si"].append(q_nominal[i].copy())
+                example["q_residual_si"].append(q_residual[i].copy())
+                example["known_external_si"].append(data["z_si"][pos, 3:].copy())
+
+        h = k + 1
+        if h not in chosen_horizons:
+            continue
+        selected = np.flatnonzero(available >= h)
+        last = start[selected] + h - 1
+        target = data["q_true_next_si"][last]
+        snapshots[h] = {
+            "selected": selected,
+            "error_nominal": q_nominal[selected] - target,
+            "error_residual": q_residual[selected] - target,
+            "sq_nominal": accum_sq_nominal[selected].copy(),
+            "sq_residual": accum_sq_residual[selected].copy(),
+        }
+        print(f"  已完成 {h*0.01:g}s：{len(selected)} 个同起点对照窗口", flush=True)
+
+    def group_metrics(snap, group_mask, h):
+        selected = np.flatnonzero(group_mask)
+        return _paired_metrics(
+            snap["error_nominal"][selected],
+            snap["error_residual"][selected],
+            snap["sq_nominal"][selected],
+            snap["sq_residual"][selected], h,
+        )
+
+    by_horizon = {}
+    by_speed = {}
+    by_scene = {}
+    for h in chosen_horizons:
+        if h not in snapshots:
+            continue
+        snap = snapshots[h]
+        eligible = snap["selected"]
+        label = f"{h * 0.01:.2f}s"
+        by_horizon[label] = _paired_metrics(
+            snap["error_nominal"], snap["error_residual"],
+            snap["sq_nominal"], snap["sq_residual"], h,
+        )
+        ep_ids = anchors["episode"][eligible]
+        for name in sorted({manifest["episodes"][int(idx)]["name"] for idx in ep_ids}):
+            mask = np.array([
+                manifest["episodes"][int(idx)]["name"] == name
+                for idx in ep_ids
+            ], dtype=bool)
+            by_scene.setdefault(name, {})[label] = group_metrics(snap, mask, h)
+
+        speeds = np.array([
+            manifest["episodes"][int(idx)]["name"].split("_", 1)[0]
+            for idx in ep_ids
+        ])
+        for speed in sorted(set(speeds)):
+            by_speed.setdefault(speed, {})[label] = group_metrics(
+                snap, speeds == speed, h
+            )
+
+    report = {
+        "format": REPORT_FORMAT,
+        "split": split,
+        "dataset": str(dataset_dir),
+        "checkpoint": str(checkpoint),
+        "dataset_manifest_sha256": actual_hash,
+        "checkpoint_sha256": sha256(checkpoint),
+        "num_anchors": int(b),
+        "anchor_stride_intervals": anchor_stride,
+        "carSim_sample_dt_s": 0.01,
+        "nmpc_prediction_horizon_s": 5.0,
+        "max_evaluated_horizon_s": float(max(snapshots) * 0.01) if snapshots else 0.0,
+        "rk4_substeps_per_10ms": rk4_substeps,
+        "vehicle_state_names": list(STATE_NAMES),
+        "known_future_external_names": [
+            "delta_front_rad", "mz_tv_estimated_nm",
+            "fx_all_n", "lamda", "mu_hat"
+        ],
+        "mode": "known_future_CarSim_equivalent_actuation_free_state_rollout",
+        "horizons": by_horizon,
+        "by_speed": by_speed,
+        "by_scene": by_scene,
+        "physics_validated": False,
+        "closed_loop_nmpc_validated": False,
+        "notes": [
+            "CarSim 未来外部执行器等效量视为已知，但预测状态自由演化。",
+            "没有用未来 CarSim vy/r/vx 回灌名义模型或残差模型。",
+            "窗口固定步长抽样，可能重叠，不能当作统计独立轨迹。",
+            "5 秒完整窗口数量取决于已清洗连续段；不足 5 秒的段仅参加更短时域。",
+            "三个状态单位不同，误差分量单独报告，不直接计算混合欧氏范数。",
+            "此条件预测不等于完整执行器与闭环 NMPC 的独立验证。",
+        ],
+    }
+    if output_dir is not None:
+        dest = Path(output_dir).expanduser().resolve()
+        if dest.exists():
+            raise FileExistsError(f"评价目录已存在，不允许覆盖：{dest}")
+        dest.mkdir(parents=True, exist_ok=False)
+        (dest/"rollout_report.json").write_text(
+            json.dumps(report, ensure_ascii=False, indent=2, allow_nan=False),
+            encoding="utf-8",
+        )
+        if example is not None:
+            np.savez_compressed(
+                dest/"example_5s.npz",
+                scene=np.asarray(example["scene"]),
+                t_from_start_s=np.asarray(example["t_from_start_s"]),
+                q_true_si=np.stack(example["q_true_si"]),
+                q_nominal_si=np.stack(example["q_nominal_si"]),
+                q_residual_si=np.stack(example["q_residual_si"]),
+                known_external_si=np.stack(example["known_external_si"]),
+            )
+        print("评价报告：", dest/"rollout_report.json")
+        if example is not None:
+            print("代表性 5s 状态轨迹：", dest/"example_5s.npz")
+    return report
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description="NMPC 长时域已知未来执行器条件滚动评价")
+    parser.add_argument("--dataset", type=Path, required=True)
+    parser.add_argument("--checkpoint", type=Path, required=True)
+    parser.add_argument("--split", choices=("train","validation","test"),
+                        default="validation")
+    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--anchor-stride", type=int, default=50,
+                        help="每个连续段每隔多少个 10ms 区间取起点，默认 0.5s")
+    parser.add_argument("--max-horizon", type=int, default=500,
+                        help="最长滚动步数，500*10ms=5s")
+    parser.add_argument("--rk4-substeps", type=int, default=1)
+    args = parser.parse_args(argv)
+    report = evaluate_split(
+        args.dataset, args.checkpoint, split=args.split,
+        anchor_stride=args.anchor_stride,
+        max_horizon=args.max_horizon,
+        rk4_substeps=args.rk4_substeps,
+        output_dir=args.output,
+    )
+    print("\n逐时域终点 RMSE：")
+    for h, row in report["horizons"].items():
+        print(
+            f"  {h} | 窗口 {row['windows']:4} | "
+            f"名义 {np.array(row['nominal']['endpoint_rmse_q_si']).round(5)} | "
+            f"残差 {np.array(row['residual']['endpoint_rmse_q_si']).round(5)} | "
+            f"改善(%) {row['endpoint_rmse_improvement_pct']}",
+        )
+    if "5.00s" in report["horizons"]:
+        final = report["horizons"]["5.00s"]
+        print("\\n5 秒整段路径 RMSE（vy[m/s], r[rad/s], vx[m/s]）：")
+        print("  名义模型：", final["nominal"]["path_rmse_q_si"])
+        print("  残差模型：", final["residual"]["path_rmse_q_si"])
+        print("  改善比例：", final["path_rmse_improvement_pct"])
+
+
+if __name__ == "__main__":
+    main()
