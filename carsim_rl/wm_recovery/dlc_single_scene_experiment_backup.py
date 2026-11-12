@@ -1,19 +1,13 @@
 # -*- coding: utf-8 -*-
 """CarSim DLC 单轨迹 NMPC 残差实验：训练 + 3/5 秒自由滚动对照。
 
-运行：
-python -m wm_recovery.dlc_single_scene_experiment ^
-  --data ".../dlc_exports.npz" --output ".../dlc_single_scene_01" ^
-  --mu-hat 0.8 --train-end 5.0 --epochs 250
+新增 --full-data:
+  0~10 秒所有 1000 个区间参与训练，所有区间也参与预测评价；
+  不做时间段拆分。报告标记为 in-sample reconstruction，不能宣称泛化。
 
-本实验用同一条 DLC 轨迹的前 5s 训练、后 5s 验证：
-- 验证区间的真实 q 不参与拟合归一化、梯度和选模型；
-- 模型 checkpoint 固定使用最后一个 epoch；
-- 3s/5s 的 RK4 不回灌未来车辆真实状态；
-- 但使用 **CarSim 未来实测转角与轮胎 Fx** 作为已知外生序列；
-  因此是 offline known-response replay (oracle-actuation diagnostic)，
-  不是仅凭将来实际可知驾驶员指令的闭环 NMPC 预测。
-- 单场景验证不代表跨场景泛化，5s 验证通常只有 1 个起点。
+默认模式保持旧行为：前 5 秒训练、后 5 秒验证，以免影响既有实验。
+两个模式均在自由滚动时使用 CarSim 未来实测前轮角、轮胎纵向力，
+所以只是 oracle-actuation 离线重放诊断，不是可部署的闭环 NMPC。
 """
 
 from __future__ import annotations
@@ -40,7 +34,7 @@ from .nmpc_residual_model import (
 from .nmpc_rollout import rollout_pair_known_future
 
 
-FORMAT = "wm_recovery_dlc_single_scene_residual_experiment_v1"
+FORMAT = "wm_recovery_dlc_single_scene_residual_experiment_v2"
 
 
 def _json_dump(path, payload):
@@ -245,12 +239,15 @@ def evaluate_windows(
     return result, examples[0]
 
 
-def _save_example(output, example, label):
-    """保存可审计的完整滚动数据和独立的3张物理量对照图。"""
+def _save_example(output, example, label, *, make_plots=True,
+                  in_sample=False):
+    """总是保存原始滚动 NPZ；可选生成预测对比图。"""
     np.savez_compressed(
         output/f"{label}_rollout.npz",
         **example,
     )
+    if not make_plots:
+        return
     try:
         import matplotlib
         matplotlib.use("Agg")
@@ -275,7 +272,10 @@ def _save_example(output, example, label):
                 label="NMPC + residual MLP", linestyle=":", linewidth=1.8)
         ax.set_xlabel("Prediction horizon (s)")
         ax.set_ylabel(ylabel)
-        ax.set_title(f"{label}: {ylabel}")
+        ax.set_title(
+            f"{label}: {ylabel}"
+            + (" (same-data reconstruction)" if in_sample else "")
+        )
         ax.grid(True, alpha=0.25)
         ax.legend()
         fig.tight_layout()
@@ -289,9 +289,16 @@ def run_experiment(
     lr=1e-3, weight_decay=1e-5, seed=42,
     horizons=(300, 500), anchor_stride=50,
     mz_mode="zero", lambda_mode="fixed-half",
-    make_plots=True, verbose=True,
+    make_plots=True, verbose=True, full_data=False,
 ):
-    """单入口：载入、转换、训练、滚动比较、保存报告。"""
+    """同一实验程序支持分段验证和整条轨迹自拟合。
+
+    full_data=True:
+      train 和 validation 均包含全部 [0,T) 的真实区间；
+      归一化/训练都使用这批数据；验证是同数据回放，非独立测试；
+      单个预测窗口内部不能回灌真实未来状态。
+    """
+    full_data = bool(full_data)
     horizons = tuple(sorted(set(int(x) for x in horizons)))
     if not horizons or any(h <= 0 for h in horizons):
         raise ValueError("horizons 必须为正采样步数")
@@ -300,58 +307,90 @@ def run_experiment(
         raise FileExistsError(f"输出目录已存在，不允许覆盖：{output}")
 
     dlc = load_dlc_si(data_path)
-    config_path = dlc.path.parent/"metadata.json"
+    config_path = dlc.path.parent / "metadata.json"
     if config_path.is_file():
         capture_metadata = json.loads(config_path.read_text(encoding="utf-8"))
         if capture_metadata.get("n_import") != 0:
             raise ValueError("不是零外部 Import 的 DLC 采集记录")
         if capture_metadata.get("n_export") != len(dlc.names):
             raise ValueError("元数据与实际 Export 通道数不匹配")
-        if (tuple(capture_metadata.get("export_names", ()))
-            != dlc.names):
+        if tuple(capture_metadata.get("export_names", ())) != dlc.names:
             raise ValueError("元数据的 Export 顺序与 NPZ 不一致")
 
     actuation = build_dlc_inputs(
-        dlc, mu_hat=mu_hat,
-        mz_mode=mz_mode, lambda_mode=lambda_mode,
+        dlc, mu_hat=mu_hat, mz_mode=mz_mode, lambda_mode=lambda_mode
     )
     z = actuation.z_si
     q = dlc.q_si
-    split = _split_index(dlc.time_s, train_end_s, horizons)
+    n_intervals = len(dlc.time_s) - 1
+
+    if full_data:
+        # 所有区间既是训练集也是本次自拟合评估集，完全重叠。
+        # 保证每个要求的滚动预测时域都有完整窗口。
+        if n_intervals < max(horizons):
+            raise ValueError(
+                f"完整轨迹只有 {n_intervals} 个区间，"
+                f"不足最大 {max(horizons)} 步预测窗口"
+            )
+        train_start, train_stop = 0, n_intervals
+        eval_start, eval_stop = 0, n_intervals
+    else:
+        split = _split_index(dlc.time_s, train_end_s, horizons)
+        train_start, train_stop = 0, split
+        eval_start, eval_stop = split, n_intervals
+
     ref = NMPCReferenceParams()
-    nominal_next, labels = make_interval_targets(
-        dlc, z, reference=ref,
-    )
-    train_z, valid_z = z[:split], z[split:-1]
-    train_y, valid_y = labels[:split], labels[split:]
-    if len(train_z) != split or len(valid_z) != len(z)-1-split:
-        raise AssertionError("训练/验证时间索引不连续")
+    nominal_next, labels = make_interval_targets(dlc, z, reference=ref)
+
+    # n_intervals = 1000 时，z 有 1001 行，标签只有 1000 行；
+    # 第 1001 行仅作最后一个真实状态，不能作为训练监督输入。
+    train_z = z[train_start:train_stop]
+    train_y = labels[train_start:train_stop]
+    valid_z = z[eval_start:eval_stop]
+    valid_y = labels[eval_start:eval_stop]
+
+    if (len(train_z) != len(train_y)
+        or len(valid_z) != len(valid_y)
+        or not len(train_z) or not len(valid_z)):
+        raise AssertionError("训练和评价的控制/状态区间长度不匹配")
 
     if verbose:
         print(
             f"数据：{len(dlc.time_s)} 帧、{len(dlc.names)} 个 Export，"
-            f"Train {len(train_z)} 个区间 "
-            f"[{dlc.time_s[0]:.2f},{dlc.time_s[split]:.2f})s，"
-            f"Validation {len(valid_z)} 个区间 "
-            f"[{dlc.time_s[split]:.2f},{dlc.time_s[-1]:.2f}]s",
+            f"模式={'同数据全量训练与回放' if full_data else '时间分段验证'}",
+            flush=True
+        )
+        print(
+            f"训练：{len(train_z)} 区间 "
+            f"[{dlc.time_s[train_start]:.2f},"
+            f"{dlc.time_s[train_stop]:.2f})s；"
+            f"评价：{len(valid_z)} 区间 "
+            f"[{dlc.time_s[eval_start]:.2f},"
+            f"{dlc.time_s[eval_stop]:.2f}]s",
+            flush=True
+        )
+        if full_data:
+            print(
+                "注意：本次 Train = Evaluation，为完整 DLC 自拟合；"
+                "此评价不具备独立泛化意义。",
+                flush=True,
+            )
+        print(
+            f"物理输入假设：Mz={mz_mode}, "
+            f"lamda={lambda_mode}, mu_hat={mu_hat}",
             flush=True,
         )
         print(
-            "物理输入假设：Mz=" + mz_mode
-            + ", lamda=" + lambda_mode
-            + f", mu_hat={mu_hat}",
-            flush=True,
-        )
-        print(
-            "注意：未来实测 CarSim 轮胎 Fx/转角是离线重放的已知外生序列；"
-            "这不是闭环 NMPC 的独立预测。",
+            "注意：未来实测 CarSim 轮胎 Fx/转角是离线重放的"
+            "已知外生序列，不是可提前获得的独立控制指令。",
             flush=True,
         )
 
     model, stats, history = train_single_scene(
-        train_z, train_y, epochs=epochs, batch_size=batch_size,
-        lr=lr, weight_decay=weight_decay, seed=seed,
-        verbose=verbose,
+        train_z, train_y,
+        epochs=epochs, batch_size=batch_size,
+        lr=lr, weight_decay=weight_decay,
+        seed=seed, verbose=verbose,
     )
     q_scale = np.asarray(stats["x_scale"][:3], dtype=np.float64)
     output.mkdir(parents=True, exist_ok=False)
@@ -365,40 +404,56 @@ def run_experiment(
             k: v.detach().cpu().clone()
             for k, v in model.state_dict().items()
         },
-        "training_mode": "one_step_fixed_epochs_train_time_segment_only",
-        "evaluation_mode": "oracle_future_carsim_tire_force_replay",
+        "training_mode": (
+            "one_step_fixed_epochs_all_data_in_sample"
+            if full_data else
+            "one_step_fixed_epochs_train_time_segment_only"
+        ),
+        "evaluation_mode": (
+            "same_data_oracle_actuation_reconstruction"
+            if full_data else
+            "heldout_time_oracle_actuation_replay"
+        ),
+        "train_and_evaluation_same_data": bool(full_data),
         "dataset_sha256": dlc.file_sha256,
-        "train_end_s": float(dlc.time_s[split]),
+        "train_end_s": float(dlc.time_s[train_stop]),
         "epochs": int(epochs),
         "seed": int(seed),
         "actuation_assumptions": actuation.assumptions,
     }
-    torch.save(checkpoint, output/"final.pt")
+    torch.save(checkpoint, output / "final.pt")
 
-    # 完整保存监督标签，后续可用同一数据重复核对。split 是 interval 索引。
     np.savez_compressed(
-        output/"dlc_residual_dataset.npz",
-        time_s=dlc.time_s,
-        q_si=q,
-        z_si=z,
+        output / "dlc_residual_dataset.npz",
+        time_s=dlc.time_s, q_si=q, z_si=z,
         nominal_next_si=nominal_next,
         residual_target_si=labels,
-        train_end_interval=np.asarray(split, dtype=np.int64),
+        train_end_interval=np.asarray(train_stop, dtype=np.int64),
+        validation_start_interval=np.asarray(eval_start, dtype=np.int64),
         dt_s=np.diff(dlc.time_s),
+        train_and_evaluation_same_data=np.asarray(full_data, dtype=np.bool_),
     )
-    single_step = {
-        "train": _one_step_assessment(
-            model, train_z, train_y, stats["y_scale"]
-        ),
-        "validation": _one_step_assessment(
-            model, valid_z, valid_y, stats["y_scale"]
-        ),
-    }
+    single_train = _one_step_assessment(
+        model, train_z, train_y, stats["y_scale"]
+    )
+    single_valid = (
+        dict(single_train) if full_data
+        else _one_step_assessment(model, valid_z, valid_y, stats["y_scale"])
+    )
+    single_step = {"train": single_train, "validation": single_valid}
+
+    # 全量模式只计算一次滚动预测；报告里 train 和 validation
+    # 指向同一批区间指标，以兼容已有的报告查看命令。
     rollouts = {"train": {}, "validation": {}}
-    for split_name, begin, end in (
-        ("train", 0, split),
-        ("validation", split, len(dlc.time_s)-1),
-    ):
+    if full_data:
+        eval_plan = (("all_data", 0, n_intervals),)
+    else:
+        eval_plan = (
+            ("train", 0, train_stop),
+            ("validation", eval_start, eval_stop),
+        )
+
+    for split_name, begin, end in eval_plan:
         for h in horizons:
             scores, example = evaluate_windows(
                 dlc, z, model,
@@ -406,7 +461,12 @@ def run_experiment(
                 horizon=h, stride=anchor_stride,
                 q_scale=q_scale, reference=ref,
             )
-            rollouts[split_name][f"{h}_steps"] = scores
+            key = f"{h}_steps"
+            if full_data:
+                rollouts["train"][key] = scores
+                rollouts["validation"][key] = dict(scores)
+            else:
+                rollouts[split_name][key] = scores
             if verbose:
                 print(
                     f"[{split_name:10s} H={h:3d} ({h/100:.1f}s)] "
@@ -417,36 +477,42 @@ def run_experiment(
                     f"{scores['normalized_path_improvement_pct']:+.2f}%",
                     flush=True,
                 )
-            if split_name == "validation" and make_plots:
-                _save_example(output, example,
-                              f"validation_{h/100:g}s")
-            elif split_name == "validation":
-                # 即使未装 matplotlib，仍保留最长时域的数值轨迹。
-                if h == max(horizons):
-                    np.savez_compressed(
-                        output/f"validation_{h/100:g}s_rollout.npz",
-                        **example,
-                    )
 
+            if full_data or split_name == "validation":
+                _save_example(
+                    output, example, f"validation_{h/100:g}s",
+                    make_plots=make_plots, in_sample=full_data,
+                )
+
+    train_range = [
+        float(dlc.time_s[train_start]), float(dlc.time_s[train_stop])
+    ]
+    valid_range = [
+        float(dlc.time_s[eval_start]), float(dlc.time_s[eval_stop])
+    ]
     report = {
         "format": FORMAT,
+        "experiment_type": (
+            "in_sample_full_data_reconstruction"
+            if full_data else "time_block_holdout_diagnostic"
+        ),
+        "full_data": bool(full_data),
+        "train_and_validation_same_intervals": bool(full_data),
+        "independent_validation": not full_data,
         "original_npz": str(dlc.path),
         "original_npz_sha256": dlc.file_sha256,
         "n_samples": len(dlc.time_s),
         "n_exports": len(dlc.names),
         "train_intervals": len(train_z),
         "validation_intervals": len(valid_z),
-        "train_interval_time_range_s": [
-            float(dlc.time_s[0]), float(dlc.time_s[split])
-        ],
-        "validation_interval_time_range_s": [
-            float(dlc.time_s[split]), float(dlc.time_s[-1])
-        ],
-        "train_validation_no_interval_overlap": True,
+        "train_interval_time_range_s": train_range,
+        "validation_interval_time_range_s": valid_range,
+        "train_validation_no_interval_overlap": not full_data,
         "model_hidden_sizes": [16, 16],
         "input_names": list(INPUT_NAMES),
         "target_names": list(TARGET_NAMES),
         "normalization_train_only": model.normalization_json(),
+        "normalization_includes_evaluation_data": bool(full_data),
         "nmpc_reference_params": asdict(ref),
         "nmpc_reference_is_existing_project_matlab_aligned_model": True,
         "dataset_assumptions": actuation.assumptions,
@@ -460,31 +526,41 @@ def run_experiment(
             "learning_rate": float(lr),
             "weight_decay": float(weight_decay),
             "seed": int(seed),
-            "used_validation_labels_for_training_or_checkpoint_selection": False,
+            "used_validation_labels_for_training_or_checkpoint_selection":
+                bool(full_data),
+            "selected_checkpoint_by": "final_epoch_not_validation_loss",
             "history": history,
         },
         "one_step_assessment": single_step,
         "rollouts": rollouts,
         "evaluation_scope": (
-            "one DLC trajectory with non-overlapping time train/validation;"
-            " future recorded CarSim tire forces and front road-wheel steer"
-            " used as oracle exogenous schedule; this is not independent"
-            " multi-scene generalization or deployable closed-loop NMPC"
+            (
+                "All 0-10s DLC time intervals are used BOTH in training "
+                "and evaluation. This is in-sample same-data reconstruction, "
+                "NOT independent validation and NOT a generalization metric."
+            ) if full_data else (
+                "One DLC trajectory with non-overlapping training/evaluation "
+                "time segments; not multi-scene generalization."
+            )
+        ) + (
+            " Future measured CarSim steering and tire Fx are treated "
+            "as oracle known exogenous data, not deployable MPC commands."
         ),
         "validation_5s_n_windows_warning": (
-            "At 10 s total and 5 s train/5 s validation, only one"
-            " disjoint validation 5 s rollout exists."
+            "All 5s windows overlap the training trajectory; "
+            "they are not independent validation cases."
+            if full_data else
+            "At 10s total and 5s train/5s validation, only one "
+            "disjoint validation 5s rollout exists."
         ),
         "genuine_closed_loop_nmpc_verified": False,
         "physics_actuator_interface_verified": False,
     }
-    _json_dump(output/"report.json", report)
-    _json_dump(output/"history.json", history)
-    _json_dump(output/"normalization.json",
-               model.normalization_json())
+    _json_dump(output / "report.json", report)
+    _json_dump(output / "history.json", history)
+    _json_dump(output / "normalization.json", model.normalization_json())
     print(f"完成：{output/'report.json'}")
     return report
-
 
 def main(argv=None):
     p = argparse.ArgumentParser(
@@ -497,7 +573,9 @@ def main(argv=None):
     p.add_argument("--mu-hat", type=float, default=0.8,
                    help="CarSim Procedure 已确认的路面附着系数")
     p.add_argument("--train-end", type=float, default=5.0,
-                   help="Train 与 Validation 的时间边界，默认 5s")
+                   help="仅分段模式使用的 Train/Validation 时间边界，默认 5s")
+    p.add_argument("--full-data", action="store_true",
+                   help="全部时间段既参与训练也参与评价（同数据自拟合，非泛化验证）")
     p.add_argument("--epochs", type=int, default=250)
     p.add_argument("--batch-size", type=int, default=128)
     p.add_argument("--lr", type=float, default=0.001)
@@ -527,6 +605,7 @@ def main(argv=None):
         anchor_stride=args.anchor_stride,
         mz_mode=args.mz_mode, lambda_mode=args.lambda_mode,
         make_plots=not args.no_plots,
+        full_data=args.full_data,
     )
 
 

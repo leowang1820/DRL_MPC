@@ -168,8 +168,9 @@ def _one_step_assessment(model, z, y, y_scale):
 def evaluate_windows(
     dlc, z, model, *, start_interval, stop_interval,
     horizon, stride, q_scale, reference=None,
+    collect_windows=None,
 ):
-    """每个窗口纯开环积分；计算逐点与终点误差，不回灌状态。"""
+    """每个窗口纯开环积分；可收集所有窗口直接弹窗，禁止未来状态回灌。"""
     if stride < 1 or horizon < 1:
         raise ValueError("stride、horizon 必须为正整数")
     if reference is None:
@@ -200,6 +201,16 @@ def evaluate_windows(
         residual_error.append(corrected-true)
         nominal_end.append(nominal[-1]-true[-1])
         residual_end.append(corrected[-1]-true[-1])
+        if collect_windows is not None:
+            # 直接保存已积分的所有窗口到内存，供交互式 Figure 使用。
+            # 不修改训练或预测结果，避免训练后再次计算全部窗口。
+            collect_windows.append({
+                "anchor": int(start),
+                "time_s": dlc.time_s[start:stop+1].copy(),
+                "true": true.copy(),
+                "nominal": nominal.copy(),
+                "residual": corrected.copy(),
+            })
         if len(examples) == 0:
             examples.append({
                 "time_s": dlc.time_s[start:stop+1].copy(),
@@ -290,8 +301,9 @@ def run_experiment(
     horizons=(300, 500), anchor_stride=50,
     mz_mode="zero", lambda_mode="fixed-half",
     make_plots=True, verbose=True, full_data=False,
+    show_all_windows=False, gui_backend="TkAgg",
 ):
-    """同一实验程序支持分段验证和整条轨迹自拟合。
+    """同一实验程序支持分段验证、全量自拟合以及交互式全部窗口。
 
     full_data=True:
       train 和 validation 均包含全部 [0,T) 的真实区间；
@@ -445,6 +457,7 @@ def run_experiment(
     # 全量模式只计算一次滚动预测；报告里 train 和 validation
     # 指向同一批区间指标，以兼容已有的报告查看命令。
     rollouts = {"train": {}, "validation": {}}
+    viewer_records = {}
     if full_data:
         eval_plan = (("all_data", 0, n_intervals),)
     else:
@@ -455,12 +468,21 @@ def run_experiment(
 
     for split_name, begin, end in eval_plan:
         for h in horizons:
+            # full_data 只评价一次，非 full_data 只显示验证时段的窗口；
+            # 不收集训练段的窗口，避免无关的额外 Figure。
+            record_this = show_all_windows and (
+                full_data or split_name == "validation"
+            )
+            records = [] if record_this else None
             scores, example = evaluate_windows(
                 dlc, z, model,
                 start_interval=begin, stop_interval=end,
                 horizon=h, stride=anchor_stride,
                 q_scale=q_scale, reference=ref,
+                collect_windows=records,
             )
+            if records is not None:
+                viewer_records[h] = records
             key = f"{h}_steps"
             if full_data:
                 rollouts["train"][key] = scores
@@ -481,7 +503,9 @@ def run_experiment(
             if full_data or split_name == "validation":
                 _save_example(
                     output, example, f"validation_{h/100:g}s",
-                    make_plots=make_plots, in_sample=full_data,
+                    # 交互式模式不使用 Agg，默认不保存首窗口 PNG。
+                    make_plots=make_plots and not show_all_windows,
+                    in_sample=full_data,
                 )
 
     train_range = [
@@ -560,6 +584,25 @@ def run_experiment(
     _json_dump(output / "history.json", history)
     _json_dump(output / "normalization.json", model.normalization_json())
     print(f"完成：{output/'report.json'}")
+    if show_all_windows:
+        from .dlc_all_windows_viewer import (
+            batches_from_recorded_windows,
+            show_all_windows as open_all_windows_gui,
+        )
+        batches=batches_from_recorded_windows(viewer_records)
+        print(
+            "训练和所有评价窗口已计算，正在打开可交互 Figure，"
+            "默认不保存窗口 PNG。",
+            flush=True,
+        )
+        open_all_windows_gui(
+            batches,
+            dlc_time_s=dlc.time_s,
+            dlc_y_m=dlc.y_m,
+            scale=q_scale,
+            backend=gui_backend,
+            block=True,
+        )
     return report
 
 def main(argv=None):
@@ -590,7 +633,12 @@ def main(argv=None):
     p.add_argument("--lambda-mode", choices=[
         "fixed-half", "ratio-strict"
     ], default="fixed-half")
-    p.add_argument("--no-plots", action="store_true")
+    p.add_argument("--no-plots", action="store_true",
+                   help="跳过默认的首窗口 PNG 保存")
+    p.add_argument("--show-all-windows", action="store_true",
+                   help="训练结束自动弹窗交互浏览全部 3s/5s 预测窗口；不保存 PNG")
+    p.add_argument("--backend", default="TkAgg", choices=("TkAgg","QtAgg"),
+                   help="可交互 Figure GUI 后端，Windows 默认 TkAgg")
     args = p.parse_args(argv)
     try:
         horizons = tuple(int(x.strip()) for x in args.horizons.split(","))
@@ -606,6 +654,8 @@ def main(argv=None):
         mz_mode=args.mz_mode, lambda_mode=args.lambda_mode,
         make_plots=not args.no_plots,
         full_data=args.full_data,
+        show_all_windows=args.show_all_windows,
+        gui_backend=args.backend,
     )
 
 

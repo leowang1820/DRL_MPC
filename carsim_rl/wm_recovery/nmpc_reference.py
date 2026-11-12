@@ -47,7 +47,7 @@ class NMPCReferenceParams:
 
     lf_m: float = 1.265
     wheelbase_m: float = 3.16
-    mass_kg: float = 1820.0 + 116.9 * 2.0
+    mass_kg: float = 1820.0 + 116.9 * 1.0+ 89.5
     inertia_z_kgm2: float = 4095.0
     cg_height_m: float = 0.59
     gravity_mps2: float = 9.81
